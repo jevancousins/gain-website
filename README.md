@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gain Strength Therapy — website
 
-## Getting Started
+Marketing site for [Gain Strength Therapy](https://www.gainstrengththerapy.com), a private strength studio in Eastbourne. Replaces the original Wix site with a modern, conversion-focused build.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router, TypeScript, Turbopack)
+- **Tailwind CSS v4** with a custom brand palette (bone / ink / rust / forest)
+- **Fraunces** (display serif) + **Inter** (body) via `next/font`
+- **Cal.com** embed for live consultation booking
+- **Lucide** icons
+- Route handler at `/api/lead` ready to forward to any webhook (n8n, Make, Zapier, HubSpot, Supabase, Resend, etc.)
+
+## Local development
 
 ```bash
+npm install
+cp .env.local.example .env.local  # then fill in values
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit <http://localhost:3000>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See `.env.local.example`. Only two are used today:
 
-## Learn More
+| Var | Where | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_CALCOM_LINK` | client | Cal.com link for the inline booking embed (e.g. `gainstrengththerapy/free-consultation`). When empty, the `/book` page shows a graceful fallback. |
+| `LEAD_WEBHOOK_URL` | server | Where `POST /api/lead` forwards submissions. When empty in dev, leads are appended to `.data/leads.jsonl` so you can inspect them locally. |
 
-To learn more about Next.js, take a look at the following resources:
+## Project layout
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/
+│   ├── layout.tsx          # root shell, fonts, nav, footer, JSON-LD
+│   ├── page.tsx            # home
+│   ├── about/              # about page
+│   ├── facility/           # facility page
+│   ├── programme/          # January landing page (primary conversion target)
+│   ├── book/               # Cal.com embed + lead form fallback
+│   ├── contact/            # contact details + form
+│   ├── faqs/, privacy/, terms/
+│   ├── api/lead/route.ts   # lead capture + webhook forwarding
+│   ├── sitemap.ts, robots.ts
+│   └── globals.css         # brand tokens (Tailwind v4 @theme)
+├── components/
+│   ├── site-nav.tsx, site-footer.tsx
+│   ├── ui.tsx              # shared primitives (Section, H2, CTAButton, etc.)
+│   ├── lead-form.tsx       # reusable capture form
+│   ├── cal-embed.tsx       # Cal.com embed wrapper
+│   ├── placeholder-image.tsx # SVG placeholders (swap for real photos)
+│   └── structured-data.tsx # LocalBusiness JSON-LD
+└── lib/utils.ts            # cn() + SITE config (address, hours, links)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Copy & content
 
-## Deploy on Vercel
+Copy for the January programme page is taken from `GAIN Strength Therapy – HQ/03 - Sales & Marketing/Landing Page Copy – January Foundations – GAIN.docx`. Team bios on `/about` and a handful of pricing/contact fields (phone number, email address) are **placeholders**. Search the codebase for `Placeholder` and for `01323 000 000` / `hello@gainstrengththerapy.com` to confirm before launch.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Imagery is currently SVG placeholders in `components/placeholder-image.tsx`. Replace with real photography by dropping files into `public/` and swapping the `<PlaceholderImage />` components for `<Image />` from `next/image`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Lead capture → automated workflows
+
+`POST /api/lead` validates a payload like:
+
+```json
+{
+  "firstName": "Jane",
+  "email": "jane@example.com",
+  "phone": "07xxx",
+  "newsletter": true,
+  "source": "programme-hero"
+}
+```
+
+When `LEAD_WEBHOOK_URL` is set, it forwards the enriched lead (with `id`, `createdAt`, `userAgent`, `referer`) to that URL. Typical destinations:
+
+- **n8n / Make / Zapier** — route to CRM, email tool, WhatsApp, etc.
+- **Notion database** — via their REST API
+- **Resend / Postmark** — instant owner notification email
+- **Supabase / Postgres** — if you want to own the data end-to-end
+
+In development, leads also append to `.data/leads.jsonl` for easy inspection.
+
+## Deploy (Vercel)
+
+1. Push this repo to GitHub.
+2. Import to [Vercel](https://vercel.com/new) — framework is auto-detected.
+3. Set `NEXT_PUBLIC_CALCOM_LINK` and `LEAD_WEBHOOK_URL` in Project Settings → Environment Variables.
+4. Point `www.gainstrengththerapy.com` at Vercel (follow the DNS instructions in the Domains tab).
+
+## Before launch checklist
+
+- [ ] Replace placeholder phone (`01323 000 000`) and email (`hello@gainstrengththerapy.com`) in `src/lib/utils.ts` and all components
+- [ ] Fill in real team bios on `/about`
+- [ ] Replace SVG placeholders with real photography
+- [ ] Add real favicon + OG image (`/public/og.jpg`)
+- [ ] Set up Cal.com account + consultation event type; paste the link into `NEXT_PUBLIC_CALCOM_LINK`
+- [ ] Write proper `/privacy` and `/terms` content
+- [ ] Wire `LEAD_WEBHOOK_URL` to your workflow destination
+- [ ] Run Lighthouse / a11y sweep in production mode

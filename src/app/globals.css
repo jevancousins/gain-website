@@ -1,26 +1,192 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand — exact orange sampled from original Wix site CTA */
+  --color-flame: #FC832C;        /* primary orange accent */
+  --color-flame-deep: #e36a15;   /* hover / pressed */
+  --color-flame-soft: #ffa766;   /* highlight / tint */
+
+  /* Neutrals — black-dominant with white text */
+  --color-ink: #0a0a0a;          /* primary surface */
+  --color-ink-soft: #141414;     /* secondary surface */
+  --color-ink-mid: #1e1e1e;      /* cards / panels */
+  --color-ink-line: #2a2a2a;     /* dark dividers */
+  --color-mute-dark: #6a6a6a;    /* muted on dark */
+  --color-paper: #ffffff;        /* used for contrast breaks */
+  --color-cream: #f5f2ea;        /* rarely used — one or two moments */
+  --color-muted: #8a867f;        /* muted on light (rare) */
+  --color-line: #2a2a2a;         /* default divider on dark */
+
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --foreground: #ffffff;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-feature-settings: "kern", "calt", "ss01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-flame);
+  color: #000;
+}
+
+/* ——— Typography utilities ——— */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 0.93;
+  font-feature-settings: "ss01", "ss02";
+}
+
+.display-tight {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
+}
+
+.display-italic {
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.kicker {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-flame);
+}
+
+.meta {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-mute-dark);
+}
+
+.lede {
+  font-weight: 300;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+}
+
+.prose-body p {
+  font-weight: 400;
+  line-height: 1.72;
+}
+
+/* Drop cap */
+.dropcap::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 4.4em;
+  line-height: 0.85;
+  padding: 0.12em 0.12em 0 0;
+  color: var(--color-flame);
+  letter-spacing: -0.04em;
+}
+
+/* ——— Rules ——— */
+
+.rule-thin { height: 1px; background: var(--color-line); }
+.rule-flame{ height: 2px; background: var(--color-flame); }
+
+/* Grain on dark */
+.grain {
+  position: relative;
+}
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  z-index: 0;
+}
+.grain > * { position: relative; z-index: 1; }
+
+/* ——— Motion ——— */
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-up {
+  from { opacity: 0; clip-path: inset(100% 0 0 0); transform: translateY(16px); }
+  to   { opacity: 1; clip-path: inset(0 0 0 0); transform: translateY(0); }
+}
+
+.anim-rise   { animation: rise 800ms cubic-bezier(.22,.61,.36,1) both; }
+.anim-reveal { animation: reveal-up 900ms cubic-bezier(.22,.61,.36,1) both; }
+
+.d-0 { animation-delay: 0ms; }
+.d-1 { animation-delay: 80ms; }
+.d-2 { animation-delay: 160ms; }
+.d-3 { animation-delay: 240ms; }
+.d-4 { animation-delay: 320ms; }
+.d-5 { animation-delay: 400ms; }
+.d-6 { animation-delay: 480ms; }
+.d-7 { animation-delay: 560ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* Underline treatment — orange */
+.link-quiet {
+  background-image: linear-gradient(var(--color-flame), var(--color-flame));
+  background-size: 0 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size 400ms cubic-bezier(.22,.61,.36,1), color 300ms ease;
+  padding-bottom: 2px;
+}
+.link-quiet:hover {
+  background-size: 100% 1px;
+  color: var(--color-flame);
+}
+
+.link-editorial {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--color-flame);
+  text-underline-offset: 5px;
+  transition: text-underline-offset 300ms ease;
+}
+.link-editorial:hover {
+  text-underline-offset: 7px;
+}
+
+/* Form input reset on dark */
+input[type="text"], input[type="email"], input[type="tel"], textarea, select {
+  color-scheme: dark;
 }
