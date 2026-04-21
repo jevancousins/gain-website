@@ -90,24 +90,23 @@ export function SiteFooter() {
           <ul className="mt-5 space-y-2.5 text-paper/75 text-sm">
             <li><Link href="/about" className="link-quiet hover:text-paper">About</Link></li>
             <li><Link href="/facilities" className="link-quiet hover:text-paper">Facilities</Link></li>
-            <li><Link href="/programme" className="link-quiet hover:text-paper">Programme</Link></li>
+            <li><Link href="/contact" className="link-quiet hover:text-paper">Enquire</Link></li>
             <li><Link href="/contact" className="link-quiet hover:text-paper">Contact</Link></li>
             <li><Link href="/contact" className="link-quiet hover:text-paper">Book</Link></li>
           </ul>
         </div>
 
         <div className="md:col-span-2">
-          <h4 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/45">Hours</h4>
-          <ul className="mt-5 space-y-1.5 text-paper/70 text-xs">
-            {SITE.hours.map((h) => (
-              <li key={h.day} className="flex justify-between gap-3">
-                <span>{h.day.slice(0, 3)}</span>
-                <span className="tabular-nums">
-                  {h.open ? `${h.open}–${h.close}` : "Closed"}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <h4 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/45">Get in touch</h4>
+          <p className="mt-5 text-paper/70 text-sm leading-relaxed">
+            Every new member starts with a short phone call with Hallum. Leave your details and we&rsquo;ll be in touch.
+          </p>
+          <Link
+            href="/contact"
+            className="mt-4 inline-flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.22em] text-flame hover:text-paper transition-colors"
+          >
+            Enquire now →
+          </Link>
         </div>
       </div>
 

@@ -107,7 +107,7 @@ export function CTAButton({
   } as const;
 
   const cls = cn(
-    "group inline-flex items-center gap-3 rounded-sm px-6 py-4 text-[0.8rem] font-bold uppercase tracking-[0.22em] transition-all duration-300",
+    "group inline-flex items-center gap-3 rounded-sm px-6 py-4 text-[0.8rem] font-bold uppercase tracking-[0.22em] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
     styles[variant],
     className
   );

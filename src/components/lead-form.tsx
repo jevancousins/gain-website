@@ -96,6 +96,20 @@ export function LeadForm({
         <input id="email" name="email" type="email" required autoComplete="email" className={inputCls} placeholder="you@example.com" />
       </div>
 
+      <div>
+        <label htmlFor="message" className={labelCls}>
+          What&rsquo;s on your mind?{" "}
+          <span className="text-paper/40 font-normal normal-case tracking-normal">(optional)</span>
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          rows={3}
+          className={cn(inputCls, "resize-none")}
+          placeholder="Goals, any injuries to know about, anything else worth mentioning…"
+        />
+      </div>
+
       <label className="flex gap-3 items-start text-sm cursor-pointer text-paper/70">
         <input type="checkbox" name="newsletter" defaultChecked className="mt-1 h-4 w-4 accent-flame" />
         <span className="leading-snug">

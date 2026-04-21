@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export const SITE = {
   name: "Gain Strength Therapy",
   shortName: "GAIN",
-  tagline: "Empowering busy adults to unlock their strength and take control of their health.",
+  tagline: "Empowering adults to unlock their strength and take control of their health.",
   description:
     "A friendly, uplifting environment where you'll move better, train smarter, and build lasting strength. Private strength training in Eastbourne.",
   url: "https://www.gainstrengththerapy.com",
@@ -18,8 +18,14 @@ export const SITE = {
     postcode: "BN22 8DJ",
     country: "United Kingdom",
   },
-  phone: "01323 370022",
+  phone: "+44 1323 370022",
   phoneHref: "+441323370022",
+  /**
+   * Enquiry status. Toggle to "waitlist" when Hallum is at capacity; the
+   * nav strip, footer callouts, and any "new enquiries open" dots read
+   * from this single source of truth.
+   */
+  enquiryStatus: "open" as "open" | "waitlist",
   hours: [
     { day: "Monday", open: "06:00", close: "20:00" },
     { day: "Tuesday", open: "07:00", close: "20:00" },
@@ -125,7 +131,7 @@ export const TEAM: TeamMember[] = [
   {
     name: "Hallum Cousins",
     role: "Founder & Head Coach",
-    specialisms: ["Injury prevention", "Human physiology", "Sports performance"],
+    specialisms: ["MSc Sport Physiology", "Injury prevention", "Sports performance"],
     bio: "I created Gain to provide a personal and supportive space where anyone can build strength and confidence at their own pace.",
     photo: "/media/hallum.jpg",
   },

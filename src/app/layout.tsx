@@ -14,6 +14,8 @@ const montserrat = Montserrat({
   style: ["normal", "italic"],
 });
 
+const isPreview = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production";
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
@@ -36,6 +38,10 @@ export const metadata: Metadata = {
   },
   alternates: { canonical: SITE.url },
   icons: { icon: "/favicon.ico" },
+  // Keep preview deploys out of the index so the real domain stays canonical.
+  robots: isPreview
+    ? { index: false, follow: false, nocache: true }
+    : { index: true, follow: true },
 };
 
 export const viewport: Viewport = {

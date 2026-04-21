@@ -6,7 +6,7 @@ export function LocalBusinessSchema() {
     "@type": ["LocalBusiness", "HealthClub", "SportsActivityLocation"],
     name: SITE.name,
     url: SITE.url,
-    image: `${SITE.url}/og.jpg`,
+    image: `${SITE.url}/opengraph-image`,
     description: SITE.description,
     address: {
       "@type": "PostalAddress",
@@ -15,16 +15,16 @@ export function LocalBusinessSchema() {
       postalCode: SITE.address.postcode,
       addressCountry: "GB",
     },
-    openingHoursSpecification: SITE.hours
-      .filter((h) => h.open)
-      .map((h) => ({
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: h.day,
-        opens: h.open,
-        closes: h.close,
-      })),
-    sameAs: [SITE.social.instagram, SITE.social.facebook],
+    // Include every day — closed days as equal 00:00 entries — so the schema
+    // is cleanly complete rather than selectively omitting Sunday.
+    openingHoursSpecification: SITE.hours.map((h) => ({
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: h.day,
+      opens: h.open ?? "00:00",
+      closes: h.close ?? "00:00",
+    })),
     telephone: SITE.phone,
+    sameAs: [SITE.social.instagram, SITE.social.facebook],
   };
 
   return (

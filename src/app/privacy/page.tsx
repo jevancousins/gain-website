@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         <h1 className="display mt-4 text-4xl md:text-5xl text-paper">
           How we handle your information.
         </h1>
-        <p className="mt-4 text-sm text-paper/55 italic">Last updated: 20/07/2024</p>
+        <p className="mt-4 text-sm text-paper/55 italic">Last updated: 21/04/2026</p>
         <Rule tone="paper" className="mt-10 mb-10" />
 
         <div className="space-y-10 text-paper/80 leading-[1.75] prose-body">

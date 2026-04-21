@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { cn, IMAGES } from "@/lib/utils";
+import { cn, IMAGES, SITE } from "@/lib/utils";
 
 const NAV = [
   { href: "/about", label: "About" },
@@ -36,8 +36,8 @@ export function SiteNav() {
           <span>Eastbourne · BN22 8DJ</span>
           <span className="flex items-center gap-5">
             <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-flame animate-pulse" />
-              New enquiries open
+              <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse", SITE.enquiryStatus === "open" ? "bg-flame" : "bg-paper/40")} />
+              {SITE.enquiryStatus === "open" ? "New enquiries open" : "Waitlist open"}
             </span>
             <span className="text-paper">5.0 ★ Google</span>
           </span>

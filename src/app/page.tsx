@@ -49,8 +49,8 @@ export default function HomePage() {
                 <div className="h-px w-10 bg-paper/40 mb-5" />
                 <p className="lede text-base md:text-[1.05rem] text-paper/85 leading-relaxed">
                   A small, friendly strength studio in Eastbourne &mdash; for
-                  busy adults who want to feel strong, capable, and in
-                  control of their health.
+                  adults who want to feel strong, capable and in control of
+                  their health, whatever their starting point.
                 </p>
                 <div className="mt-6 flex flex-col gap-3">
                   <CTAButton href="/contact" variant="primary" className="!justify-between !w-full">
@@ -88,7 +88,7 @@ export default function HomePage() {
             {[
               ["Qualified", "coaches only"],
               ["Small groups", "of 4 to 6"],
-              ["Built for", "busy adults"],
+              ["Built for", "the long game"],
               ["No contract", "month to month"],
             ].map(([top, bot], i) => (
               <div key={i} className="px-5 md:px-8 py-7">
@@ -106,7 +106,7 @@ export default function HomePage() {
           <div className="md:col-span-7">
             <Folio number="02" label="Our approach" />
             <H2 className="mt-6">
-              Empowering busy adults to unlock their strength&nbsp;
+              Empowering adults to unlock their strength&nbsp;
               <em className="display-italic font-medium text-flame">and take control of their health.</em>
             </H2>
           </div>
@@ -148,8 +148,8 @@ export default function HomePage() {
             weekend was.
           </FeatureCard>
           <FeatureCard n="06" icon={<Star size={18} />} title="Flexible by design">
-            Month-to-month memberships. Pause when you&rsquo;re on holiday. We
-            back ourselves on results, not small print.
+            Month-to-month memberships. Pause when you&rsquo;re on holiday.
+            No contracts, no lock-ins, no guilt if life gets in the way.
           </FeatureCard>
         </div>
       </Section>
@@ -183,7 +183,7 @@ export default function HomePage() {
           <ol className="lg:col-span-7 border-t border-ink-line">
             {[
               { n: "01", icon: <PhoneCall size={16} />, t: "Leave your details", d: "Use the enquiry form. Hallum will call you back for a short, no-pressure chat to understand your goals and any injury history." },
-              { n: "02", icon: <MapPin size={16} />, t: "In-person consultation", d: "If it sounds like a fit, you'll be invited to the studio to meet the team, see the space, and talk through how training would look for you." },
+              { n: "02", icon: <MapPin size={16} />, t: "In-person consultation", d: "If it sounds like a fit, you'll be invited to the studio to meet Hallum, see the space, and talk through how training would look for you." },
               { n: "03", icon: <Handshake size={16} />, t: "Join if you want to", d: "We talk membership at the consultation. No contracts, no pressure — just an honest path forward if it's right." },
             ].map((s) => (
               <li key={s.n} className="border-b border-ink-line py-10 grid grid-cols-12 gap-x-8 gap-y-3 items-start">
@@ -212,9 +212,7 @@ export default function HomePage() {
             <Folio number="04" label="Members" />
             <H2 className="mt-6">Real members. Real progress.</H2>
             <Lede className="mt-6">
-              We&rsquo;re rated {GOOGLE_RATING.stars.toFixed(1)} stars on
-              Google across {GOOGLE_RATING.count} reviews &mdash; read what
-              members actually say about training here.
+              {`We're rated ${GOOGLE_RATING.stars.toFixed(1)} stars on Google across ${GOOGLE_RATING.count} reviews — read what members actually say about training here.`}
             </Lede>
             <div className="mt-8 flex items-center gap-8">
               <Stat value={GOOGLE_RATING.stars.toFixed(1)} label="★ Google" />
@@ -223,16 +221,10 @@ export default function HomePage() {
               <div className="h-10 w-px bg-ink-line" />
               <Stat value="4–6" label="Per group" />
             </div>
-            <div className="mt-8">
-              <a
-                href={GOOGLE_RATING.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.22em] text-paper link-editorial"
-              >
-                Read all {GOOGLE_RATING.count} reviews on Google <ExternalLink size={14} />
-              </a>
-            </div>
+            <p className="mt-8 text-paper/65 text-[0.98rem] leading-relaxed max-w-md">
+              Plenty of our members walked in having never trained before. If
+              that&rsquo;s you, you&rsquo;re in good company.
+            </p>
           </div>
 
           <div className="lg:col-span-7">
@@ -296,26 +288,27 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-4">
               <Photo src={IMAGES.gymWide} alt="The gym floor at Gain" aspect="aspect-[4/5]" sizes="40vw" />
               <div className="pt-12 space-y-4">
-                <Photo src={IMAGES.studioYoga} alt="The studio set up for mat work" aspect="aspect-square" sizes="40vw" />
-                <Photo src={IMAGES.saunaPlungeWide} alt="The sauna and cold plunge" aspect="aspect-[4/5]" sizes="40vw" />
+                <Photo src={IMAGES.gymGroupClass} alt="A small-group class in the gym" aspect="aspect-square" sizes="40vw" />
+                <Photo src={IMAGES.gymCoachMember} alt="A coach with a member at the cable machine" aspect="aspect-[4/5]" sizes="40vw" />
               </div>
             </div>
           </div>
 
           <div className="lg:col-span-7 order-1 lg:order-2">
-            <Folio number="05" label="Facilities" />
-            <H2 className="mt-6">A small private gym &mdash; with a studio and sauna alongside.</H2>
+            <Folio number="05" label="The Gym" />
+            <H2 className="mt-6">A small, fully-equipped gym &mdash; where the classes happen.</H2>
             <Lede className="mt-6">
-              Three spaces under one roof: a fully-equipped free-weights gym
-              at the heart of the facility, a dedicated studio for group and
-              mat work, and an infrared sauna with cold plunge for recovery.
+              The gym is the heart of Gain. Classes run as small-group
+              personal training &mdash; an instructor leads the room with up
+              to six members training together. Everything you need, nothing
+              you won&rsquo;t use.
             </Lede>
 
             <div className="mt-8 flex flex-wrap gap-2">
-              <Pill tone="paper">Small-group PT gym</Pill>
-              <Pill tone="paper">Studio for yoga & mobility</Pill>
-              <Pill tone="paper">Infrared sauna</Pill>
-              <Pill tone="paper">Cold plunge</Pill>
+              <Pill tone="paper">Small-group PT</Pill>
+              <Pill tone="paper">Up to six per class</Pill>
+              <Pill tone="paper">Led by your coach</Pill>
+              <Pill tone="paper">Free weights &amp; racks</Pill>
             </div>
 
             <div className="mt-10">

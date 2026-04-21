@@ -8,7 +8,7 @@ const FAQS = [
   { q: "What happens after I fill in the form?", a: "Hallum will call you for a short, no-pressure conversation. If it sounds like a fit, you'll be invited into the studio for an in-person consultation." },
   { q: "I haven't trained in years. Will I cope?", a: "Yes. Most people walk in feeling exactly the same. We start where you are, not where we wish you were." },
   { q: "How many people are in a session?", a: "Four to six. Enough for atmosphere, few enough that your coach sees every rep." },
-  { q: "Will I be the oldest person there?", a: "Almost certainly not. Our members span a wide age range — the majority are busy adults somewhere in their 30s to 60s." },
+  { q: "Will I be the oldest person there?", a: "Almost certainly not. Our members span a wide age range — most are somewhere in their 30s to 60s, a mix of still-working and retired, and plenty walked in having never set foot in a gym before." },
   { q: "I have an injury. Can I still train?", a: "Usually yes, and often training helps. Tell us about it on the call — if we're not the right place for you, we'll say so honestly." },
   { q: "How long until I see results?", a: "Most members feel stronger within 2–3 weeks and see visible change over the first couple of months. The bigger shifts — confidence, posture, being pain-free — tend to land between months 3 and 6." },
   { q: "Do you do 1-to-1 sessions?", a: "We do, but most people get better results from small-group sessions at a fraction of the cost. We'll talk you through what makes sense." },

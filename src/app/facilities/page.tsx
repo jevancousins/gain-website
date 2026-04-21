@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Section, H2, CTAButton, FinalCTA, Lede, Pill } from "@/components/ui";
+import Link from "next/link";
+import { Section, H2, CTAButton, FinalCTA, Lede } from "@/components/ui";
 import { Photo } from "@/components/photo";
 import { LoopVideo } from "@/components/loop-video";
 import { Folio, Kicker, Rule, Caption } from "@/components/editorial";
 import { IMAGES, VIDEOS, SITE } from "@/lib/utils";
-import { MapPin, Train, Car, Clock } from "lucide-react";
+import { MapPin, Train, Car } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Facilities",
@@ -254,17 +255,16 @@ export default function FacilitiesPage() {
             <Folio number="03" label="Sauna & Cold Plunge" />
             <H2 className="mt-6">Contrast therapy, on demand.</H2>
             <p className="mt-6 text-paper/75 leading-[1.72] text-[1.05rem]">
-              A dedicated recovery corner &mdash; an infrared sauna for
-              gentle, deep heat, and a cold plunge for the part you dread but
-              always feel better after. Members use them around their
-              sessions.
+              A dedicated recovery corner at the studio &mdash; an infrared
+              sauna for gentle, deep heat, and a cold plunge for the part
+              you dread but always feel better after.
             </p>
             <Rule tone="paper" className="my-8 w-12" />
             <ul className="space-y-2.5 text-paper/75 text-[0.98rem]">
               {[
                 "Infrared sauna — lower, drier heat than traditional sauna",
                 "Cold plunge — temperature-controlled recovery",
-                "Available around your training",
+                "Separate from membership — ask on your consultation",
               ].map((b) => (
                 <li key={b} className="flex gap-3">
                   <span className="text-flame">▸</span>
@@ -278,33 +278,44 @@ export default function FacilitiesPage() {
 
       {/* ——— 04 · Find us ——— */}
       <Section tone="ink-soft">
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
-          <div>
+        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          <div className="lg:col-span-5">
             <Folio number="04" label="Find us" />
             <H2 className="mt-6">{SITE.address.line1}</H2>
             <p className="mt-3 text-paper/75 text-lg">
               {SITE.address.city}, {SITE.address.postcode}
             </p>
+            <p className="mt-6 text-paper/60 text-sm">
+              Opening hours live on the{" "}
+              <Link href="/contact" className="link-editorial text-paper">
+                contact page
+              </Link>
+              .
+            </p>
+          </div>
 
-            <Rule tone="paper" className="my-8" />
-
+          <div className="lg:col-span-7">
+            <Rule tone="paper" className="mb-8" />
             <ul className="space-y-5 text-paper/80 text-[0.98rem] leading-relaxed">
               <li className="flex gap-4">
                 <Train size={18} className="text-flame shrink-0 mt-1" />
                 <span>
-                  <strong className="font-semibold text-paper">Near Eastbourne town centre.</strong> Roughly a 15-minute walk from Eastbourne railway station.
+                  <strong className="font-semibold text-paper">Near Eastbourne town centre.</strong>{" "}
+                  Roughly a 15-minute walk from Eastbourne railway station.
                 </span>
               </li>
               <li className="flex gap-4">
                 <Car size={18} className="text-flame shrink-0 mt-1" />
                 <span>
-                  <strong className="font-semibold text-paper">On-street parking only.</strong> There is no on-site parking &mdash; spaces on surrounding roads can fill up, so arrive a few minutes early.
+                  <strong className="font-semibold text-paper">On-street parking only.</strong>{" "}
+                  There is no on-site parking &mdash; spaces on surrounding roads can fill up, so arrive a few minutes early.
                 </span>
               </li>
               <li className="flex gap-4">
                 <MapPin size={18} className="text-flame shrink-0 mt-1" />
                 <span>
-                  <strong className="font-semibold text-paper">Private facility.</strong> Follow the signs once you&rsquo;re on Dursley Road.
+                  <strong className="font-semibold text-paper">Private facility.</strong>{" "}
+                  Follow the signs once you&rsquo;re on Dursley Road.
                 </span>
               </li>
             </ul>
@@ -322,31 +333,12 @@ export default function FacilitiesPage() {
               </a>
             </div>
           </div>
-
-          <div>
-            <Folio number="05" label="Opening hours" />
-            <div className="mt-8 flex items-center gap-2 text-paper/60 text-[0.68rem] font-bold uppercase tracking-[0.22em]">
-              <Clock size={12} /> Updated weekly
-            </div>
-            <Rule tone="paper" className="mt-4 mb-0" />
-            <ul className="divide-y divide-ink-line">
-              {SITE.hours.map((h) => (
-                <li key={h.day} className="flex justify-between py-4 text-paper">
-                  <span className="font-semibold tracking-wide">{h.day}</span>
-                  <span className={h.open ? "text-paper/70 tabular-nums" : "text-paper/40 italic"}>
-                    {h.open ? `${h.open} – ${h.close}` : "Closed"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <Rule tone="paper" />
-          </div>
         </div>
       </Section>
 
       <FinalCTA
         title="Come see the facility for yourself."
-        body="Leave your details and Hallum will call you. If it sounds like a fit, you'll be invited in to meet the team and tour the space."
+        body="Leave your details and Hallum will call you. If it sounds like a fit, you'll be invited in to meet Hallum and see the studio."
       />
     </>
   );

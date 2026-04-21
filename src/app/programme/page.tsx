@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Section, H2, CTAButton, FinalCTA, Pill, Lede } from "@/components/ui";
+import { Section, H2, CTAButton, FinalCTA, Lede } from "@/components/ui";
 import { LeadForm } from "@/components/lead-form";
 import { Photo } from "@/components/photo";
 import { Folio, Kicker, Rule, Caption } from "@/components/editorial";
 import { IMAGES } from "@/lib/utils";
-import { CheckCircle2, Sparkles, HeartPulse, ShieldCheck, PhoneCall, Target, Rocket } from "lucide-react";
+import { Sparkles, HeartPulse, ShieldCheck, PhoneCall, Target, Rocket } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "30-Day Strength Boost",
@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 const FAQS = [
   { q: "Is this suitable for beginners?", a: "Yes — it's built for them. Most people start feeling unsure. You'll always work at your own level, with a coach watching every rep." },
   { q: "What happens after I submit the form?", a: "Hallum will give you a quick call to chat, answer questions, and see if it's a good fit. No pressure to sign up — that's the whole point of the call." },
-  { q: "What does it cost?", a: "£149 for 12 sessions over the 30 days. The first five people get a free 1-to-1 personal training session too (worth £45)." },
-  { q: "What if I don't feel stronger at the end?", a: "We'll refund you 100%. That's the guarantee — we back ourselves on results, not small print." },
+  { q: "What does it cost?", a: "£149 for 12 sessions over the 30 days." },
+  { q: "What if I don't feel stronger at the end?", a: "Complete 10 of the 12 sessions and still don't feel stronger? 100% refund, no questions asked. We back ourselves on the work, and we make our side of the guarantee legible so you know exactly where you stand." },
   { q: "Do I need to be fit already?", a: "No. We meet you exactly where you are. If you can walk in the door, we can work with you." },
   { q: "What happens after the 30 days?", a: "If you'd like to continue, we'll talk through membership options at your next session. No auto-renewals, no contracts you can't leave." },
 ];
@@ -24,13 +24,13 @@ const FAQS = [
 export default function ProgrammePage() {
   return (
     <>
-      {/* ——— HERO — aligned with the real /30daystrengthboost copy ——— */}
+      {/* ——— HERO ——— */}
       <section className="relative bg-ink">
         <div className="border-b border-paper/10">
           <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
             <Folio number="01" label="30-Day Strength Boost" />
             <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
-              Limited places · 5 bonus spots
+              12 sessions · 30 days · £149
             </span>
           </div>
         </div>
@@ -48,26 +48,21 @@ export default function ProgrammePage() {
               &mdash; without the overwhelm of a busy gym.
             </Lede>
 
-            <div className="mt-10 grid sm:grid-cols-3 gap-4">
+            <div className="mt-10 grid sm:grid-cols-2 gap-4">
               <div className="border border-ink-line bg-ink-soft p-5">
                 <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame">Investment</p>
                 <p className="display mt-2 text-3xl text-paper tabular-nums">£149</p>
                 <p className="mt-1 text-xs text-paper/60">12 sessions over 30 days</p>
               </div>
               <div className="border border-ink-line bg-ink-soft p-5">
-                <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame">Bonus</p>
-                <p className="display mt-2 text-3xl text-paper tabular-nums">+£45</p>
-                <p className="mt-1 text-xs text-paper/60">Free 1-to-1 (first 5 spots)</p>
-              </div>
-              <div className="border border-ink-line bg-ink-soft p-5">
                 <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame">Guarantee</p>
                 <p className="display mt-2 text-3xl text-paper tabular-nums">100%</p>
-                <p className="mt-1 text-xs text-paper/60">Refund if you're not stronger</p>
+                <p className="mt-1 text-xs text-paper/60">Complete 10 of 12 sessions and still not stronger? Full refund.</p>
               </div>
             </div>
 
             <div className="mt-10 flex flex-wrap gap-3">
-              <CTAButton href="#enquire" variant="primary">Secure your spot</CTAButton>
+              <CTAButton href="#enquire" variant="primary">Enquire now</CTAButton>
               <CTAButton href="#how" variant="ghost">How it works</CTAButton>
             </div>
 
@@ -108,22 +103,22 @@ export default function ProgrammePage() {
         </div>
       </Section>
 
-      {/* ——— How it works — 3 steps from the real page ——— */}
+      {/* ——— How it works ——— */}
       <Section tone="ink" id="how">
         <div className="grid md:grid-cols-12 gap-12">
           <div className="md:col-span-5">
             <Folio number="03" label="How it works" />
             <H2 className="mt-6">From enquiry to first session.</H2>
             <Lede className="mt-6">
-              A call, a plan, and you&rsquo;re under way. No speed-date, no
-              sales funnel wizardry.
+              A free call, a plan, and you&rsquo;re under way. No speed-date,
+              no sales-funnel wizardry.
             </Lede>
           </div>
 
           <ol className="md:col-span-7 border-t border-paper/20">
             {[
-              { n: "01", icon: <PhoneCall size={16} />, t: "Book a call", d: "Have a zero-pressure chat with Hallum to see if we'd be the right fit for you." },
-              { n: "02", icon: <Target size={16} />, t: "Set your goals", d: "We map out exactly what you want to achieve so we can help you get there." },
+              { n: "01", icon: <PhoneCall size={16} />, t: "Book a free call", d: "Have a zero-pressure chat with Hallum to see if we'd be the right fit for you." },
+              { n: "02", icon: <Target size={16} />, t: "Free in-person consultation", d: "If it's a fit, Hallum will invite you into the studio for a free in-person consultation — we map out exactly what you want to achieve so we can help you get there." },
               { n: "03", icon: <Rocket size={16} />, t: "Get started", d: "Begin to build your strength, confidence, and energy levels over 30 days." },
             ].map((s) => (
               <li key={s.n} className="border-b border-paper/20 py-10 grid grid-cols-12 gap-x-8 gap-y-3 items-start">
@@ -141,7 +136,7 @@ export default function ProgrammePage() {
         </div>
       </Section>
 
-      {/* ——— Key benefits from the real page ——— */}
+      {/* ——— Key benefits ——— */}
       <Section tone="ink-soft">
         <div className="grid md:grid-cols-12 gap-10 items-end mb-12">
           <div className="md:col-span-7">
@@ -181,13 +176,14 @@ export default function ProgrammePage() {
         <div className="max-w-4xl">
           <Kicker tone="ink">Our promise</Kicker>
           <h2 className="display mt-6 text-[clamp(2rem,5vw,4rem)] text-ink">
-            If you don&rsquo;t feel stronger after 30 days,
-            <span className="display-italic font-medium"> we&rsquo;ll refund you 100%.</span>
+            Complete 10 of the 12 sessions and still don&rsquo;t feel stronger?
+            <span className="display-italic font-medium"> We refund you 100%.</span>
           </h2>
           <p className="mt-6 text-ink/80 text-[1.05rem] leading-relaxed max-w-2xl">
-            No small print, no partial refunds, no &ldquo;it&rsquo;s up to
-            you.&rdquo; If it doesn&rsquo;t work, you don&rsquo;t pay. We
-            can&rsquo;t say fairer than that.
+            No small print, no partial refunds, no subjective judgement
+            calls. You turn up for 10 of the 12 sessions, and if it
+            hasn&rsquo;t worked, we return every pound. We back ourselves on
+            results.
           </p>
           <div className="mt-8">
             <CTAButton
@@ -195,7 +191,7 @@ export default function ProgrammePage() {
               variant="solid-black"
               className="hover:!bg-ink hover:!text-flame"
             >
-              Secure your spot
+              Enquire now
             </CTAButton>
           </div>
         </div>
@@ -244,7 +240,7 @@ export default function ProgrammePage() {
       </Section>
 
       <FinalCTA
-        title="Secure your spot today."
+        title="Start your 30 days."
         body="Twelve sessions, thirty days, £149. Leave your details and Hallum will call for a no-pressure chat."
       />
     </>
