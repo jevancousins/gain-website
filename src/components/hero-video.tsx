@@ -9,25 +9,24 @@ type VideoKey = keyof typeof VIDEOS;
 export function HeroVideo({
   className,
   video = "hero",
-  poster,
 }: {
   className?: string;
   video?: VideoKey;
-  poster?: string;
 }) {
   const v = VIDEOS[video];
-  const posterSrc = poster ?? ("poster" in v ? v.poster : undefined);
 
   return (
     <div className={`absolute inset-0 overflow-hidden bg-ink ${className ?? ""}`}>
+      {/* No poster — lets the black parent background show until the video
+          can play, then the video fades in naturally. Avoids the
+          poster-image flash the user flagged. */}
       <video
-        className="absolute inset-0 w-full h-full object-cover opacity-80"
+        className="absolute inset-0 w-full h-full object-cover opacity-80 motion-safe:animate-[fadeIn_700ms_ease-out_200ms_both]"
         autoPlay
         muted
         loop
         playsInline
-        preload="metadata"
-        poster={posterSrc}
+        preload="auto"
         aria-hidden
       >
         <source src={v.src1080} type="video/mp4" media="(min-width: 1024px)" />
