@@ -3,6 +3,8 @@ import { Section, H2, CTAButton, FeatureCard, FinalCTA, Lede } from "@/component
 import { Photo } from "@/components/photo";
 import { Folio, Kicker, Rule, PullQuote } from "@/components/editorial";
 import { IMAGES, TEAM } from "@/lib/utils";
+
+const HALLUM = TEAM[0];
 import { Award, Compass, HeartPulse, MessageCircle, GraduationCap, Trophy, Stethoscope } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -75,7 +77,7 @@ export default function AboutPage() {
             <H2 className="mt-6">Why I started Gain.</H2>
             <div className="mt-8">
               <Photo
-                src={IMAGES.gymCoachMemberAlt}
+                src={HALLUM.photo}
                 alt="Hallum Cousins, founder of Gain Strength Therapy"
                 aspect="aspect-[4/5]"
                 tone="warm"
@@ -89,7 +91,7 @@ export default function AboutPage() {
             <div className="space-y-6 text-[1.05rem] text-paper/80 leading-[1.72] prose-body">
               <p className="dropcap">
                 I grew up around sport, studied it at university, and spent
-                years working with professional clubs as a sports scientist.
+                time working with professional clubs as a sports scientist.
                 What I saw along the way &mdash; and what eventually pulled
                 me back to Eastbourne to start Gain &mdash; is that most of
                 the best ideas about strength and longevity never make it out
@@ -129,7 +131,7 @@ export default function AboutPage() {
                 </div>
                 <p className="text-paper text-[0.98rem] leading-relaxed">
                   <strong className="font-semibold">Sports scientist</strong>{" "}
-                  at Fulham FC, Bath City FC and other professional clubs
+                  at Fulham FC and Bath City FC
                 </p>
               </div>
 
