@@ -15,7 +15,7 @@ type FieldKey = "firstName" | "email" | "phone";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // After stripping separators: optional + then 7–15 digits. Covers E.164
-// and every national mobile format worth accepting.
+// and every national landline / mobile format worth accepting.
 const PHONE_RE = /^\+?[0-9]{7,15}$/;
 
 function normalizePhone(raw: string) {
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   if (!phone || !PHONE_RE.test(phone)) {
     return fieldError(
       "phone",
-      "Please enter a valid mobile number — digits only, with an optional + prefix."
+      "Please enter a valid phone number — digits only, with an optional + prefix."
     );
   }
 

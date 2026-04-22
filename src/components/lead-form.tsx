@@ -135,7 +135,7 @@ export function LeadForm({
           <FieldMessage id="firstName-error" msg={fieldErrors.firstName} />
         </div>
         <div>
-          <label htmlFor="phone" className={labelCls}>Mobile</label>
+          <label htmlFor="phone" className={labelCls}>Phone</label>
           <input
             id="phone"
             name="phone"
@@ -144,7 +144,7 @@ export function LeadForm({
             required
             autoComplete="tel"
             className={inputCls(fieldErrors.phone)}
-            placeholder="+44 7700 900123"
+            placeholder="Mobile or landline"
             aria-invalid={Boolean(fieldErrors.phone)}
             aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
             onChange={() => clearFieldError("phone")}
