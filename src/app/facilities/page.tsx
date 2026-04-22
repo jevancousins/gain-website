@@ -4,6 +4,7 @@ import { Section, H2, CTAButton, FinalCTA, Lede } from "@/components/ui";
 import { Photo } from "@/components/photo";
 import { LoopVideo } from "@/components/loop-video";
 import { Folio, Kicker, Rule, Caption } from "@/components/editorial";
+import { TeamUpEmbed } from "@/components/teamup-embed";
 import { IMAGES, VIDEOS, SITE } from "@/lib/utils";
 import { MapPin, Train, Car } from "lucide-react";
 
@@ -264,7 +265,6 @@ export default function FacilitiesPage() {
               {[
                 "Infrared sauna — lower, drier heat than traditional sauna",
                 "Cold plunge — temperature-controlled recovery",
-                "Separate from membership — ask on your consultation",
               ].map((b) => (
                 <li key={b} className="flex gap-3">
                   <span className="text-flame">▸</span>
@@ -273,6 +273,28 @@ export default function FacilitiesPage() {
               ))}
             </ul>
           </div>
+        </div>
+
+        {/* Live booking — TeamUp iframe */}
+        <div className="mt-20 md:mt-28">
+          <div className="mb-8 flex items-end justify-between flex-wrap gap-4">
+            <div>
+              <Kicker>Book a session</Kicker>
+              <h3 className="display-tight mt-4 text-2xl md:text-[2rem] text-paper">
+                Live availability.{" "}
+                <span className="display-italic font-medium text-flame">Pick a slot.</span>
+              </h3>
+            </div>
+            <p className="text-paper/60 text-sm max-w-xs">
+              45-minute solo sessions or hour-long doubles. Bookings are
+              handled through TeamUp &mdash; secure your spot below.
+            </p>
+          </div>
+          <TeamUpEmbed
+            src={SITE.teamup.appointments}
+            title="Book a sauna or cold plunge session with Gain Strength Therapy"
+            fallbackHref={SITE.teamup.appointments}
+          />
         </div>
       </Section>
 

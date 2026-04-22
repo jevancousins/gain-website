@@ -40,6 +40,18 @@ export const SITE = {
     facebook: "https://www.facebook.com/p/Gain-Strength-Therapy-61555544315873/",
     googleReviews: "https://share.google/VbfM3tGyhVSDRZUIZ",
   },
+  /**
+   * TeamUp booking URLs. Hallum manages bookings in TeamUp
+   * (goteamup.com/p/8554886-gain-strength-therapy). When he sends the
+   * official embed snippet from the TeamUp dashboard, swap these for
+   * the canonical iframe URL.
+   */
+  teamup: {
+    appointments:
+      "https://goteamup.com/p/8554886-gain-strength-therapy/c/appointment_types?page=1",
+    customerSite:
+      "https://goteamup.com/p/8554886-gain-strength-therapy/",
+  },
 };
 
 /**
