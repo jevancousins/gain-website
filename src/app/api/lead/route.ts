@@ -11,7 +11,20 @@ type LeadPayload = {
   message?: string;
 };
 
+type FieldKey = "firstName" | "email" | "phone";
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// After stripping separators: optional + then 7–15 digits. Covers E.164
+// and every national mobile format worth accepting.
+const PHONE_RE = /^\+?[0-9]{7,15}$/;
+
+function normalizePhone(raw: string) {
+  return raw.replace(/[\s\-().]/g, "");
+}
+
+function fieldError(field: FieldKey, message: string) {
+  return NextResponse.json({ error: message, field }, { status: 400 });
+}
 
 export async function POST(request: Request) {
   let body: LeadPayload;
@@ -23,14 +36,23 @@ export async function POST(request: Request) {
 
   const firstName = (body.firstName ?? "").toString().trim();
   const email = (body.email ?? "").toString().trim().toLowerCase();
-  const phone = (body.phone ?? "").toString().trim();
+  const phoneRaw = (body.phone ?? "").toString().trim();
   const source = (body.source ?? "unknown").toString().trim();
   const message = (body.message ?? "").toString().trim();
   const newsletter = body.newsletter === true || body.newsletter === "on";
 
-  if (!firstName) return NextResponse.json({ error: "First name required" }, { status: 400 });
+  if (!firstName) {
+    return fieldError("firstName", "Please enter your first name.");
+  }
   if (!email || !EMAIL_RE.test(email)) {
-    return NextResponse.json({ error: "Valid email required" }, { status: 400 });
+    return fieldError("email", "Please enter a valid email address.");
+  }
+  const phone = normalizePhone(phoneRaw);
+  if (!phone || !PHONE_RE.test(phone)) {
+    return fieldError(
+      "phone",
+      "Please enter a valid mobile number — digits only, with an optional + prefix."
+    );
   }
 
   const lead = {
@@ -38,7 +60,8 @@ export async function POST(request: Request) {
     createdAt: new Date().toISOString(),
     firstName,
     email,
-    phone,
+    phone, // normalised E.164-ish
+    phoneRaw, // preserve exactly what the user typed, for reference
     message,
     source,
     newsletter,
