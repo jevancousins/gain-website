@@ -111,7 +111,7 @@ export function LeadForm({
       </div>
 
       <label className="flex gap-3 items-start text-sm cursor-pointer text-paper/70">
-        <input type="checkbox" name="newsletter" defaultChecked className="mt-1 h-4 w-4 accent-flame" />
+        <input type="checkbox" name="newsletter" className="mt-1 h-4 w-4 accent-flame" />
         <span className="leading-snug">
           Yes, I&rsquo;m happy to receive occasional updates from Gain Strength Therapy. Unsubscribe anytime.
         </span>
