@@ -250,7 +250,7 @@ export function Pill({
 
 export function FinalCTA({
   title = "Ready to feel stronger?",
-  body = "Leave your details and Hallum will call you for a short, no-pressure chat. If it sounds like a fit, he'll invite you in to see the studio.",
+  body = "Leave your details and we'll call you for a short, no-pressure chat. If it sounds like a fit, we'll invite you in to see the studio.",
 }: {
   title?: string;
   body?: string;

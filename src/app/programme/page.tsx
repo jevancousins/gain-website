@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 const FAQS = [
   { q: "Is this suitable for beginners?", a: "Yes — it's built for them. Most people start feeling unsure. You'll always work at your own level, with a coach watching every rep." },
-  { q: "What happens after I submit the form?", a: "Hallum will give you a quick call to chat, answer questions, and see if it's a good fit. No pressure to sign up — that's the whole point of the call." },
+  { q: "What happens after I submit the form?", a: "We'll give you a quick call to chat, answer questions, and see if it's a good fit. No pressure to sign up — that's the whole point of the call." },
   { q: "What does it cost?", a: "£149 for 12 sessions over the 30 days." },
   { q: "What if I don't feel stronger at the end?", a: "Complete 10 of the 12 sessions and still don't feel stronger? 100% refund, no questions asked. We back ourselves on the work, and we make our side of the guarantee legible so you know exactly where you stand." },
   { q: "Do I need to be fit already?", a: "No. We meet you exactly where you are. If you can walk in the door, we can work with you." },
@@ -117,8 +117,8 @@ export default function ProgrammePage() {
 
           <ol className="md:col-span-7 border-t border-paper/20">
             {[
-              { n: "01", icon: <PhoneCall size={16} />, t: "Book a free call", d: "Have a zero-pressure chat with Hallum to see if we'd be the right fit for you." },
-              { n: "02", icon: <Target size={16} />, t: "Free in-person consultation", d: "If it's a fit, Hallum will invite you into the studio for a free in-person consultation — we map out exactly what you want to achieve so we can help you get there." },
+              { n: "01", icon: <PhoneCall size={16} />, t: "Book a free call", d: "Have a zero-pressure chat with us to see if we'd be the right fit for you." },
+              { n: "02", icon: <Target size={16} />, t: "Free in-person consultation", d: "If it's a fit, we'll invite you into the studio for a free in-person consultation — we map out exactly what you want to achieve so we can help you get there." },
               { n: "03", icon: <Rocket size={16} />, t: "Get started", d: "Begin to build your strength, confidence, and energy levels over 30 days." },
             ].map((s) => (
               <li key={s.n} className="border-b border-paper/20 py-10 grid grid-cols-12 gap-x-8 gap-y-3 items-start">
@@ -241,7 +241,7 @@ export default function ProgrammePage() {
 
       <FinalCTA
         title="Start your 30 days."
-        body="Twelve sessions, thirty days, £149. Leave your details and Hallum will call for a no-pressure chat."
+        body="Twelve sessions, thirty days, £149. Leave your details and we'll call for a no-pressure chat."
       />
     </>
   );

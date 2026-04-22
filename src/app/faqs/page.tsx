@@ -5,7 +5,7 @@ import { Folio, Kicker, Rule } from "@/components/editorial";
 export const metadata: Metadata = { title: "FAQs" };
 
 const FAQS = [
-  { q: "What happens after I fill in the form?", a: "Hallum will call you for a short, no-pressure conversation. If it sounds like a fit, you'll be invited into the studio for an in-person consultation." },
+  { q: "What happens after I fill in the form?", a: "We'll call you for a short, no-pressure conversation. If it sounds like a fit, you'll be invited into the studio for an in-person consultation." },
   { q: "I haven't trained in years. Will I cope?", a: "Yes. Most people walk in feeling exactly the same. We start where you are, not where we wish you were." },
   { q: "How many people are in a session?", a: "Four to six. Enough for atmosphere, few enough that your coach sees every rep." },
   { q: "Will I be the oldest person there?", a: "Almost certainly not. Our members span a wide age range — most are somewhere in their 30s to 60s, a mix of still-working and retired, and plenty walked in having never set foot in a gym before." },

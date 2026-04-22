@@ -338,7 +338,7 @@ export default function FacilitiesPage() {
 
       <FinalCTA
         title="Come see the facility for yourself."
-        body="Leave your details and Hallum will call you. If it sounds like a fit, you'll be invited in to meet Hallum and see the studio."
+        body="Leave your details and we'll call you. If it sounds like a fit, we'll invite you in to see the studio and meet your coach."
       />
     </>
   );

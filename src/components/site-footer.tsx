@@ -99,7 +99,8 @@ export function SiteFooter() {
         <div className="md:col-span-2">
           <h4 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/45">Get in touch</h4>
           <p className="mt-5 text-paper/70 text-sm leading-relaxed">
-            Every new member starts with a short phone call with Hallum. Leave your details and we&rsquo;ll be in touch.
+            Every new member starts with a short phone call. Leave your
+            details and we&rsquo;ll be in touch.
           </p>
           <Link
             href="/contact"

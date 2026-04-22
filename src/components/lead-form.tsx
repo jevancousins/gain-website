@@ -51,9 +51,9 @@ export function LeadForm({
           <div>
             <h3 className="display-tight text-2xl text-paper">Thanks &mdash; we&rsquo;ve got it.</h3>
             <p className="mt-2 text-paper/70 leading-relaxed text-sm">
-              Hallum will be in touch shortly to arrange a short phone call. If
-              it sounds like a good fit, he&rsquo;ll invite you in to meet the
-              team and see the studio.
+              We&rsquo;ll be in touch shortly to arrange a short phone call.
+              If it sounds like a good fit, we&rsquo;ll invite you in to see
+              the studio and meet your coach.
             </p>
           </div>
         </div>
@@ -74,8 +74,8 @@ export function LeadForm({
           Start with a free call.
         </h3>
         <p className="mt-3 text-sm text-paper/65 leading-relaxed">
-          Leave your details and Hallum will call to learn about your goals.
-          No pressure &mdash; if we&rsquo;re a fit, he&rsquo;ll invite you in
+          Leave your details and we&rsquo;ll call to learn about your goals.
+          No pressure &mdash; if we&rsquo;re a fit, we&rsquo;ll invite you in
           for an in-person consultation.
         </p>
       </div>

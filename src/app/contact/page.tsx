@@ -8,7 +8,7 @@ import { SITE } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Get in touch with Gain Strength Therapy in Eastbourne. Leave your details and Hallum will call you back — or pick up the phone.",
+    "Get in touch with Gain Strength Therapy in Eastbourne. Leave your details and we'll call you back — or pick up the phone.",
 };
 
 export default function ContactPage() {
@@ -29,7 +29,7 @@ export default function ContactPage() {
             <Kicker>Say hello</Kicker>
             <h1 className="display mt-6 text-[clamp(2.75rem,7vw,6rem)] text-paper">
               Leave your details.
-              <span className="block display-italic font-medium text-flame"> Hallum will call you back.</span>
+              <span className="block display-italic font-medium text-flame"> We&rsquo;ll call you back.</span>
             </h1>
             <Lede className="mt-8">
               Every new member starts with a short, no-pressure phone call. No

@@ -162,7 +162,7 @@ export default function HomePage() {
             <H2 className="mt-6">Three simple steps.</H2>
             <Lede className="mt-6">
               No pushy forms, no 20-minute speed-date. Leave your details
-              and Hallum will call you.
+              and we&rsquo;ll call you.
             </Lede>
             <div className="mt-10">
               <CTAButton href="/contact" variant="primary">Enquire now</CTAButton>
@@ -182,8 +182,8 @@ export default function HomePage() {
 
           <ol className="lg:col-span-7 border-t border-ink-line">
             {[
-              { n: "01", icon: <PhoneCall size={16} />, t: "Leave your details", d: "Use the enquiry form. Hallum will call you back for a short, no-pressure chat to understand your goals and any injury history." },
-              { n: "02", icon: <MapPin size={16} />, t: "In-person consultation", d: "If it sounds like a fit, you'll be invited to the studio to meet Hallum, see the space, and talk through how training would look for you." },
+              { n: "01", icon: <PhoneCall size={16} />, t: "Leave your details", d: "Use the enquiry form. We'll call you back for a short, no-pressure chat to understand your goals and any injury history." },
+              { n: "02", icon: <MapPin size={16} />, t: "In-person consultation", d: "If it sounds like a fit, you'll be invited to the studio to meet us, see the space, and talk through how training would look for you." },
               { n: "03", icon: <Handshake size={16} />, t: "Join if you want to", d: "We talk membership at the consultation. No contracts, no pressure — just an honest path forward if it's right." },
             ].map((s) => (
               <li key={s.n} className="border-b border-ink-line py-10 grid grid-cols-12 gap-x-8 gap-y-3 items-start">
