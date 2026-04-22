@@ -50,8 +50,8 @@ export default function FacilitiesPage() {
 
             <div className="lg:col-span-5">
               <Photo
-                src={IMAGES.gymCoachMemberAlt}
-                alt="A coach working with a member at the cable machine in the Gain gym"
+                src={IMAGES.gymStretching}
+                alt="Hallum coaching a member through a warm-up stretch in the gym"
                 aspect="aspect-[4/5]"
                 priority
                 tone="warm"
@@ -88,8 +88,8 @@ export default function FacilitiesPage() {
             <div className="grid grid-cols-5 gap-4">
               <div className="col-span-3">
                 <Photo
-                  src={IMAGES.gymCoachMember}
-                  alt="A coach spotting a member at the cable machine"
+                  src={IMAGES.gymBoxCoaching}
+                  alt="Hallum coaching a member on the box step-up in the gym"
                   aspect="aspect-[4/5]"
                   sizes="(min-width: 1024px) 30vw, 60vw"
                 />

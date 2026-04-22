@@ -289,7 +289,7 @@ export default function HomePage() {
               <Photo src={IMAGES.gymWide} alt="The gym floor at Gain" aspect="aspect-[4/5]" sizes="40vw" />
               <div className="pt-12 space-y-4">
                 <Photo src={IMAGES.gymGroupClass} alt="A small-group class in the gym" aspect="aspect-square" sizes="40vw" />
-                <Photo src={IMAGES.gymCoachMember} alt="A coach with a member at the cable machine" aspect="aspect-[4/5]" sizes="40vw" />
+                <Photo src={IMAGES.gymBoxCoaching} alt="Hallum coaching a member on the box step-up" aspect="aspect-[4/5]" sizes="40vw" />
               </div>
             </div>
           </div>

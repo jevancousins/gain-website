@@ -57,13 +57,13 @@ export default function AboutPage() {
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16">
           <div className="grid grid-cols-12 gap-4 md:gap-6">
             <div className="col-span-12 md:col-span-6">
-              <Photo src={IMAGES.gymCoachMember} alt="A coach working with a member in the gym" aspect="aspect-[4/5]" tone="warm" />
+              <Photo src={IMAGES.gymStretching} alt="Hallum coaching a member through a warm-up stretch" aspect="aspect-[4/5]" tone="warm" />
             </div>
             <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4 md:gap-6 md:pt-16">
               <Photo src={IMAGES.gymLunges} alt="Members doing lunges in the gym" aspect="aspect-square" />
               <Photo src={IMAGES.gymStretching} alt="Warm-up in the gym" aspect="aspect-square" />
               <Photo src={IMAGES.gymBoxCoaching} alt="Box step-up coaching" aspect="aspect-square" tone="warm" />
-              <Photo src={IMAGES.teamPhoto} alt="The Gain coaching team" aspect="aspect-square" />
+              <Photo src={IMAGES.gymGroupClass} alt="Hallum coaching a small-group class in the gym" aspect="aspect-square" />
             </div>
           </div>
         </div>
