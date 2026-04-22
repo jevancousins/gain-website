@@ -119,17 +119,23 @@ export function PullQuote({
 }) {
   return (
     <figure className={cn("relative", className)}>
+      {/* Decorative oversized quote mark — sits behind the text (z-0 via
+          negative z-index) so it never overlays or blocks selection of
+          the real words. pointer-events-none belt-and-braces. */}
       <span
         aria-hidden
-        className="display absolute -left-4 -top-10 text-[9rem] leading-none text-flame/40 select-none"
+        className={cn(
+          "display absolute -left-6 -top-16 md:-top-20 text-[10rem] leading-none select-none pointer-events-none -z-10",
+          tone === "ink" ? "text-ink/10" : "text-flame/25"
+        )}
       >
         &ldquo;
       </span>
-      <blockquote className={cn("display-tight text-3xl md:text-5xl leading-[1.05]", tone === "ink" ? "text-ink" : "text-paper")}>
+      <blockquote className={cn("relative z-10 display-tight text-3xl md:text-5xl leading-[1.05]", tone === "ink" ? "text-ink" : "text-paper")}>
         {quote}
       </blockquote>
       {attribution && (
-        <figcaption className={cn("mt-6 text-sm tracking-wide italic", tone === "ink" ? "text-ink/60" : "text-paper/55")}>
+        <figcaption className={cn("relative z-10 mt-6 text-sm tracking-wide italic", tone === "ink" ? "text-ink/60" : "text-paper/55")}>
           — {attribution}
         </figcaption>
       )}
