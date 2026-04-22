@@ -205,9 +205,9 @@ export default function AboutPage() {
         <Rule tone="paper" />
         <div className="grid md:grid-cols-2 border-l border-r border-b border-ink-line">
           <FeatureCard n="01" icon={<HeartPulse size={18} />} title="Expert guidance">
-            Advanced qualifications, university degrees, and years in the
-            trenches. You&rsquo;re paying for real expertise &mdash; not
-            someone reading off a clipboard.
+            Advanced qualifications, university degrees, and hands-on
+            coaching experience. You&rsquo;re paying for real expertise
+            &mdash; not someone reading off a clipboard.
           </FeatureCard>
           <FeatureCard n="02" icon={<Compass size={18} />} title="Personalised coaching">
             Every session is tailored to fit your ability and lifestyle. We
