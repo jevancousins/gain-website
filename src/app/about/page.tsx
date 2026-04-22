@@ -141,7 +141,7 @@ export default function AboutPage() {
                   <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Coaching</span>
                 </div>
                 <p className="text-paper text-[0.98rem] leading-relaxed">
-                  Qualified Personal Trainer. Specialist interests in injury
+                  Qualified personal trainer. Specialist interests in injury
                   prevention, human physiology, and strength for life after
                   40.
                 </p>
@@ -173,10 +173,10 @@ export default function AboutPage() {
             <Rule tone="paper" className="mb-10" />
             <div className="space-y-6 text-[1.05rem] text-paper/75 leading-[1.72] prose-body">
               <p className="dropcap">
-                Every session at Gain is led by a qualified Personal Trainer,
+                Every session at Gain is led by a qualified personal trainer,
                 backed by advanced qualifications and university degrees.
                 Your coach watches every rep, adjusts every session, and
-                treats you like a grown-up.
+                keeps you progressing week on week.
               </p>
               <p>
                 We believe in tailored coaching that fits into your

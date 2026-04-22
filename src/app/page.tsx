@@ -114,8 +114,8 @@ export default function HomePage() {
             <p className="prose-body text-paper/75 text-[1.05rem]">
               Three pillars run through everything we do: expert guidance,
               personalised coaching, and a private &amp; supportive space.
-              Every session is led by a qualified Personal Trainer &mdash; no
-              exceptions.
+              Every session is led by a qualified personal trainer &mdash;
+              no exceptions.
             </p>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function HomePage() {
             them up on the way.
           </FeatureCard>
           <FeatureCard n="03" icon={<Dumbbell size={18} />} title="Qualified coaches only">
-            Every session is led by a Personal Trainer with advanced
+            Every session is led by a personal trainer with advanced
             qualifications and a university degree. No wander-around
             inductions, no one-size plans.
           </FeatureCard>
