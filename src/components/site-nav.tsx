@@ -47,18 +47,19 @@ export function SiteNav() {
       <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 h-16 md:h-[72px] flex items-center justify-between gap-6">
         <Link
           href="/"
-          className="flex items-center gap-3"
+          className="flex items-center shrink-0"
           onClick={() => setOpen(false)}
           aria-label="Gain Strength Therapy — home"
         >
-          <span className="relative h-8 w-8 shrink-0">
-            <Image src={IMAGES.logo} alt="" fill sizes="32px" className="object-contain brightness-0 invert" />
-          </span>
-          <span className="display text-[1.55rem] leading-none font-black tracking-[-0.03em] text-paper">
-            GAIN
-          </span>
-          <span className="hidden md:inline text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-paper/50 pl-3 border-l border-paper/15">
-            Strength Therapy
+          <span className="relative h-9 w-[5.6rem] md:h-10 md:w-[6.25rem]">
+            <Image
+              src={IMAGES.logo}
+              alt="Gain Strength Therapy"
+              fill
+              priority
+              sizes="(min-width: 768px) 100px, 90px"
+              className="object-contain"
+            />
           </span>
         </Link>
 

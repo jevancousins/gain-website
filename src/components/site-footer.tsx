@@ -34,13 +34,9 @@ export function SiteFooter() {
 
       <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-16 md:py-20 grid gap-12 md:grid-cols-12">
         <div className="md:col-span-5">
-          <div className="flex items-center gap-3">
-            <span className="relative h-10 w-10">
-              <Image src={IMAGES.logo} alt="" fill sizes="40px" className="object-contain brightness-0 invert opacity-90" />
-            </span>
-            <span className="display text-3xl font-black text-paper tracking-[-0.03em]">GAIN</span>
-            <span className="text-[0.62rem] uppercase tracking-[0.26em] text-paper/55 pl-3 border-l border-paper/15">
-              Strength Therapy
+          <div className="flex items-center">
+            <span className="relative h-12 w-[7.5rem]">
+              <Image src={IMAGES.logo} alt="Gain Strength Therapy" fill sizes="120px" className="object-contain" />
             </span>
           </div>
           <p className="mt-6 max-w-sm text-paper/65 leading-relaxed">
