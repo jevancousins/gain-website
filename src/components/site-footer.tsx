@@ -24,18 +24,11 @@ export function SiteFooter() {
   return (
     <footer className="bg-ink-soft text-paper/85 mt-0 border-t border-ink-line">
       <div className="border-b border-ink-line">
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-10 md:py-12 flex items-center justify-between gap-6 flex-wrap">
-          <p className="display text-[clamp(1.75rem,3.5vw,3rem)] text-paper leading-[1.05]">
+        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-10 md:py-12">
+          <p className="display text-[clamp(1.75rem,3.5vw,3rem)] text-paper leading-[1.05] max-w-5xl">
             Move better. Train smarter.
-            <span className="text-flame"> </span>
-            <span className="display-italic">Build lasting strength.</span>
+            <span className="display-italic text-flame"> Build lasting strength.</span>
           </p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 rounded-sm bg-flame text-ink px-5 py-3 text-[0.78rem] font-bold uppercase tracking-[0.2em] hover:bg-flame-deep transition-colors shrink-0"
-          >
-            Enquire now
-          </Link>
         </div>
       </div>
 
