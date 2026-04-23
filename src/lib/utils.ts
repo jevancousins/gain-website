@@ -290,10 +290,6 @@ export type TeamMember = {
   photo: string;
 };
 
-/**
- * Team bios taken from the original Wix /about-us page verbatim (minus Aaron &
- * Ash who no longer work at GAIN).
- */
 export const TEAM: TeamMember[] = [
   {
     name: "Hallum Cousins",
@@ -301,12 +297,5 @@ export const TEAM: TeamMember[] = [
     specialisms: ["MSc Sport Physiology", "Injury prevention", "Sports performance"],
     bio: "I created Gain to provide a personal and supportive space where anyone can build strength and confidence at their own pace.",
     photo: "/media/hallum.jpg",
-  },
-  {
-    name: "Becky Brown",
-    role: "Personal Trainer",
-    specialisms: ["Pre & post natal", "Fat loss", "Nutrition"],
-    bio: "I'm here not only to help expectant and new mums but I also work with people to improve lifestyle habits.",
-    photo: "/media/becky.jpg",
   },
 ];
