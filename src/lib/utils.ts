@@ -55,19 +55,22 @@ export const SITE = {
 };
 
 /**
- * Live Google rating — verified 2026-04 from the Knowledge Graph panel
+ * Live Google rating, verified 2026-04-23 from the Maps listing
  * (kgmid: /g/11ld82lbxg). Bump the count when it climbs.
  */
 export const GOOGLE_RATING = {
   stars: 5.0,
-  count: 21,
+  count: 22,
   href: "https://share.google/VbfM3tGyhVSDRZUIZ",
 };
 
 /**
- * Real Google reviews for Gain Strength Therapy.
- * TODO(hallum): paste 3–4 existing 5-star reviews here. The placeholder
- * entries below render a clearly-marked empty state until filled.
+ * Curated slice of the 22 five-star Google reviews. Each entry is
+ * verbatim excerpts from a public Google review (pulled 2026-04-23);
+ * selection covers the three niche audiences (first-timer/anxious,
+ * injury/illness recovery, older adults) plus a 30-day success and a
+ * strength-for-performance angle. Reviews that name former staff
+ * (Aaron, Becky) are intentionally excluded.
  */
 export type Review = {
   text: string;
@@ -75,7 +78,38 @@ export type Review = {
   rating?: 1 | 2 | 3 | 4 | 5;
 };
 
-export const REVIEWS: Review[] = [];
+export const REVIEWS: Review[] = [
+  {
+    author: "Alistair W.",
+    rating: 5,
+    text: "Walking into a gym can be intimidating, especially if you're dealing with health challenges or haven't felt confident about exercising in a while. The sessions feel private, respectful, and genuinely encouraging, which makes taking that first step far less daunting than a typical gym environment.",
+  },
+  {
+    author: "Felicity W.",
+    rating: 5,
+    text: "Stronger, leaner, fitter. And the best I've felt in 10yrs. I needed to focus on flexibility and mobility to continue my recovery from a hip injury and build greater strength. Having regular sessions tailored specifically to my needs has enabled me to take huge leaps forwards.",
+  },
+  {
+    author: "Julie F.",
+    rating: 5,
+    text: "At 72, and a professional fitness trainer for over 48 years, I am very hard to please. Since joining Gain Strength Therapy I have been enlightened and enthused by the knowledge and refreshing approach to strength training. The session flies by, and I always leave on a high.",
+  },
+  {
+    author: "Alan B.",
+    rating: 5,
+    text: "If like me you're not a fan of typical gyms, and struggle to know which exercises to do and how, then these sessions are for you. I'm 50 but ages range from 20s upwards and everyone is really friendly and supportive. Over the 6 weeks I gained strength but also confidence.",
+  },
+  {
+    author: "Karen S.",
+    rating: 5,
+    text: "I'm just coming to the end of my 30 day programme and cannot say how much better I feel in myself. Had a very stiff shoulder before I started and the difference in the 30 days is great. Enjoyed it so much that I have decided to continue my membership.",
+  },
+  {
+    author: "Dan H.",
+    rating: 5,
+    text: "With Brighton Marathon looming on the horizon, and no longer a spring chicken, I needed more than just miles in my legs. My strength, conditioning and mobility have come on leaps and bounds. Sessions fly by, which is not something I ever expected to say about a workout.",
+  },
+];
 
 /**
  * Image assets — served from /public/media.
