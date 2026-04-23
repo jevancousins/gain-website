@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Section, H2, CTAButton, FeatureCard, FinalCTA, Lede } from "@/components/ui";
+import { Section, H2, FeatureCard, FinalCTA, Lede } from "@/components/ui";
 import { Photo } from "@/components/photo";
 import { Folio, Kicker, Rule, PullQuote } from "@/components/editorial";
 import { IMAGES, TEAM } from "@/lib/utils";
@@ -222,61 +222,6 @@ export default function AboutPage() {
             When to rest, when to ease off, when to push. You&rsquo;re paying
             for judgement, not cheerleading.
           </FeatureCard>
-        </div>
-      </Section>
-
-      {/* ——— Team ——— */}
-      <Section tone="ink">
-        <div className="mb-14 flex items-end justify-between flex-wrap gap-6">
-          <div>
-            <Folio number="05" label="The Coaches" />
-            <H2 className="mt-6">The people who&rsquo;ll be coaching you.</H2>
-          </div>
-          <p className="max-w-sm text-paper/70">
-            A small team by design. You&rsquo;ll get to know your coach
-            &mdash; and they&rsquo;ll get to know you.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-          {TEAM.map((m, i) => (
-            <article key={m.name} className="grid grid-cols-12 gap-4 md:gap-6">
-              <div className="col-span-5">
-                <Photo
-                  src={m.photo}
-                  alt={`${m.name}, ${m.role}`}
-                  aspect="aspect-[4/5]"
-                  tone={i % 2 === 0 ? "warm" : "neutral"}
-                  sizes="(min-width: 768px) 25vw, 40vw"
-                />
-              </div>
-              <div className="col-span-7 flex flex-col justify-center">
-                <p className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-flame">
-                  Coach · {String(i + 1).padStart(2, "0")}
-                </p>
-                <h3 className="display-tight mt-3 text-[1.9rem] md:text-[2.1rem] text-paper leading-[1.05]">
-                  {m.name}
-                </h3>
-                <p className="mt-2 text-paper/60 text-sm italic">{m.role}</p>
-                <Rule tone="paper" className="my-5 w-12" />
-                <p className="text-[0.98rem] text-paper/80 leading-relaxed">{m.bio}</p>
-                <ul className="mt-5 flex flex-wrap gap-2">
-                  {m.specialisms.map((s) => (
-                    <li
-                      key={s}
-                      className="text-[0.68rem] font-bold uppercase tracking-[0.18em] border border-paper/25 px-2.5 py-1 text-paper/70"
-                    >
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="mt-16">
-          <CTAButton href="/contact" variant="primary">Enquire now</CTAButton>
         </div>
       </Section>
 
