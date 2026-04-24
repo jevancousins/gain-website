@@ -45,17 +45,17 @@ export function SiteFooter() {
             coaching in Eastbourne.
           </p>
           <div className="mt-7 flex gap-2">
-            <Link href={SITE.social.instagram} aria-label="Instagram" className="p-2.5 border border-paper/15 hover:border-flame hover:text-flame transition-colors">
+            <Link href={SITE.social.instagram} aria-label="Instagram" className="p-2.5 border border-paper/40 hover:border-flame hover:text-flame transition-colors">
               <InstagramIcon />
             </Link>
-            <Link href={SITE.social.facebook} aria-label="Facebook" className="p-2.5 border border-paper/15 hover:border-flame hover:text-flame transition-colors">
+            <Link href={SITE.social.facebook} aria-label="Facebook" className="p-2.5 border border-paper/40 hover:border-flame hover:text-flame transition-colors">
               <FacebookIcon />
             </Link>
           </div>
         </div>
 
         <div className="md:col-span-3">
-          <h4 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/45">Visit</h4>
+          <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Visit</h3>
           <address className="not-italic mt-5 text-paper/80 leading-relaxed flex gap-3">
             <MapPin size={14} className="mt-1 shrink-0 text-flame" />
             <span>
@@ -75,7 +75,7 @@ export function SiteFooter() {
         </div>
 
         <div className="md:col-span-2">
-          <h4 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/45">Explore</h4>
+          <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Explore</h3>
           <ul className="mt-5 space-y-2.5 text-paper/75 text-sm">
             <li><Link href="/about" className="link-quiet hover:text-paper">About</Link></li>
             <li><Link href="/facilities" className="link-quiet hover:text-paper">Facilities</Link></li>
@@ -86,7 +86,7 @@ export function SiteFooter() {
         </div>
 
         <div className="md:col-span-2">
-          <h4 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/45">Get in touch</h4>
+          <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Get in touch</h3>
           <p className="mt-5 text-paper/70 text-sm leading-relaxed">
             Every new member starts with a short phone call. Leave your
             details and we&rsquo;ll be in touch.
@@ -101,12 +101,12 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-ink-line">
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-[0.7rem] uppercase tracking-[0.22em] text-paper/40">
+        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-[0.7rem] uppercase tracking-[0.22em] text-paper/60">
           <p>© {new Date().getFullYear()} Gain Strength Therapy · All rights reserved</p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-paper/80">Privacy</Link>
-            <Link href="/terms" className="hover:text-paper/80">Terms</Link>
-            <Link href="/faqs" className="hover:text-paper/80">FAQs</Link>
+            <Link href="/privacy" className="hover:text-paper">Privacy</Link>
+            <Link href="/terms" className="hover:text-paper">Terms</Link>
+            <Link href="/faqs" className="hover:text-paper">FAQs</Link>
           </div>
         </div>
       </div>

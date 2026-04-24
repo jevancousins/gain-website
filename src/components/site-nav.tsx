@@ -86,6 +86,8 @@ export function SiteNav() {
 
         <button
           aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="mobile-nav"
           className="md:hidden p-2 -mr-2 text-paper"
           onClick={() => setOpen((v) => !v)}
         >
@@ -94,6 +96,7 @@ export function SiteNav() {
       </div>
 
       <div
+        id="mobile-nav"
         className={cn(
           "md:hidden overflow-hidden transition-[max-height] duration-500 ease-out border-t border-ink-line",
           open ? "max-h-[28rem]" : "max-h-0"
@@ -108,7 +111,7 @@ export function SiteNav() {
               style={{ animationDelay: `${i * 60}ms` }}
               onClick={() => setOpen(false)}
             >
-              <span className="text-paper/40 text-xs mr-3 align-middle tabular-nums">
+              <span className="text-paper/55 text-xs mr-3 align-middle tabular-nums">
                 0{i + 1}
               </span>
               {item.label}

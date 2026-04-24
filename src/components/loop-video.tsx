@@ -1,8 +1,14 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 /**
  * Inline decorative looping video — the editorial counterpart to <Photo/>.
- * Use alongside photos, not as a replacement. Server component.
+ * Use alongside photos, not as a replacement.
+ *
+ * Pauses and falls back to the poster still when the user has
+ * `prefers-reduced-motion: reduce` set (WCAG 2.2.2).
  */
 export function LoopVideo({
   src720,
@@ -25,6 +31,24 @@ export function LoopVideo({
   priority?: boolean;
   tone?: "neutral" | "warm" | "cool";
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => {
+      const el = videoRef.current;
+      if (!el) return;
+      if (mq.matches) {
+        el.pause();
+      } else {
+        el.play().catch(() => {});
+      }
+    };
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
   const washes = {
     neutral: "",
     warm: "after:bg-flame/10 after:mix-blend-screen",
@@ -41,6 +65,7 @@ export function LoopVideo({
         )}
       >
         <video
+          ref={videoRef}
           className="absolute inset-0 w-full h-full object-cover"
           autoPlay
           muted
@@ -61,7 +86,7 @@ export function LoopVideo({
         <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-paper/5" />
       </div>
       {caption && (
-        <figcaption className="mt-3 text-xs italic text-paper/50 tracking-wide">
+        <figcaption className="mt-3 text-xs italic text-paper/55 tracking-wide">
           {caption}
         </figcaption>
       )}

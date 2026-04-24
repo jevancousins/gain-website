@@ -93,7 +93,7 @@ export default function ContactPage() {
                 {SITE.hours.map((h) => (
                   <li key={h.day} className="flex justify-between py-3 text-sm">
                     <span className="text-paper font-semibold">{h.day}</span>
-                    <span className={h.open ? "text-paper/70 tabular-nums" : "text-paper/40 italic"}>
+                    <span className={h.open ? "text-paper/70 tabular-nums" : "text-paper/55 italic"}>
                       {h.open ? `${h.open} – ${h.close}` : "Closed"}
                     </span>
                   </li>

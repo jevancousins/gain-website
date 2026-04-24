@@ -135,7 +135,7 @@ export function PullQuote({
         {quote}
       </blockquote>
       {attribution && (
-        <figcaption className={cn("relative z-10 mt-6 text-sm tracking-wide italic", tone === "ink" ? "text-ink/60" : "text-paper/55")}>
+        <figcaption className={cn("relative z-10 mt-6 text-sm tracking-wide italic", tone === "ink" ? "text-ink/75" : "text-paper/65")}>
           — {attribution}
         </figcaption>
       )}

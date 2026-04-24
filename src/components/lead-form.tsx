@@ -74,10 +74,10 @@ export function LeadForm({
   const labelCls = "block text-[0.68rem] font-bold uppercase tracking-[0.22em] mb-2 text-paper/60";
   const inputCls = (err?: string) =>
     cn(
-      "w-full rounded-sm px-4 py-3.5 text-base outline-none transition-colors border bg-ink text-paper placeholder:text-paper/35",
+      "w-full rounded-sm px-4 py-3.5 text-base outline-none transition-colors border bg-ink text-paper placeholder:text-paper/55",
       err
         ? "border-flame focus:border-flame ring-1 ring-flame/60"
-        : "border-paper/20 focus:border-flame"
+        : "border-paper/40 focus:border-flame"
     );
 
   if (state === "success") {
@@ -86,7 +86,7 @@ export function LeadForm({
         <div className="flex gap-4 items-start">
           <CheckCircle2 className="text-flame shrink-0 mt-1" size={22} />
           <div>
-            <h3 className="display-tight text-2xl text-paper">Thanks &mdash; we&rsquo;ve got it.</h3>
+            <h2 className="display-tight text-2xl text-paper">Thanks &mdash; we&rsquo;ve got it.</h2>
             <p className="mt-2 text-paper/70 leading-relaxed text-sm">
               We&rsquo;ll be in touch shortly to arrange a short phone call.
               If it sounds like a good fit, we&rsquo;ll invite you in to see
@@ -108,9 +108,9 @@ export function LeadForm({
         <p className="text-[0.68rem] font-bold uppercase tracking-[0.28em] text-flame">
           Step 01 · Arrange a call
         </p>
-        <h3 className="display-tight mt-3 text-[1.7rem] md:text-[1.95rem] leading-[1.05] text-paper">
+        <h2 className="display-tight mt-3 text-[1.7rem] md:text-[1.95rem] leading-[1.05] text-paper">
           Start with a free call.
-        </h3>
+        </h2>
         <p className="mt-3 text-sm text-paper/65 leading-relaxed">
           Leave your details and we&rsquo;ll call to learn about your goals.
           No pressure &mdash; if we&rsquo;re a fit, we&rsquo;ll invite you in
@@ -173,7 +173,7 @@ export function LeadForm({
       <div>
         <label htmlFor="message" className={labelCls}>
           What&rsquo;s on your mind?{" "}
-          <span className="text-paper/40 font-normal normal-case tracking-normal">(optional)</span>
+          <span className="text-paper/55 font-normal normal-case tracking-normal">(optional)</span>
         </label>
         <textarea
           id="message"
@@ -217,7 +217,7 @@ export function LeadForm({
         </div>
       )}
 
-      <p className="text-[0.68rem] italic text-paper/45">
+      <p className="text-[0.68rem] italic text-paper/55">
         Your call is free. No pressure, no obligation.
       </p>
     </form>

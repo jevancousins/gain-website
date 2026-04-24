@@ -101,8 +101,8 @@ export function CTAButton({
   const styles = {
     primary: "bg-flame text-ink hover:bg-flame-deep",
     secondary: "bg-paper text-ink hover:bg-flame hover:text-ink",
-    ghost: "bg-transparent text-paper border border-paper/20 hover:border-flame hover:text-flame",
-    "outline-cream": "bg-transparent text-paper border border-paper/25 hover:bg-paper/10",
+    ghost: "bg-transparent text-paper border border-paper/40 hover:border-flame hover:text-flame",
+    "outline-cream": "bg-transparent text-paper border border-paper/40 hover:bg-paper/10",
     "solid-black": "bg-ink text-paper hover:bg-flame hover:text-ink",
   } as const;
 
@@ -156,7 +156,7 @@ export function Stat({
       <div className={cn("display text-5xl md:text-6xl font-black tabular-nums", tone === "ink" ? "text-ink" : "text-paper")}>
         {value}
       </div>
-      <div className={cn("mt-2 text-[0.7rem] font-semibold uppercase tracking-[0.22em]", tone === "ink" ? "text-ink/60" : "text-paper/55")}>
+      <div className={cn("mt-2 text-[0.7rem] font-semibold uppercase tracking-[0.22em]", tone === "ink" ? "text-ink/75" : "text-paper/70")}>
         {label}
       </div>
     </div>
@@ -185,7 +185,7 @@ export function FeatureCard({
           <span />
         )}
         {n && (
-          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-mute-dark tabular-nums">
+          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-paper/55 tabular-nums">
             / {n}
           </span>
         )}
@@ -221,7 +221,7 @@ export function Testimonial({
       </blockquote>
       <figcaption className="mt-auto flex items-baseline justify-between pt-6 border-t border-ink-line">
         <span className="text-sm font-semibold tracking-wide text-paper">{name}</span>
-        {detail && <span className="text-xs uppercase tracking-[0.18em] text-mute-dark">{detail}</span>}
+        {detail && <span className="text-xs uppercase tracking-[0.18em] text-paper/55">{detail}</span>}
       </figcaption>
     </figure>
   );
@@ -279,7 +279,7 @@ export function FinalCTA({
             <CTAButton
               href="/about"
               variant="ghost"
-              className="!text-ink !border-ink/40 hover:!bg-ink hover:!text-flame hover:!border-ink"
+              className="!text-ink !border-ink/80 hover:!bg-ink hover:!text-flame hover:!border-ink"
             >
               Learn more
             </CTAButton>

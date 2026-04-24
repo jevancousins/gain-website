@@ -58,7 +58,7 @@ export default function HomePage() {
                   </CTAButton>
                   <Link
                     href="/about"
-                    className="inline-flex items-center justify-between gap-2 text-[0.78rem] font-bold uppercase tracking-[0.2em] text-paper/85 hover:text-paper border border-paper/25 hover:border-paper/60 px-5 py-3.5 rounded-sm transition-colors"
+                    className="inline-flex items-center justify-between gap-2 text-[0.78rem] font-bold uppercase tracking-[0.2em] text-paper/85 hover:text-paper border border-paper/40 hover:border-paper/70 px-5 py-3.5 rounded-sm transition-colors"
                   >
                     <span>How we train</span>
                     <span>→</span>
@@ -244,7 +244,7 @@ export default function HomePage() {
                     </blockquote>
                     <figcaption className="mt-auto pt-5 border-t border-ink-line flex items-baseline justify-between">
                       <span className="text-sm font-semibold text-paper">{r.author}</span>
-                      <span className="text-xs uppercase tracking-[0.18em] text-paper/40">Google</span>
+                      <span className="text-xs uppercase tracking-[0.18em] text-paper/55">Google</span>
                     </figcaption>
                   </figure>
                 ))}
@@ -255,7 +255,7 @@ export default function HomePage() {
                 href={GOOGLE_RATING.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block bg-ink-soft border border-ink-line hover:border-flame transition-colors p-10 md:p-14 h-full"
+                className="group block bg-ink-soft border border-paper/40 hover:border-flame transition-colors p-10 md:p-14 h-full"
               >
                 <div className="flex items-center gap-2 text-flame">
                   {Array.from({ length: 5 }).map((_, k) => (
