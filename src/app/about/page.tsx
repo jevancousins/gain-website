@@ -38,14 +38,16 @@ export default function AboutPage() {
             </div>
             <div className="lg:col-span-5">
               <Lede>
-                Gain Strength Therapy is a small, independent studio in
-                Eastbourne. We specialise in strength training and coaching
-                for adults who want to feel capable in their bodies &mdash;
-                whatever their starting point.
+                Gain Strength Therapy is Eastbourne&rsquo;s specialist small
+                group strength training studio. We bridge the gap between
+                physio and the gym &mdash; for adults who need expert guidance
+                to build strength safely.
               </Lede>
               <p className="mt-5 text-paper/60 text-sm leading-relaxed max-w-md">
-                Plenty of our members walked in having never trained before.
-                If that&rsquo;s you, you&rsquo;re in good company.
+                Post-rehab, returning after illness, managing a long-term
+                condition, or starting from scratch. Plenty of our members
+                walked in having never trained before. You will be in good
+                company.
               </p>
             </div>
           </div>
@@ -98,12 +100,17 @@ export default function AboutPage() {
                 of the academy or the elite-sport bubble.
               </p>
               <p>
-                Commercial gyms weren&rsquo;t built for adults in their 40s,
-                50s and 60s who want to feel strong, move well and stay in
-                their bodies for the long haul. They were built for
-                twenty-somethings. Gain is my answer to that gap: a small
-                private studio, small groups, proper coaching, and the space
-                to train without being watched, judged or rushed.
+                There is also a gap on the other side. People finish physio
+                and are sent away pain-free but nowhere near strong. Adults
+                with osteoporosis, type 2 diabetes, post-surgical recovery,
+                or long COVID are told to lift weights but rarely shown how.
+                Commercial gyms were not built for them, and one-to-one
+                training is out of reach.
+              </p>
+              <p>
+                Gain is my answer to that gap: a small private studio, small
+                groups, proper coaching, and the space to train without
+                being watched, judged or rushed.
               </p>
             </div>
 
@@ -141,9 +148,9 @@ export default function AboutPage() {
                   <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Coaching</span>
                 </div>
                 <p className="text-paper text-[0.98rem] leading-relaxed">
-                  Qualified personal trainer. Specialist interests in injury
-                  prevention, human physiology, and strength for life after
-                  40.
+                  Qualified personal trainer. Specialist focus on
+                  post-rehabilitation progression, chronic conditions, and
+                  strength for life after 40.
                 </p>
               </div>
             </div>

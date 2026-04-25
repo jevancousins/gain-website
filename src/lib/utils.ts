@@ -8,9 +8,9 @@ export function cn(...inputs: ClassValue[]) {
 export const SITE = {
   name: "Gain Strength Therapy",
   shortName: "GAIN",
-  tagline: "Empowering adults to unlock their strength and take control of their health.",
+  tagline: "Specialist small group strength training for adults who need expert guidance to build strength safely.",
   description:
-    "A friendly, uplifting environment where you'll move better, train smarter, and build lasting strength. Private strength training in Eastbourne.",
+    "Eastbourne's specialist small group strength training studio. We work with post-rehab clients, beginners, active seniors, and anyone rebuilding after illness. Maximum six per session.",
   url: "https://www.gainstrengththerapy.com",
   address: {
     line1: "Dursley Rd",
@@ -67,10 +67,12 @@ export const GOOGLE_RATING = {
 /**
  * Curated slice of the 22 five-star Google reviews. Each entry is
  * verbatim excerpts from a public Google review (pulled 2026-04-23);
- * selection covers the three niche audiences (first-timer/anxious,
- * injury/illness recovery, older adults) plus a 30-day success and a
- * strength-for-performance angle. Reviews that name former staff
- * (Aaron, Becky) are intentionally excluded.
+ * selection covers the niche audiences (first-timer / anxious,
+ * injury / illness recovery, older adults) plus a strength-for-performance
+ * angle. Reviews that name former staff (Aaron, Becky) are intentionally
+ * excluded. The 30-Day Strength Boost has been retired, so reviews that
+ * reference it by name are excluded too. Drop in a fresh 5-star review
+ * here when one comes through that fits the new programme positioning.
  */
 export type Review = {
   text: string;
@@ -95,14 +97,14 @@ export const REVIEWS: Review[] = [
     text: "At 72, and a professional fitness trainer for over 48 years, I am very hard to please. Since joining Gain Strength Therapy I have been enlightened and enthused by the knowledge and refreshing approach to strength training. The session flies by, and I always leave on a high.",
   },
   {
+    author: "L T",
+    rating: 5,
+    text: "After a period of illness, I was looking for some structured support to ease myself back into the gym and rebuild my fitness and strength. Hal is fantastic at tailoring each session to individual needs and goals. I've already noticed real progress and am even back doing my previous sports.",
+  },
+  {
     author: "Alan B.",
     rating: 5,
     text: "If like me you're not a fan of typical gyms, and struggle to know which exercises to do and how, then these sessions are for you. I'm 50 but ages range from 20s upwards and everyone is really friendly and supportive. Over the 6 weeks I gained strength but also confidence.",
-  },
-  {
-    author: "Karen S.",
-    rating: 5,
-    text: "I'm just coming to the end of my 30 day programme and cannot say how much better I feel in myself. Had a very stiff shoulder before I started and the difference in the 30 days is great. Enjoyed it so much that I have decided to continue my membership.",
   },
   {
     author: "Dan H.",
@@ -145,7 +147,6 @@ export const IMAGES = {
 
   // ——— HEADSHOTS ———
   hallum: "/media/hallum.jpg",
-  becky: "/media/becky.jpg",
 
   // ——— ARCHIVAL — the original Gain team, including people no longer
   //     at Gain (Aaron, Ash, the physio). Use only if historical context
@@ -251,12 +252,6 @@ export const IMAGE_META: Record<string, ImageMeta> = {
     setting: "headshot",
     status: "current",
   },
-  "/media/becky.jpg": {
-    description: "Headshot of Becky smiling, plain background.",
-    people: ["Becky Brown"],
-    setting: "headshot",
-    status: "current",
-  },
   "/media/gym/coach-member.jpg": {
     description:
       "Aaron Goacher (former Gain PT) smiling while a female client (40s) does seated overhead barbell press. Aaron is prominently in frame.",
@@ -329,7 +324,7 @@ export const TEAM: TeamMember[] = [
     name: "Hallum Cousins",
     role: "Founder & Head Coach",
     specialisms: ["MSc Sport Physiology", "Injury prevention", "Sports performance"],
-    bio: "I created Gain to provide a personal and supportive space where anyone can build strength and confidence at their own pace.",
+    bio: "I started Gain to bridge the gap between physio and the gym. A small, expert-led space for adults who want to get strong safely, whatever their starting point.",
     photo: "/media/hallum.jpg",
   },
 ];

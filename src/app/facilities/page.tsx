@@ -38,10 +38,10 @@ export default function FacilitiesPage() {
               </h1>
               <Lede className="mt-10">
                 A small private facility near Eastbourne town centre. The gym
-                is the heart of it &mdash; that&rsquo;s where small-group
-                personal training classes run, led by an instructor with up
-                to six members at a time. The studio and sauna sit alongside
-                for everything else.
+                is the heart of it &mdash; that&rsquo;s where the 6-week and
+                12-week programmes run as small group personal training, led
+                by an instructor with up to six members at a time. The studio
+                and sauna sit alongside as separate, bookable spaces.
               </Lede>
               <div className="mt-8 flex flex-wrap gap-3">
                 <CTAButton href="/contact" variant="primary">Enquire now</CTAButton>
@@ -69,13 +69,7 @@ export default function FacilitiesPage() {
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
             <Photo src={IMAGES.gymWide} alt="The gym floor at Gain" aspect="aspect-[4/5]" />
-            <LoopVideo
-              src720={VIDEOS.facilityA.src720}
-              src1080={VIDEOS.facilityA.src1080}
-              poster={IMAGES.gymLunges}
-              alt="Training footage from the gym"
-              aspect="aspect-[4/5]"
-            />
+            <Photo src={IMAGES.gymGroupClass} alt="A small-group class in the gym" aspect="aspect-[4/5]" />
             <Photo src={IMAGES.studioYoga} alt="The studio set up for a mat session" aspect="aspect-[4/5]" />
             <Photo src={IMAGES.saunaPlungeWide} alt="The sauna and cold plunge room" aspect="aspect-[4/5]" />
           </div>
@@ -96,12 +90,12 @@ export default function FacilitiesPage() {
                 />
               </div>
               <div className="col-span-2 pt-16">
-                <LoopVideo
-                  src720={VIDEOS.facilityA.src720}
-                  src1080={VIDEOS.facilityA.src1080}
-                  poster={IMAGES.gymStretching}
-                  alt="Training footage from the gym floor"
+                <Photo
+                  src={IMAGES.gymWarmup}
+                  alt="Hallum warming up with a member in the gym"
                   aspect="aspect-[4/6]"
+                  tone="warm"
+                  sizes="(min-width: 1024px) 30vw, 60vw"
                 />
               </div>
             </div>
@@ -161,6 +155,11 @@ export default function FacilitiesPage() {
               A small space &mdash; deliberately. Six people, one coach,
               plenty of room to breathe.
             </p>
+            <p className="mt-4 text-paper/65 text-sm leading-relaxed">
+              Outside scheduled class hours, the gym floor is also available
+              for private hire. Get in touch if you would like to use it
+              outside of a programme.
+            </p>
           </div>
         </div>
       </Section>
@@ -173,19 +172,18 @@ export default function FacilitiesPage() {
             <H2 className="mt-6">A softer room, for the quieter work.</H2>
             <p className="mt-6 text-paper/75 leading-[1.72] text-[1.05rem]">
               A dedicated space next door to the gym, with a softer floor and
-              natural light. We use it for yoga and mobility classes,
-              recovery work, and the occasional 1-to-1 session that needs a
-              quieter setting. Not where the strength work happens
-              &mdash; that&rsquo;s the gym &mdash; but the perfect place for
-              everything around it.
+              natural light. The studio is available for hire by independent
+              practitioners and groups. Not where Gain&rsquo;s strength
+              programmes happen &mdash; that&rsquo;s the gym &mdash; but the
+              perfect setting for the practices that need a calmer room.
             </p>
             <Rule tone="paper" className="my-8 w-12" />
             <ul className="space-y-2.5 text-paper/75 text-[0.98rem]">
               {[
-                "Yoga and mobility classes",
-                "Recovery and breathwork sessions",
-                "1-to-1 coaching in a quieter setting",
+                "Available for hire by yoga teachers and similar",
+                "Suited to mobility, breathwork and recovery work",
                 "Softer floor, natural light",
+                "Separate from programme membership",
               ].map((b) => (
                 <li key={b} className="flex gap-3">
                   <span className="text-flame">▸</span>
@@ -193,6 +191,10 @@ export default function FacilitiesPage() {
                 </li>
               ))}
             </ul>
+            <p className="mt-6 text-paper/65 text-sm leading-relaxed">
+              Interested in renting the studio? Get in touch via the contact
+              page.
+            </p>
           </div>
 
           <div className="lg:col-span-6 order-1 lg:order-2">
@@ -234,11 +236,12 @@ export default function FacilitiesPage() {
                 />
               </div>
               <div className="col-span-2 pt-16">
-                <Photo
-                  src={IMAGES.saunaPlungeClose}
-                  alt="Close-up of the cold plunge tub"
+                <LoopVideo
+                  src720={VIDEOS.facilityA.src720}
+                  src1080={VIDEOS.facilityA.src1080}
+                  poster={IMAGES.saunaPlungeClose}
+                  alt="Footage of the sauna and cold plunge"
                   aspect="aspect-square"
-                  sizes="(min-width: 1024px) 20vw, 40vw"
                 />
               </div>
             </div>
@@ -256,15 +259,17 @@ export default function FacilitiesPage() {
             <Folio number="03" label="Sauna & Cold Plunge" />
             <H2 className="mt-6">Contrast therapy, on demand.</H2>
             <p className="mt-6 text-paper/75 leading-[1.72] text-[1.05rem]">
-              A dedicated recovery corner at the studio &mdash; an infrared
+              A dedicated recovery corner at the facility &mdash; an infrared
               sauna for gentle, deep heat, and a cold plunge for the part
-              you dread but always feel better after.
+              you dread but always feel better after. Bookable as standalone
+              sessions; not part of programme membership.
             </p>
             <Rule tone="paper" className="my-8 w-12" />
             <ul className="space-y-2.5 text-paper/75 text-[0.98rem]">
               {[
                 "Infrared sauna — lower, drier heat than traditional sauna",
                 "Cold plunge — temperature-controlled recovery",
+                "Pay-per-session, bookable below",
               ].map((b) => (
                 <li key={b} className="flex gap-3">
                   <span className="text-flame">▸</span>

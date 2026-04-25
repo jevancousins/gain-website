@@ -58,7 +58,7 @@ export default async function OgImage() {
               color: "#ffffff",
             }}
           >
-            Get stronger.
+            Train smarter.
           </div>
           <div
             style={{
@@ -81,7 +81,7 @@ export default async function OgImage() {
               color: "#FC832C",
             }}
           >
-            Feel like yourself again.
+            Build lasting strength.
           </div>
         </div>
 
