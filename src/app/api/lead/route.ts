@@ -99,6 +99,7 @@ type Lead = {
   message: string;
   source: string;
   newsletter: boolean;
+  createdAt: string;
 };
 
 async function writeLeadToNotion(lead: Lead, token: string, databaseId: string) {
@@ -106,11 +107,13 @@ async function writeLeadToNotion(lead: Lead, token: string, databaseId: string) 
     Name: { title: [{ text: { content: lead.firstName } }] },
     Email: { email: lead.email },
     Phone: { phone_number: lead.phoneRaw },
-    Source: { select: { name: lead.source || "unknown" } },
+    Source: { select: { name: "Website" } },
+    "Source Page": { rich_text: [{ text: { content: lead.source || "unknown" } }] },
+    "First Contact": { date: { start: lead.createdAt } },
     Newsletter: { checkbox: lead.newsletter },
   };
   if (lead.message) {
-    properties.Message = { rich_text: [{ text: { content: lead.message } }] };
+    properties.Notes = { rich_text: [{ text: { content: lead.message } }] };
   }
 
   const res = await fetch("https://api.notion.com/v1/pages", {
