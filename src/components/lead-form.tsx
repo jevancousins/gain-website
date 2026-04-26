@@ -88,7 +88,7 @@ export function LeadForm({
           <div>
             <h2 className="display-tight text-2xl text-paper">Thanks &mdash; we&rsquo;ve got it.</h2>
             <p className="mt-2 text-paper/70 leading-relaxed text-sm">
-              We&rsquo;ll be in touch shortly to arrange a short phone call.
+              We&rsquo;ll be in touch soon to arrange a short phone call.
               If it sounds like a good fit, we&rsquo;ll invite you in to see
               the studio and meet your coach.
             </p>
