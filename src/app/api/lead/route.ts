@@ -69,19 +69,11 @@ export async function POST(request: Request) {
     referer: request.headers.get("referer") ?? "",
   };
 
-  // Persist locally in dev. In production, swap for a real destination:
-  //   - POST to a CRM (HubSpot, Notion, Attio, etc.) via their REST API
-  //   - Forward to n8n / Make / Zapier webhook (env: LEAD_WEBHOOK_URL)
-  //   - Write to Supabase / Postgres
-  //   - Trigger an email via Resend
   try {
-    const webhook = process.env.LEAD_WEBHOOK_URL;
-    if (webhook) {
-      await fetch(webhook, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(lead),
-      });
+    const notionToken = process.env.NOTION_TOKEN;
+    const notionDbId = process.env.NOTION_LEADS_DB_ID;
+    if (notionToken && notionDbId) {
+      await writeLeadToNotion(lead, notionToken, notionDbId);
     } else if (process.env.NODE_ENV !== "production") {
       const dir = path.join(process.cwd(), ".data");
       await fs.mkdir(dir, { recursive: true });
@@ -91,9 +83,51 @@ export async function POST(request: Request) {
       console.log("[lead] captured", lead);
     }
   } catch (err) {
-    console.error("[lead] persistence error", err);
+    // Never lose the lead if Notion is down: log loudly so it can be replayed
+    // from Vercel logs, and tell the user we received it.
+    console.error("[lead] persistence error", err, { lead });
     return NextResponse.json({ ok: true, warning: "queued" }, { status: 202 });
   }
 
   return NextResponse.json({ ok: true, id: lead.id }, { status: 201 });
+}
+
+type Lead = {
+  firstName: string;
+  email: string;
+  phoneRaw: string;
+  message: string;
+  source: string;
+  newsletter: boolean;
+};
+
+async function writeLeadToNotion(lead: Lead, token: string, databaseId: string) {
+  const properties: Record<string, unknown> = {
+    Name: { title: [{ text: { content: lead.firstName } }] },
+    Email: { email: lead.email },
+    Phone: { phone_number: lead.phoneRaw },
+    Source: { select: { name: lead.source || "unknown" } },
+    Newsletter: { checkbox: lead.newsletter },
+  };
+  if (lead.message) {
+    properties.Message = { rich_text: [{ text: { content: lead.message } }] };
+  }
+
+  const res = await fetch("https://api.notion.com/v1/pages", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Notion-Version": "2022-06-28",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      parent: { database_id: databaseId },
+      properties,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Notion API ${res.status}: ${body}`);
+  }
 }
