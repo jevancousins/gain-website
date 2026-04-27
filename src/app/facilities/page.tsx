@@ -4,14 +4,13 @@ import { Section, H2, CTAButton, FinalCTA, Lede } from "@/components/ui";
 import { Photo } from "@/components/photo";
 import { LoopVideo } from "@/components/loop-video";
 import { Folio, Kicker, Rule, Caption } from "@/components/editorial";
-import { TeamUpEmbed } from "@/components/teamup-embed";
 import { IMAGES, VIDEOS, SITE } from "@/lib/utils";
 import { MapPin, Train, Car } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Facilities",
   description:
-    "Inside the Gain Strength Therapy facility in Eastbourne — a fully-equipped gym that hosts small-group personal training, a studio for mobility and yoga, and an infrared sauna with cold plunge.",
+    "Inside the Gain Strength Therapy facility in Eastbourne. A fully-equipped gym that hosts small-group personal training, alongside a studio for mobility and yoga.",
 };
 
 export default function FacilitiesPage() {
@@ -31,17 +30,17 @@ export default function FacilitiesPage() {
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-14 md:pt-20 pb-16 md:pb-24">
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-end">
             <div className="lg:col-span-7">
-              <Kicker>Three spaces, one roof</Kicker>
+              <Kicker>Two spaces, one roof</Kicker>
               <h1 className="display mt-6 text-[clamp(3rem,8vw,7.5rem)] text-paper">
-                Gym. Studio.
-                <span className="block display-italic font-medium text-flame">Sauna.</span>
+                Gym.
+                <span className="block display-italic font-medium text-flame">And studio.</span>
               </h1>
               <Lede className="mt-10">
                 A small private facility near Eastbourne town centre. The gym
-                is the heart of it &mdash; that&rsquo;s where the 6-week and
-                12-week programmes run as small group personal training, led
-                by an instructor with up to six members at a time. The studio
-                and sauna sit alongside as separate, bookable spaces.
+                is the heart of it. That is where the 6-week and 12-week
+                programmes run as small group personal training, led by an
+                instructor with up to six members at a time. A separate studio
+                next door is available for hire.
               </Lede>
               <div className="mt-8 flex flex-wrap gap-3">
                 <CTAButton href="/contact" variant="primary">Enquire now</CTAButton>
@@ -64,14 +63,13 @@ export default function FacilitiesPage() {
         </div>
       </section>
 
-      {/* ——— Mosaic strip: one image per area + one video ——— */}
+      {/* ——— Mosaic strip: one image per area ——— */}
       <section className="bg-ink-soft py-8">
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+          <div className="grid grid-cols-3 gap-3 md:gap-5">
             <Photo src={IMAGES.gymWide} alt="The gym floor at Gain" aspect="aspect-[4/5]" />
             <Photo src={IMAGES.gymGroupClass} alt="A small-group class in the gym" aspect="aspect-[4/5]" />
             <Photo src={IMAGES.studioYoga} alt="The studio set up for a mat session" aspect="aspect-[4/5]" />
-            <Photo src={IMAGES.saunaPlungeWide} alt="The sauna and cold plunge room" aspect="aspect-[4/5]" />
           </div>
         </div>
       </section>
@@ -222,92 +220,11 @@ export default function FacilitiesPage() {
         </div>
       </Section>
 
-      {/* ——— 03 · SAUNA & COLD PLUNGE ——— */}
-      <Section tone="ink" id="sauna">
-        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          <div className="lg:col-span-6">
-            <div className="grid grid-cols-5 gap-4">
-              <div className="col-span-3">
-                <Photo
-                  src={IMAGES.saunaPlungeWide}
-                  alt="The wooden cold plunge and infrared sauna with night-sky mural"
-                  aspect="aspect-[4/5]"
-                  sizes="(min-width: 1024px) 30vw, 60vw"
-                />
-              </div>
-              <div className="col-span-2 pt-16">
-                <LoopVideo
-                  src720={VIDEOS.facilityA.src720}
-                  src1080={VIDEOS.facilityA.src1080}
-                  poster={IMAGES.saunaPlungeClose}
-                  alt="Footage of the sauna and cold plunge"
-                  aspect="aspect-square"
-                />
-              </div>
-            </div>
-            <div className="mt-4">
-              <Photo
-                src={IMAGES.saunaCabin}
-                alt="The infrared sauna cabin"
-                aspect="aspect-[16/10]"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-              />
-            </div>
-          </div>
-
-          <div className="lg:col-span-6">
-            <Folio number="03" label="Sauna & Cold Plunge" />
-            <H2 className="mt-6">Contrast therapy, on demand.</H2>
-            <p className="mt-6 text-paper/75 leading-[1.72] text-[1.05rem]">
-              A dedicated recovery corner at the facility &mdash; an infrared
-              sauna for gentle, deep heat, and a cold plunge for the part
-              you dread but always feel better after. Bookable as standalone
-              sessions; not part of programme membership.
-            </p>
-            <Rule tone="paper" className="my-8 w-12" />
-            <ul className="space-y-2.5 text-paper/75 text-[0.98rem]">
-              {[
-                "Infrared sauna — lower, drier heat than traditional sauna",
-                "Cold plunge — temperature-controlled recovery",
-                "Pay-per-session, bookable below",
-              ].map((b) => (
-                <li key={b} className="flex gap-3">
-                  <span className="text-flame">▸</span>
-                  <span>{b}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Live booking — TeamUp iframe */}
-        <div className="mt-20 md:mt-28">
-          <div className="mb-8 flex items-end justify-between flex-wrap gap-4">
-            <div>
-              <Kicker>Book a session</Kicker>
-              <h3 className="display-tight mt-4 text-2xl md:text-[2rem] text-paper">
-                Live availability.{" "}
-                <span className="display-italic font-medium text-flame">Pick a slot.</span>
-              </h3>
-            </div>
-            <p className="text-paper/60 text-sm max-w-xs">
-              45-minute solo sessions or hour-long doubles. Bookings are
-              handled through TeamUp &mdash; secure your spot below.
-            </p>
-          </div>
-          <TeamUpEmbed
-            src={SITE.teamup.appointments}
-            title="Book a sauna or cold plunge session with Gain Strength Therapy"
-            fallbackHref={SITE.teamup.appointments}
-          />
-        </div>
-      </Section>
-
-      {/* ——— 04 · Find us ——— */}
+      {/* ——— 03 · Find us ——— */}
       <Section tone="ink-soft">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           <div className="lg:col-span-5">
-            <Folio number="04" label="Find us" />
+            <Folio number="03" label="Find us" />
             <H2 className="mt-6">{SITE.address.line1}</H2>
             <p className="mt-3 text-paper/75 text-lg">
               {SITE.address.city}, {SITE.address.postcode}

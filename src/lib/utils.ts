@@ -40,18 +40,6 @@ export const SITE = {
     facebook: "https://www.facebook.com/p/Gain-Strength-Therapy-61555544315873/",
     googleReviews: "https://share.google/VbfM3tGyhVSDRZUIZ",
   },
-  /**
-   * TeamUp booking URLs. Hallum manages bookings in TeamUp
-   * (goteamup.com/p/8554886-gain-strength-therapy). When he sends the
-   * official embed snippet from the TeamUp dashboard, swap these for
-   * the canonical iframe URL.
-   */
-  teamup: {
-    appointments:
-      "https://goteamup.com/p/8554886-gain-strength-therapy/c/appointment_types?page=1",
-    customerSite:
-      "https://goteamup.com/p/8554886-gain-strength-therapy/",
-  },
 };
 
 /**
@@ -140,11 +128,6 @@ export const IMAGES = {
   // ——— STUDIO ———
   studioYoga: "/media/studio/yoga.jpg",
 
-  // ——— SAUNA & COLD PLUNGE ———
-  saunaPlungeClose: "/media/sauna/plunge-close.jpg",
-  saunaPlungeWide: "/media/sauna/plunge-wide.jpg",
-  saunaCabin: "/media/sauna/cabin.jpg",
-
   // ——— HEADSHOTS ———
   hallum: "/media/hallum.jpg",
 
@@ -165,7 +148,7 @@ export const IMAGES = {
 export type ImageMeta = {
   description: string;
   people: string[];
-  setting: "gym" | "studio" | "sauna" | "headshot" | "brand";
+  setting: "gym" | "studio" | "headshot" | "brand";
   status: "current" | "archive";
 };
 
@@ -227,25 +210,6 @@ export const IMAGE_META: Record<string, ImageMeta> = {
     setting: "studio",
     status: "current",
   },
-  "/media/sauna/plunge-wide.jpg": {
-    description:
-      "Wide shot of the sauna + cold plunge room. Wooden cold plunge tub, sauna cabin, night-sky mountain mural on the wall, herringbone floor.",
-    people: [],
-    setting: "sauna",
-    status: "current",
-  },
-  "/media/sauna/plunge-close.jpg": {
-    description: "Close-up of the wooden cold plunge tub with night-sky mural behind.",
-    people: [],
-    setting: "sauna",
-    status: "current",
-  },
-  "/media/sauna/cabin.jpg": {
-    description: "Side view of the cold plunge and infrared sauna cabin.",
-    people: [],
-    setting: "sauna",
-    status: "current",
-  },
   "/media/hallum.jpg": {
     description: "Headshot of Hallum smiling, plain background.",
     people: ["Hallum Cousins"],
@@ -298,10 +262,6 @@ export const VIDEOS = {
     src720: "/media/videos/hero-720.mp4",
     src1080: "/media/videos/hero-1080.mp4",
     poster: IMAGES.gymStretching,
-  },
-  facilityA: {
-    src720: "/media/videos/facility-a-720.mp4",
-    src1080: "/media/videos/facility-a-1080.mp4",
   },
   facilityB: {
     src720: "/media/videos/facility-b-720.mp4",

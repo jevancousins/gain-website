@@ -46,17 +46,6 @@ Wide atmospheric shot of the empty gym floor — racks, weights, equipment.
 ### `studio/yoga.jpg`  · status: current
 The studio set up for yoga / meditation — mats, singing bowls on a woven rug, Buddha wall art, turquoise curtains. No people.
 
-## Sauna & cold plunge
-
-### `sauna/plunge-wide.jpg`  · status: current
-Wide shot of the sauna + cold plunge room. Wooden cold plunge tub, sauna cabin, night-sky mountain mural on the wall, herringbone floor.
-
-### `sauna/plunge-close.jpg`  · status: current
-Close-up of the wooden cold plunge tub with the night-sky mural behind.
-
-### `sauna/cabin.jpg`  · status: current
-Side view of the cold plunge and infrared sauna cabin.
-
 ## Headshots
 
 ### `hallum.jpg`  · status: current
@@ -79,9 +68,6 @@ Gain Strength Therapy circular wordmark logo.
 
 ### `videos/hero-1080.mp4` & `videos/hero-720.mp4`  · status: current
 Homepage hero background loop. Dark, moody, training scene.
-
-### `videos/facility-a-1080.mp4` & `videos/facility-a-720.mp4`  · status: current
-Facilities page gym-section loop.
 
 ### `videos/facility-b-1080.mp4` & `videos/facility-b-720.mp4`  · status: current
 Facilities page studio-section loop.
