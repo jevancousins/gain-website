@@ -10,9 +10,15 @@ type FieldErrors = Partial<Record<FieldKey, string>>;
 export function LeadForm({
   source = "landing",
   className,
+  eyebrow,
+  title,
+  body,
 }: {
   source?: string;
   className?: string;
+  eyebrow?: string;
+  title?: string;
+  body?: string;
 }) {
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">(
     "idle"
@@ -47,7 +53,7 @@ export function LeadForm({
           const el = form.querySelector<HTMLInputElement>(`[name="${body.field}"]`);
           el?.focus();
         } else {
-          setFormError(body?.error ?? "Something went wrong — please try again, or call us.");
+          setFormError(body?.error ?? "Something went wrong. Please try again, or call us.");
         }
         setState("idle");
         return;
@@ -56,7 +62,7 @@ export function LeadForm({
       setState("success");
       form.reset();
     } catch {
-      setFormError("Network issue — please try again, or call us on 01323 370022.");
+      setFormError("Network issue. Please try again, or call us on 01323 370022.");
       setState("idle");
     }
   }
@@ -106,15 +112,14 @@ export function LeadForm({
     >
       <div>
         <p className="text-[0.68rem] font-bold uppercase tracking-[0.28em] text-flame">
-          Step 01 · Arrange a call
+          {eyebrow ?? "Step 01 · Arrange a call"}
         </p>
         <h2 className="display-tight mt-3 text-[1.7rem] md:text-[1.95rem] leading-[1.05] text-paper">
-          Start with a free call.
+          {title ?? "Start with a free call."}
         </h2>
         <p className="mt-3 text-sm text-paper/65 leading-relaxed">
-          Leave your details and we&rsquo;ll call to learn about your goals.
-          No pressure &mdash; if we&rsquo;re a fit, we&rsquo;ll invite you in
-          for an in-person consultation.
+          {body ??
+            "Leave your details and we'll call to learn about your goals. No pressure, and if we're a fit, we'll invite you in for an in-person consultation."}
         </p>
       </div>
 

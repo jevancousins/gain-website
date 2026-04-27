@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { ChromeGate } from "@/components/chrome-gate";
 import { LocalBusinessSchema } from "@/components/structured-data";
 import { SITE } from "@/lib/utils";
 
@@ -67,9 +68,13 @@ export default function RootLayout({
           Skip to content
         </a>
         <ScrollToTop />
-        <SiteNav />
+        <ChromeGate>
+          <SiteNav />
+        </ChromeGate>
         <main id="main" className="flex-1">{children}</main>
-        <SiteFooter />
+        <ChromeGate>
+          <SiteFooter />
+        </ChromeGate>
         <LocalBusinessSchema />
       </body>
     </html>
