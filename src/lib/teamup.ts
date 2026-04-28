@@ -21,13 +21,14 @@ export async function teamupGet<T = unknown>(path: string, opts: FetchOpts = {})
   }
   if (opts.expand?.length) url.searchParams.set("expand", opts.expand.join(","));
 
-  const res = await fetch(url.toString(), {
-    headers: {
-      Authorization: `Token ${token}`,
-      Accept: "application/json",
-    },
-    cache: "no-store",
-  });
+  const headers: Record<string, string> = {
+    Authorization: `Token ${token}`,
+    Accept: "application/json",
+  };
+  const providerId = process.env.TEAMUP_PROVIDER_ID;
+  if (providerId) headers["TeamUp-Provider-ID"] = providerId;
+
+  const res = await fetch(url.toString(), { headers, cache: "no-store" });
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");

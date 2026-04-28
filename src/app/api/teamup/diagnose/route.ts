@@ -36,7 +36,7 @@ export async function GET(request: Request) {
       probeResults[path] = { ok: true, keys: topLevelShape(data) };
     } catch (err) {
       if (err instanceof TeamUpError) {
-        probeResults[path] = { ok: false, status: err.status };
+        probeResults[path] = { ok: false, status: err.status, body: err.body.slice(0, 400) };
       } else {
         probeResults[path] = { ok: false, error: (err as Error).message };
       }
