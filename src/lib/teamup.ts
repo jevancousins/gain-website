@@ -12,8 +12,8 @@ type FetchOpts = {
 };
 
 export async function teamupGet<T = unknown>(path: string, opts: FetchOpts = {}): Promise<T> {
-  const token = process.env.TEAMUP_APPLICATION_TOKEN;
-  if (!token) throw new Error("TEAMUP_APPLICATION_TOKEN not set");
+  const token = process.env.TEAMUP_APPLICATION_TOKENS;
+  if (!token) throw new Error("TEAMUP_APPLICATION_TOKENS not set");
 
   const url = new URL(BASE_URL + path);
   for (const [k, v] of Object.entries(opts.query ?? {})) {
