@@ -1,0 +1,62 @@
+name: Deploy to production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  test-and-deploy:
+    name: Test and promote to production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build the site
+        run: npm run build
+
+      - name: Run E2E tests against the production build
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          CI: 'true'
+        run: |
+          npm run start &
+          npx -y wait-on http://localhost:3000 --timeout 60000
+          npm run test:e2e
+
+      - name: Promote to Vercel production via Deploy Hook
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "::error::VERCEL_DEPLOY_HOOK_URL secret is not set."
+            echo "Configure it in repo settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          response=$(curl -fsSL -X POST "$DEPLOY_HOOK_URL")
+          echo "Vercel deploy hook response: $response"
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-deploy
+          path: playwright-report/
+          retention-days: 14
