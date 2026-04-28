@@ -1,4 +1,4 @@
-import { getAuthApplication, TeamUpError } from "@/lib/teamup";
+import { getAuthApplication, teamupGet, TeamUpError } from "@/lib/teamup";
 
 export async function GET(request: Request) {
   const expectedKey = process.env.TEAMUP_DIAG_KEY;
@@ -24,12 +24,51 @@ export async function GET(request: Request) {
       scopedProviders: app.scoped_providers.map((p) => ({ id: p.id, name: p.name })),
     };
   } catch (err) {
-    if (err instanceof TeamUpError) {
-      checks.authApplication = { ok: false, status: err.status, body: err.body.slice(0, 500) };
-    } else {
-      checks.authApplication = { ok: false, error: (err as Error).message };
-    }
+    checks.authApplication = errorShape(err);
   }
 
+  // Probe likely endpoint paths to discover the right URL shape without doc archaeology.
+  const probes = ["/customers", "/customer", "/core/customers", "/providers/customers"];
+  const probeResults: Record<string, unknown> = {};
+  for (const path of probes) {
+    try {
+      const data = await teamupGet<unknown>(path, { query: { limit: 1 } });
+      probeResults[path] = { ok: true, keys: topLevelShape(data) };
+    } catch (err) {
+      if (err instanceof TeamUpError) {
+        probeResults[path] = { ok: false, status: err.status };
+      } else {
+        probeResults[path] = { ok: false, error: (err as Error).message };
+      }
+    }
+  }
+  checks.probes = probeResults;
+
   return Response.json(checks);
+}
+
+function errorShape(err: unknown) {
+  if (err instanceof TeamUpError) {
+    return { ok: false, status: err.status, body: err.body.slice(0, 500) };
+  }
+  return { ok: false, error: (err as Error).message };
+}
+
+function topLevelShape(data: unknown): unknown {
+  if (data === null || typeof data !== "object") return typeof data;
+  if (Array.isArray(data)) {
+    return { type: "array", length: data.length, sampleKeys: data[0] && typeof data[0] === "object" ? Object.keys(data[0] as object) : null };
+  }
+  const obj = data as Record<string, unknown>;
+  const result: Record<string, unknown> = { keys: Object.keys(obj) };
+  // If there's a typical pagination wrapper, peek at the first row's keys too.
+  for (const k of ["results", "data", "items", "objects"]) {
+    const v = obj[k];
+    if (Array.isArray(v) && v.length > 0 && typeof v[0] === "object") {
+      result.firstRowKeys = Object.keys(v[0] as object);
+      result.collectionKey = k;
+      break;
+    }
+  }
+  return result;
 }
