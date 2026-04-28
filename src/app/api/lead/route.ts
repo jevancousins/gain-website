@@ -70,6 +70,18 @@ export async function POST(request: Request) {
     referer: request.headers.get("referer") ?? "",
   };
 
+  // QA short-circuit: when the message contains the [QA-TEST] marker, accept
+  // the request through validation but skip the Notion write and the
+  // confirmation email. Lets the E2E test exercise the real route without
+  // polluting the leads DB or sending real emails. The marker is specific
+  // enough that no real submission will trip it.
+  if (message.includes("[QA-TEST]")) {
+    return NextResponse.json(
+      { ok: true, id: lead.id, testMode: true },
+      { status: 201 }
+    );
+  }
+
   const tasks: Array<{ name: string; promise: Promise<void> }> = [];
 
   const notionToken = process.env.NOTION_TOKEN;
