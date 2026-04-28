@@ -24,6 +24,7 @@ export async function teamupGet<T = unknown>(path: string, opts: FetchOpts = {})
   const headers: Record<string, string> = {
     Authorization: `Token ${token}`,
     Accept: "application/json",
+    "TeamUp-Request-Mode": "provider",
   };
   const providerId = process.env.TEAMUP_PROVIDER_ID;
   if (providerId) headers["TeamUp-Provider-ID"] = providerId;
