@@ -42,3 +42,10 @@ next-env.d.ts
 
 # lead capture dev store
 /.data/
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/.playwright-cli/
