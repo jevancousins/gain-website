@@ -1,5 +1,6 @@
 import { fetchMembershipSummaryByCustomer } from "@/lib/teamup-memberships";
 import { teamupGet } from "@/lib/teamup";
+import { detectExpansionTriggers, type SessionSlot } from "@/lib/teamup-events";
 
 const NOTION_API = "https://api.notion.com/v1";
 const NOTION_VERSION = "2022-06-28";
@@ -36,6 +37,12 @@ export type DashboardMetrics = {
   monthlyRevenue: Array<{ month: string; net: number; invoiceCount: number }>;
   atRiskCount: number;
   netLast30Days: number;
+  capacity: {
+    windowDays: number;
+    threshold: number;
+    slotsAtThreshold: SessionSlot[];
+    topSlots: SessionSlot[];
+  };
 };
 
 type ActiveMembershipRow = {
@@ -146,12 +153,20 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
   if (!membersDbId) throw new Error("NOTION_MEMBERS_DB_ID not set");
   if (!financesDbId) throw new Error("NOTION_FINANCES_DB_ID not set");
 
-  const [activeMemberships, totalMembers, activeMembers, revenueRows, membershipSummaries] = await Promise.all([
+  const [
+    activeMemberships,
+    totalMembers,
+    activeMembers,
+    revenueRows,
+    membershipSummaries,
+    expansionTriggers,
+  ] = await Promise.all([
     fetchActiveCustomerMemberships(),
     countMembersByStatus(membersDbId, null),
     countMembersByStatus(membersDbId, "Active"),
     fetchTeamupRevenueRows(financesDbId),
     fetchMembershipSummaryByCustomer(),
+    detectExpansionTriggers(14, 5),
   ]);
 
   // Programme breakdown: count + MRR contribution per programme name.
@@ -225,6 +240,12 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     monthlyRevenue,
     atRiskCount,
     netLast30Days: round2(netLast30Days),
+    capacity: {
+      windowDays: expansionTriggers.windowDays,
+      threshold: expansionTriggers.threshold,
+      slotsAtThreshold: expansionTriggers.slotsAtThreshold,
+      topSlots: expansionTriggers.allSlots.slice(0, 8),
+    },
     // membershipSummaries is unused here but kept in scope above for clarity
     ...{ membershipSummariesCount: membershipSummaries.size as number },
   } as DashboardMetrics;
@@ -320,6 +341,39 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
     );
     for (const p of prepaidList) {
       blocks.push(bullet(`${p.programme} - ${p.count} customer${p.count === 1 ? "" : "s"}`));
+    }
+  }
+
+  blocks.push(heading2("Session capacity (last 14 days)"));
+  if (m.capacity.slotsAtThreshold.length > 0) {
+    blocks.push(
+      callout(
+        "⚠️",
+        `${m.capacity.slotsAtThreshold.length} session slot${m.capacity.slotsAtThreshold.length === 1 ? "" : "s"} averaging ${m.capacity.threshold}+/${m.capacity.topSlots[0]?.capacity ?? 6} for the last ${m.capacity.windowDays} days. Time to add the next session from the expansion list.`,
+      ),
+    );
+    for (const s of m.capacity.slotsAtThreshold) {
+      blocks.push(
+        bullet(
+          `${s.slotKey} - avg ${s.averageAttending.toFixed(1)}/${s.capacity} across ${s.occurrences.length} session${s.occurrences.length === 1 ? "" : "s"}`,
+        ),
+      );
+    }
+  } else {
+    blocks.push(
+      paragraph(
+        `No session slots are at the ${m.capacity.threshold}/${m.capacity.topSlots[0]?.capacity ?? 6} expansion threshold yet.`,
+      ),
+    );
+  }
+  if (m.capacity.topSlots.length > 0) {
+    blocks.push(paragraph(`Top sessions by average attendance:`));
+    for (const s of m.capacity.topSlots) {
+      blocks.push(
+        bullet(
+          `${s.slotKey} (${s.sampleName}) - avg ${s.averageAttending.toFixed(1)}/${s.capacity}, ${s.occurrences.length} occurrence${s.occurrences.length === 1 ? "" : "s"}`,
+        ),
+      );
     }
   }
 
