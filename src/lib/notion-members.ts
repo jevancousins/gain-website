@@ -61,47 +61,138 @@ function buildProperties(c: TeamupCustomer) {
   return properties;
 }
 
-type FoundPage = { id: string };
+type MemberRow = {
+  id: string;
+  properties: {
+    Email?: { email: string | null };
+    Name?: { title?: Array<{ plain_text: string }> };
+    Status?: { select?: { name: string } | null };
+    Source?: { select?: { name: string } | null };
+    Joined?: { date?: { start: string } | null };
+  };
+};
 
-async function findByEmail(email: string): Promise<FoundPage | null> {
+type ExistingMember = {
+  pageId: string;
+  name: string;
+  status: string | null;
+  source: string | null;
+  joined: string | null;
+};
+
+async function loadEmailIndex(): Promise<Map<string, ExistingMember>> {
   const { token, dbId } = notionConfig();
-  const res = await fetch(`${NOTION_API}/databases/${dbId}/query`, {
-    method: "POST",
-    headers: notionHeaders(token),
-    body: JSON.stringify({
-      filter: { property: "Email", email: { equals: email } },
-      page_size: 1,
-    }),
-    cache: "no-store",
+  const index = new Map<string, ExistingMember>();
+  let cursor: string | undefined = undefined;
+
+  while (true) {
+    const body: Record<string, unknown> = { page_size: 100 };
+    if (cursor) body.start_cursor = cursor;
+    const res = await fetch(`${NOTION_API}/databases/${dbId}/query`, {
+      method: "POST",
+      headers: notionHeaders(token),
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(`Notion query failed: ${res.status} ${await res.text()}`);
+    const data = (await res.json()) as {
+      results: MemberRow[];
+      next_cursor: string | null;
+      has_more: boolean;
+    };
+    for (const row of data.results) {
+      const email = row.properties.Email?.email;
+      if (!email) continue;
+      index.set(email.toLowerCase(), {
+        pageId: row.id,
+        name: row.properties.Name?.title?.map((t) => t.plain_text).join("") ?? "",
+        status: row.properties.Status?.select?.name ?? null,
+        source: row.properties.Source?.select?.name ?? null,
+        joined: row.properties.Joined?.date?.start ?? null,
+      });
+    }
+    if (!data.has_more || !data.next_cursor) break;
+    cursor = data.next_cursor;
+  }
+
+  return index;
+}
+
+function isUnchanged(c: TeamupCustomer, existing: ExistingMember): boolean {
+  const desiredName =
+    [c.first_name, c.last_name].filter(Boolean).join(" ").trim() || c.email || `TeamUp #${c.id}`;
+  const desiredStatus = mapStatus(c.status);
+  const desiredSource = mapSource(c.lead_source);
+  const desiredJoined = c.created_at ? c.created_at.slice(0, 10) : null;
+
+  return (
+    existing.name === desiredName &&
+    existing.status === desiredStatus &&
+    existing.source === desiredSource &&
+    existing.joined === desiredJoined
+  );
+}
+
+async function runWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let nextIndex = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (true) {
+      const i = nextIndex++;
+      if (i >= items.length) break;
+      results[i] = await fn(items[i]);
+    }
   });
-  if (!res.ok) throw new Error(`Notion query failed: ${res.status} ${await res.text()}`);
-  const data = (await res.json()) as { results: FoundPage[] };
-  return data.results[0] ?? null;
+  await Promise.all(workers);
+  return results;
 }
 
 export type SyncResult = {
   total: number;
   created: number;
   updated: number;
+  unchanged: number;
   skipped: number;
   errors: Array<{ id: number; reason: string }>;
 };
 
 export async function upsertCustomers(customers: TeamupCustomer[]): Promise<SyncResult> {
   const { token, dbId } = notionConfig();
-  const result: SyncResult = { total: customers.length, created: 0, updated: 0, skipped: 0, errors: [] };
+  const result: SyncResult = {
+    total: customers.length,
+    created: 0,
+    updated: 0,
+    unchanged: 0,
+    skipped: 0,
+    errors: [],
+  };
 
-  for (const c of customers) {
+  const emailIndex = await loadEmailIndex();
+  // Notion's published rate limit averages ~3 req/s. Three concurrent writers
+  // matches that without bursting hard enough to draw 429s.
+  const CONCURRENCY = 3;
+
+  await runWithConcurrency(customers, CONCURRENCY, async (c) => {
     try {
       if (!c.email) {
         result.skipped += 1;
-        continue;
+        return;
       }
-      const existing = await findByEmail(c.email);
+      const existing = emailIndex.get(c.email.toLowerCase());
+
+      if (existing && isUnchanged(c, existing)) {
+        result.unchanged += 1;
+        return;
+      }
+
       const properties = buildProperties(c);
 
       if (existing) {
-        const res = await fetch(`${NOTION_API}/pages/${existing.id}`, {
+        const res = await fetch(`${NOTION_API}/pages/${existing.pageId}`, {
           method: "PATCH",
           headers: notionHeaders(token),
           body: JSON.stringify({ properties }),
@@ -120,7 +211,7 @@ export async function upsertCustomers(customers: TeamupCustomer[]): Promise<Sync
     } catch (err) {
       result.errors.push({ id: c.id, reason: (err as Error).message });
     }
-  }
+  });
 
   return result;
 }
