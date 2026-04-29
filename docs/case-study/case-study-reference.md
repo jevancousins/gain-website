@@ -1,6 +1,18 @@
-# Foundry OAuth2 Documentation
+# Case Study Reference Documentation
 
-> Collated from screenshots for case study reference. Additional screenshots may be appended below.
+> Collated from screenshots. Covers Foundry OAuth2 (sections 1–8) and the Python Requests library (sections 9 onward).
+
+## Contents
+
+1. [Third-party applications](#third-party-applications)
+2. [Writing OAuth2 clients for Foundry](#writing-oauth2-clients-for-foundry)
+3. [Authorization code grant](#authorization-code-grant)
+4. [Client credentials grant](#client-credentials-grant)
+5. [Refreshing an access token](#refreshing-an-access-token)
+6. [Refresh token rotation](#refresh-token-rotation)
+7. [Rotate a client secret](#rotate-a-client-secret)
+8. [OAuth2 API reference](#oauth2-api-reference)
+9. [Requests Library](#requests-library)
 
 ## Third-party applications
 
@@ -424,4 +436,128 @@ requests.exceptions.HTTPError: 404 Client Error
 
 But, since our `status_code` for `r` was 200, when we call `raise_for_status()` we get:
 
-*(continues in next screenshot)*
+```python
+>>> r.raise_for_status()
+None
+```
+
+All is well.
+
+## Response Headers
+
+We can view the server's response headers using a Python dictionary:
+
+```python
+>>> r.headers
+{
+    'content-encoding': 'gzip',
+    'transfer-encoding': 'chunked',
+    'connection': 'close',
+    'server': 'nginx/1.0.4',
+    'x-runtime': '148ms',
+    'etag': '"e1ca502697e5c9317743dc078f67693f"',
+    'content-type': 'application/json'
+}
+```
+
+The dictionary is special, though: it's made just for HTTP headers. According to RFC 7230, HTTP Header names are case-insensitive.
+
+So, we can access the headers using any capitalization we want:
+
+```python
+>>> r.headers['Content-Type']
+'application/json'
+>>> r.headers.get('content-type')
+'application/json'
+```
+
+It is also special in that the server could have sent the same header multiple times with different values, but requests combines them so they can be represented in the dictionary within a single mapping, as per RFC 7230:
+
+> A recipient MAY combine multiple header fields with the same field name into one "field-name: field-value" pair, without changing the semantics of the message, by appending each subsequent field value to the combined field value in order, separated by a comma.
+
+## Session Objects
+
+The Session object allows you to persist certain parameters across requests. It also persists cookies across all requests made from the Session instance, and will use `urllib3`'s connection pooling. So if you're making several requests to the same host, the underlying TCP connection will be reused, which can result in a significant performance increase.
+
+A Session object has all the methods of the main Requests API.
+
+Let's persist some cookies across requests:
+
+```python
+s = requests.Session()
+s.get('https://httpbin.org/cookies/set/sessioncookie/123456789')
+r = s.get('https://httpbin.org/cookies')
+print(r.text)
+# '{"cookies": {"sessioncookie": "123456789"}}'
+```
+
+Sessions can also be used to provide default data to the request methods. This is done by providing data to the properties on a Session object:
+
+```python
+s = requests.Session()
+s.auth = ('user', 'pass')
+s.headers.update({'x-test': 'true'})
+# both 'x-test' and 'x-test2' are sent
+s.get('https://httpbin.org/headers', headers={'x-test2': 'true'})
+```
+
+Any dictionaries that you pass to a request method will be merged with the session-level values that are set. The method-level parameters override session parameters.
+
+Note, however, that method-level parameters will *not* be persisted across requests, even if using a session. This example will only send the cookies with the first request, but not the second:
+
+```python
+s = requests.Session()
+r = s.get('https://httpbin.org/cookies', cookies={'from-my': 'browser'})
+print(r.text)
+# '{"cookies": {"from-my": "browser"}}'
+r = s.get('https://httpbin.org/cookies')
+print(r.text)
+# '{"cookies": {}}'
+```
+
+If you want to manually add cookies to your session, use the Cookie utility functions to manipulate `Session.cookies`.
+
+Sessions can also be used as context managers:
+
+```python
+with requests.Session() as s:
+    s.get('https://httpbin.org/cookies/set/sessioncookie/123456789')
+```
+
+This will make sure the session is closed as soon as the `with` block is exited, even if unhandled exceptions occurred.
+
+## Keep-Alive
+
+Excellent news — thanks to urllib3, keep-alive is 100% automatic within a session! Any requests that you make within a session will automatically reuse the appropriate connection!
+
+> Note that connections are only released back to the pool for reuse once all body data has been read; be sure to either set `stream` to `False` or read the `content` property of the `Response` object.
+
+## Timeout
+
+Most requests to external servers should have a timeout attached, in case the server is not responding in a timely manner. By default, requests do not time out unless a timeout value is set explicitly. Without a timeout, your code may hang for minutes or more.
+
+The **connect** timeout is the number of seconds Requests will wait for your client to establish a connection to a remote machine (corresponding to the connect() call on the socket). It's a good practice to set connect timeouts to slightly larger than a multiple of 3, which is the default TCP packet retransmission window.
+
+Once your client has connected to the server and sent the HTTP request, the **read** timeout is the number of seconds the client will wait for the server to send a response. (Specifically, it's the number of seconds that the client will wait *between* bytes sent from the server. In 99.9% of cases, this is the time before the server sends the first byte).
+
+If you specify a single value for the timeout, like this:
+
+```python
+r = requests.get('https://github.com', timeout=5)
+```
+
+The timeout value will be applied to both the `connect` and the `read` timeouts. Specify a tuple if you would like to set the values separately:
+
+```python
+r = requests.get('https://github.com', timeout=(3.05, 27))
+```
+
+If the remote server is very slow, you can tell Requests to wait forever for a response, by passing None as a timeout value and then retrieving a cup of coffee.
+
+```python
+r = requests.get('https://github.com', timeout=None)
+```
+
+> **Note:** The connect timeout applies to each connection attempt to an IP address. If multiple addresses exist for a domain name, the underlying `urllib3` will try each address sequentially until one successfully connects. This may lead to an effective total connection timeout *multiple* times longer than the specified time, e.g. an unresponsive server having both IPv4 and IPv6 addresses will have its perceived timeout *doubled*, so take that into account when setting the connection timeout.
+
+> **Note:** Neither the connect nor read timeouts are wall clock. This means that if you start a request, and look at the time, and then look at the time when the request finishes or times out, the real-world time may be greater than what you specified.
