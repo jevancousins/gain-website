@@ -4,5 +4,11 @@
     "deploymentEnabled": {
       "main": false
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/teamup-members-sync",
+      "schedule": "0 6 * * *"
+    }
+  ]
 }
