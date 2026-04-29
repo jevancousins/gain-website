@@ -1,4 +1,5 @@
 import type { TeamupCustomer } from "@/lib/teamup-customers";
+import { fetchLastAttendedByCustomer } from "@/lib/teamup-attendances";
 
 const NOTION_API = "https://api.notion.com/v1";
 const NOTION_VERSION = "2022-06-28";
@@ -47,7 +48,7 @@ function mapSource(teamupSource: string | null): NotionSource | null {
   return "Other";
 }
 
-function buildProperties(c: TeamupCustomer) {
+function buildProperties(c: TeamupCustomer, lastSession: string | null) {
   const name = [c.first_name, c.last_name].filter(Boolean).join(" ").trim() || c.email || `TeamUp #${c.id}`;
   const properties: Record<string, unknown> = {
     Name: { title: [{ text: { content: name } }] },
@@ -58,6 +59,7 @@ function buildProperties(c: TeamupCustomer) {
   if (status) properties.Status = { select: { name: status } };
   const source = mapSource(c.lead_source);
   if (source) properties.Source = { select: { name: source } };
+  if (lastSession) properties["Last Session"] = { date: { start: lastSession } };
   return properties;
 }
 
@@ -69,6 +71,7 @@ type MemberRow = {
     Status?: { select?: { name: string } | null };
     Source?: { select?: { name: string } | null };
     Joined?: { date?: { start: string } | null };
+    "Last Session"?: { date?: { start: string } | null };
   };
 };
 
@@ -78,6 +81,7 @@ type ExistingMember = {
   status: string | null;
   source: string | null;
   joined: string | null;
+  lastSession: string | null;
 };
 
 async function loadEmailIndex(): Promise<Map<string, ExistingMember>> {
@@ -109,6 +113,7 @@ async function loadEmailIndex(): Promise<Map<string, ExistingMember>> {
         status: row.properties.Status?.select?.name ?? null,
         source: row.properties.Source?.select?.name ?? null,
         joined: row.properties.Joined?.date?.start ?? null,
+        lastSession: row.properties["Last Session"]?.date?.start ?? null,
       });
     }
     if (!data.has_more || !data.next_cursor) break;
@@ -118,7 +123,7 @@ async function loadEmailIndex(): Promise<Map<string, ExistingMember>> {
   return index;
 }
 
-function isUnchanged(c: TeamupCustomer, existing: ExistingMember): boolean {
+function isUnchanged(c: TeamupCustomer, existing: ExistingMember, lastSession: string | null): boolean {
   const desiredName =
     [c.first_name, c.last_name].filter(Boolean).join(" ").trim() || c.email || `TeamUp #${c.id}`;
   const desiredStatus = mapStatus(c.status);
@@ -129,7 +134,8 @@ function isUnchanged(c: TeamupCustomer, existing: ExistingMember): boolean {
     existing.name === desiredName &&
     existing.status === desiredStatus &&
     existing.source === desiredSource &&
-    existing.joined === desiredJoined
+    existing.joined === desiredJoined &&
+    existing.lastSession === lastSession
   );
 }
 
@@ -171,7 +177,10 @@ export async function upsertCustomers(customers: TeamupCustomer[]): Promise<Sync
     errors: [],
   };
 
-  const emailIndex = await loadEmailIndex();
+  const [emailIndex, lastAttendedByCustomer] = await Promise.all([
+    loadEmailIndex(),
+    fetchLastAttendedByCustomer(),
+  ]);
   // Notion's published rate limit averages ~3 req/s. Three concurrent writers
   // matches that without bursting hard enough to draw 429s.
   const CONCURRENCY = 3;
@@ -183,13 +192,14 @@ export async function upsertCustomers(customers: TeamupCustomer[]): Promise<Sync
         return;
       }
       const existing = emailIndex.get(c.email.toLowerCase());
+      const lastSession = lastAttendedByCustomer.get(c.id) ?? null;
 
-      if (existing && isUnchanged(c, existing)) {
+      if (existing && isUnchanged(c, existing, lastSession)) {
         result.unchanged += 1;
         return;
       }
 
-      const properties = buildProperties(c);
+      const properties = buildProperties(c, lastSession);
 
       if (existing) {
         const res = await fetch(`${NOTION_API}/pages/${existing.pageId}`, {
