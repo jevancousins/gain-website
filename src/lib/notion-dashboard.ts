@@ -22,9 +22,17 @@ export type DashboardMetrics = {
   generatedAt: string;
   activeMembers: number;
   totalMembers: number;
-  mrr: number;
+  recurringMembers: number;
+  recurringMrr: number;
+  prepaidActive: number;
+  prepaidActivePeople: number;
   mrrCurrencySymbol: string;
-  programmeBreakdown: Array<{ programme: string; count: number; mrrContribution: number }>;
+  programmeBreakdown: Array<{
+    programme: string;
+    count: number;
+    mrrContribution: number;
+    cohort: "recurring" | "prepaid";
+  }>;
   monthlyRevenue: Array<{ month: string; net: number; invoiceCount: number }>;
   atRiskCount: number;
   netLast30Days: number;
@@ -146,10 +154,9 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     fetchMembershipSummaryByCustomer(),
   ]);
 
-  // MRR: sum billed_price across active customer_memberships.
-  const mrr = activeMemberships.reduce((sum, m) => sum + (m.billed_price?.decimal ?? 0), 0);
-
   // Programme breakdown: count + MRR contribution per programme name.
+  // Programmes that bill £0 are pre-paid one-offs (e.g. 30 Day Strength,
+  // 5-Week Fix); they contribute one-off revenue at signup, not MRR.
   const programmeMap = new Map<string, { count: number; mrr: number }>();
   for (const m of activeMemberships) {
     const name = m.name || "Unknown";
@@ -160,8 +167,24 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     programmeMap.set(name, entry);
   }
   const programmeBreakdown = Array.from(programmeMap.entries())
-    .map(([programme, v]) => ({ programme, count: v.count, mrrContribution: round2(v.mrr) }))
+    .map(([programme, v]) => ({
+      programme,
+      count: v.count,
+      mrrContribution: round2(v.mrr),
+      cohort: (v.mrr > 0 ? "recurring" : "prepaid") as "recurring" | "prepaid",
+    }))
     .sort((a, b) => b.mrrContribution - a.mrrContribution);
+
+  const recurringMembers = programmeBreakdown
+    .filter((p) => p.cohort === "recurring")
+    .reduce((sum, p) => sum + p.count, 0);
+  const recurringMrr = programmeBreakdown
+    .filter((p) => p.cohort === "recurring")
+    .reduce((sum, p) => sum + p.mrrContribution, 0);
+  const prepaidActive = programmeBreakdown.filter((p) => p.cohort === "prepaid").length;
+  const prepaidActivePeople = programmeBreakdown
+    .filter((p) => p.cohort === "prepaid")
+    .reduce((sum, p) => sum + p.count, 0);
 
   // Monthly revenue: extract YYYY-MM from Date and pair with Amount.
   const monthlyRevenue = revenueRows
@@ -193,7 +216,10 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     generatedAt: new Date().toISOString(),
     activeMembers,
     totalMembers,
-    mrr: round2(mrr),
+    recurringMembers,
+    recurringMrr: round2(recurringMrr),
+    prepaidActive,
+    prepaidActivePeople,
     mrrCurrencySymbol: "£",
     programmeBreakdown,
     monthlyRevenue,
@@ -236,12 +262,26 @@ export async function refreshDashboardPage(metrics: DashboardMetrics): Promise<{
 
 function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
   const dateLabel = m.generatedAt.slice(0, 10);
+  const sym = m.mrrCurrencySymbol;
   const blocks: unknown[] = [
     paragraph(`Auto-generated ${dateLabel}. Refreshes Mondays at 08:00 UTC.`),
     heading2("Headline numbers"),
-    callout("👥", `${m.activeMembers} active members (of ${m.totalMembers} total in TeamUp)`),
-    callout("💷", `${m.mrrCurrencySymbol}${m.mrr.toFixed(2)} MRR (sum of billed prices on active memberships)`),
-    callout("📈", `${m.mrrCurrencySymbol}${m.netLast30Days.toFixed(2)} net revenue in the last 30 days`),
+    callout(
+      "💷",
+      `${sym}${m.recurringMrr.toFixed(2)} MRR from ${m.recurringMembers} recurring member${m.recurringMembers === 1 ? "" : "s"} (avg ${sym}${m.recurringMembers > 0 ? (m.recurringMrr / m.recurringMembers).toFixed(0) : "0"}/mo)`,
+    ),
+    callout(
+      "📈",
+      `${sym}${m.netLast30Days.toFixed(2)} net revenue in the last 30 days (includes one-off programme purchases)`,
+    ),
+    callout(
+      "🎫",
+      `${m.prepaidActivePeople} ${m.prepaidActivePeople === 1 ? "person is" : "people are"} on a pre-paid programme right now (one-off revenue, no MRR contribution)`,
+    ),
+    callout(
+      "👥",
+      `${m.activeMembers} Notion-Active members (of ${m.totalMembers} total in TeamUp; the difference is leads, lapsed, or PT-only customers)`,
+    ),
   ];
 
   if (m.monthlyRevenue.length > 0) {
@@ -251,22 +291,35 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
     blocks.push(paragraph(`Net invoice revenue per month, GBP.`));
   }
 
-  // Programme MRR contribution as a horizontal bar chart.
-  const billed = m.programmeBreakdown.filter((p) => p.mrrContribution > 0);
+  // Programme MRR contribution as a horizontal bar chart (recurring only).
+  const billed = m.programmeBreakdown.filter((p) => p.cohort === "recurring");
   if (billed.length > 0) {
     blocks.push(heading2("MRR by programme"));
     const chartUrl = programmeBarChartUrl(m, billed);
     if (chartUrl) blocks.push(image(chartUrl));
   }
 
-  if (m.programmeBreakdown.length > 0) {
-    blocks.push(heading2("Active programmes (full list)"));
-    for (const p of m.programmeBreakdown) {
+  const recurringList = m.programmeBreakdown.filter((p) => p.cohort === "recurring");
+  const prepaidList = m.programmeBreakdown.filter((p) => p.cohort === "prepaid");
+  if (recurringList.length > 0) {
+    blocks.push(heading2("Active recurring programmes"));
+    for (const p of recurringList) {
       blocks.push(
         bullet(
-          `${p.programme} - ${p.count} member${p.count === 1 ? "" : "s"}, ${m.mrrCurrencySymbol}${p.mrrContribution.toFixed(2)} billed`,
+          `${p.programme} - ${p.count} member${p.count === 1 ? "" : "s"}, ${m.mrrCurrencySymbol}${p.mrrContribution.toFixed(2)}/mo`,
         ),
       );
+    }
+  }
+  if (prepaidList.length > 0) {
+    blocks.push(heading2("Active pre-paid programmes"));
+    blocks.push(
+      paragraph(
+        "These customers have already paid in full for a fixed-length programme. They sit in 'active' status until expiry and don't contribute to MRR.",
+      ),
+    );
+    for (const p of prepaidList) {
+      blocks.push(bullet(`${p.programme} - ${p.count} customer${p.count === 1 ? "" : "s"}`));
     }
   }
 
