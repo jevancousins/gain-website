@@ -104,6 +104,66 @@ export async function GET(request: Request) {
   result.attendanceWithExpand = await tryEndpoint("/attendances", { limit: 1, expand: "event,event.start_at" });
   result.attendanceFilteredAttended = await tryEndpoint("/attendances", { limit: 1, status: "attended" });
 
+  // 3c. Ordering experiments to find recent attendances
+  const orderings = ["-event__starts_at", "-event__start_at", "-id", "-starts_at", "-checked_off_at"];
+  const orderingProbes: Record<string, unknown> = {};
+  for (const o of orderings) {
+    try {
+      const p = await teamupGet<{ results: Array<{ id: number; event: unknown; status: string }> }>(
+        "/attendances",
+        { query: { limit: 3, status: "attended", ordering: o }, expand: ["event"] },
+      );
+      orderingProbes[o] = {
+        ok: true,
+        first3: p.results.map((r) => ({
+          id: r.id,
+          status: r.status,
+          start: typeof r.event === "object" && r.event && "starts_at" in r.event ? (r.event as { starts_at?: string }).starts_at : null,
+        })),
+      };
+    } catch (err) {
+      if (err instanceof TeamUpError) orderingProbes[o] = { ok: false, status: err.status, body: err.body.slice(0, 120) };
+      else orderingProbes[o] = { ok: false, error: (err as Error).message };
+    }
+  }
+  result.orderingProbes = orderingProbes;
+
+  // 3d. Date filter probes
+  const filterPaths = [
+    { q: { event__starts_at__gte: "2026-04-01" } },
+    { q: { event__starts_at_gte: "2026-04-01" } },
+    { q: { starts_at__gte: "2026-04-01" } },
+    { q: { event__starts_at_after: "2026-04-01" } },
+    { q: { date_gte: "2026-04-01" } },
+    { q: { from: "2026-04-01" } },
+    { q: { since: "2026-04-01" } },
+    { q: { page: 5 } }, // try paginating forward to see if later pages have recent dates
+    { q: { page: 10 } },
+    { q: { page: 20 } },
+  ];
+  const filterResults: Record<string, unknown> = {};
+  for (const f of filterPaths) {
+    try {
+      const data = await teamupGet<{ count?: number; results: Array<{ id: number; event: unknown; status: string }> }>(
+        "/attendances",
+        { query: { limit: 3, status: "attended", ...f.q }, expand: ["event"] },
+      );
+      filterResults[JSON.stringify(f.q)] = {
+        ok: true,
+        count: data.count,
+        first3: data.results.slice(0, 3).map((r) => ({
+          id: r.id,
+          status: r.status,
+          start: typeof r.event === "object" && r.event && "starts_at" in r.event ? (r.event as { starts_at?: string }).starts_at : null,
+        })),
+      };
+    } catch (err) {
+      if (err instanceof TeamUpError) filterResults[JSON.stringify(f.q)] = { ok: false, status: err.status };
+      else filterResults[JSON.stringify(f.q)] = { ok: false, error: (err as Error).message };
+    }
+  }
+  result.dateFilterProbes = filterResults;
+
   // 4. Membership endpoint discovery
   const membershipPaths = [
     "/customer_memberships",
