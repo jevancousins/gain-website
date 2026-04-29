@@ -16,12 +16,16 @@ type FetchOpts = {
 };
 
 type AuthMode =
+  | { kind: "m2m" }
   | { kind: "application" }
   | { kind: "oauth" };
 
 function authMode(): AuthMode {
-  // Prefer OAuth (provider-mode access). Fall back to the static Application
-  // Token only for the /auth/application diagnostic, which works under either.
+  // M2M is the canonical TeamUp recommendation for back-office automation:
+  // long-lived, business-tied (not user-tied), always provider mode. We
+  // prefer it when available and fall back to OAuth, then the static
+  // Application Token, only if M2M isn't configured.
+  if (process.env.TEAMUP_M2M_TOKEN) return { kind: "m2m" };
   if (process.env.TEAMUP_TOKENS_DB_ID) return { kind: "oauth" };
   return { kind: "application" };
 }
@@ -70,7 +74,11 @@ async function authHeaders(): Promise<Record<string, string>> {
   const providerId = process.env.TEAMUP_PROVIDER_ID;
   if (providerId) headers["TeamUp-Provider-ID"] = providerId;
 
-  if (mode.kind === "oauth") {
+  if (mode.kind === "m2m") {
+    const token = process.env.TEAMUP_M2M_TOKEN;
+    if (!token) throw new Error("TEAMUP_M2M_TOKEN not set");
+    headers.Authorization = `Token ${token}`;
+  } else if (mode.kind === "oauth") {
     headers.Authorization = `JWT ${await getAccessToken()}`;
   } else {
     const token = process.env.TEAMUP_APPLICATION_TOKENS;
