@@ -25,7 +25,8 @@ export async function GET(request: Request) {
       status: r.status,
       start: typeof r.event === "object" && r.event && "starts_at" in r.event ? (r.event as { starts_at?: string }).starts_at : null,
     }));
-    return Response.json({ ok: true, count: data.count, returned: data.results?.length, sample });
+    const firstRow = data.results?.[0] ?? null;
+    return Response.json({ ok: true, count: data.count, returned: data.results?.length, sample, firstRow });
   } catch (err) {
     if (err instanceof TeamUpError) return Response.json({ ok: false, status: err.status, body: err.body.slice(0, 400) });
     return Response.json({ ok: false, error: (err as Error).message });
