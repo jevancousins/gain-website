@@ -9,6 +9,14 @@
     {
       "path": "/api/cron/teamup-members-sync",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/teamup-retention-digest",
+      "schedule": "0 7 * * 3"
+    },
+    {
+      "path": "/api/cron/teamup-finances-sync",
+      "schedule": "0 8 * * 1"
     }
   ]
 }
