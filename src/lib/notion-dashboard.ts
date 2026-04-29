@@ -438,7 +438,7 @@ function programmeBarChartUrl(
   const labels = billed.map((p) => p.programme.replace(/Gain /g, "").slice(0, 30));
   const data = billed.map((p) => p.mrrContribution);
   const config = {
-    type: "horizontalBar",
+    type: "bar",
     data: {
       labels,
       datasets: [
@@ -450,15 +450,14 @@ function programmeBarChartUrl(
       ],
     },
     options: {
+      indexAxis: "y",
       plugins: {
         legend: { display: false },
         title: { display: true, text: `MRR contribution by programme (${m.mrrCurrencySymbol})` },
         datalabels: { align: "end", anchor: "end", color: "#222" },
       },
       scales: {
-        xAxes: [
-          { ticks: { beginAtZero: true, callback: "function(v){return '" + m.mrrCurrencySymbol + "'+v}" } },
-        ],
+        x: { beginAtZero: true },
       },
     },
   };
