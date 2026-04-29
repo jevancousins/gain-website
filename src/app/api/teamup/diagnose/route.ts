@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   }
 
   const checks: Record<string, unknown> = {
-    hasToken: Boolean(process.env.TEAMUP_APPLICATION_TOKENS),
+    hasToken: Boolean(process.env.TEAMUP_M2M_TOKEN),
     providerIdEnv: process.env.TEAMUP_PROVIDER_ID ?? null,
   };
 
