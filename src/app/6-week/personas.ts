@@ -26,7 +26,20 @@ export type Persona = {
     intro: string;
     items: { number: string; title: string; body: string }[];
   };
+  // Optional persona-tailored walkthrough rendered between the pillars
+  // section and the why-six-weeks section. Defuses first-time uncertainty
+  // (the dominant Caroline fear); omitted on personas where it is not the
+  // dominant objection.
+  firstSession?: {
+    title: string;
+    italic: string;
+    intro: string;
+    steps: { time: string; body: string }[];
+    footnote?: string;
+  };
   whyNow: string[];
+  // Persona-tailored framing sentence above the programme structure list.
+  programmeFraming: string;
   testimonials: Review[];
   faqs: { q: string; a: string }[];
   ctaPrimary: string;
@@ -34,6 +47,8 @@ export type Persona = {
     eyebrow: string;
     title: string;
     body: string;
+    // Lead-form submit button label. Defaults to "Book a free call".
+    submitLabel?: string;
   };
   finalCta: {
     title: string;
@@ -104,7 +119,7 @@ export const PERSONAS: Persona[] = [
             "That is precisely who the 6-week is for. We start with the basics: getting up off the floor, standing from a chair, stepping safely. Strength is built from there.",
         },
         {
-          headline: "What if I have a condition the coach does not understand.",
+          headline: "I have a health condition. Will I be safe?",
           body:
             "Tell us on the consultation call. Our head coach holds an MSc in Sport Physiology and works regularly with members managing diabetes, arthritis, blood pressure, and more. We adapt the programme to you.",
         },
@@ -142,12 +157,54 @@ export const PERSONAS: Persona[] = [
         },
       ],
     },
+    firstSession: {
+      title: "Your first session,",
+      italic: "minute by minute.",
+      intro:
+        "The biggest fear is the unknown. So here is exactly what your first time in the studio looks like, from arriving at the door to walking out the other side. It is a 20 to 30 minute one-to-one with your coach, before any group session.",
+      steps: [
+        {
+          time: "0:00",
+          body:
+            "You arrive. The door is on Dursley Road; parking is free out front. Your coach meets you at the door, you hang up your coat, you sit down for a quick cup of water.",
+        },
+        {
+          time: "0:05",
+          body:
+            "A short chat. Anything that has changed since the consultation call, anything bothering you today, what you ate, how you slept. No tests, no clipboards.",
+        },
+        {
+          time: "0:10",
+          body:
+            "Movement assessment. Five basic patterns walked through with you, one at a time: a squat to a box, a hip hinge, a press, a pull, a carry. We watch, we cue, we never make a fuss.",
+        },
+        {
+          time: "0:18",
+          body:
+            "We pick your tracking exercise. One movement we will measure across the six weeks, chosen to suit you. Your week-1 baseline is set, deliberately conservative.",
+        },
+        {
+          time: "0:25",
+          body:
+            "Walk through your weekly schedule. Which sessions you are booked into, what to wear, what to bring, where to put your bag, where the toilet is.",
+        },
+        {
+          time: "0:30",
+          body:
+            "You leave. You know what you did, why, and when you are next in. The next time you walk through the door, the room will already feel familiar.",
+        },
+      ],
+      footnote:
+        "From there, group sessions are six people maximum, same exercises, your own weights, your own pace. Your coach watches every rep.",
+    },
     whyNow: [
       "The hardest part of starting is starting.",
       "Six weeks is short enough to commit to without a leap of faith, and long enough to feel real change in how you move and how you feel.",
       "Most of our first-timers tell us, six weeks in, that they wish they had started a year ago.",
     ],
-    testimonials: pickReviews(["Alistair W.", "Alan B."]),
+    programmeFraming:
+      "Two phases. The first three weeks are about learning the lifts in your own time. The next three are when strength starts to show.",
+    testimonials: pickReviews(["Alistair W.", "Alan B.", "Felicity W."]),
     faqs: [
       {
         q: "I have honestly never lifted a weight. Is this really for me?",
@@ -220,7 +277,7 @@ export const PERSONAS: Persona[] = [
         {
           headline: "I do not want to be 'rehabbed' forever.",
           body:
-            "You should not be. Physio gets you out of pain. Strength training gets you back to the life you had, and then some. The 6-week is a clean handover, not endless treatment.",
+            "You should not be. Physio gets you out of pain. Strength training is the next step: building the capacity to handle real life, with expert eyes on your form. We are explicitly not treatment, and we are not trying to be.",
         },
         {
           headline: "Generic gym programmes do not respect my history.",
@@ -230,7 +287,7 @@ export const PERSONAS: Persona[] = [
         {
           headline: "I cannot afford another 12 weeks of physio.",
           body:
-            "Strength training is the cheaper, more durable next step, with the same expert oversight. Six weeks here costs less than a single re-injury.",
+            "Strength training is the cheaper, more durable next step, with experienced strength-coaching oversight. Six weeks here costs less than a single re-injury.",
         },
       ],
     },
@@ -254,15 +311,15 @@ export const PERSONAS: Persona[] = [
         },
         {
           number: "03",
-          title: "Clinical-to-strength handover",
+          title: "We work from your physio's notes, not around them",
           body:
-            "We are explicitly the next step after physio, not a replacement for it. Where useful, we coordinate with your physio's notes and respect their advice.",
+            "Every programme starts with what your physio said you can and cannot do. Bring their notes to the consultation call and we build the six weeks on top of them.",
         },
         {
           number: "04",
-          title: "Built for life, not for the gym",
+          title: "On-site physiotherapy when you need it",
           body:
-            "The goal is to lift the kid, dig the garden, do the trade work, finish the round. Strength that holds up outside the studio.",
+            "Isabel, our on-site physiotherapist, works from the same building. If something flares up mid-programme, you can book a session with her directly. Physiotherapy is a separate service charged separately, but it is a short walk, not a separate trip across town.",
         },
       ],
     },
@@ -271,7 +328,9 @@ export const PERSONAS: Persona[] = [
       "Members who load progressively in the months after discharge stay out of the clinic. Members who do not, come back.",
       "Six weeks is enough to put a structured re-build between you and the old pattern.",
     ],
-    testimonials: pickReviews(["Felicity W.", "Alan B."]),
+    programmeFraming:
+      "Two phases. The first three weeks rebuild patterns and confidence under load. The next three add real progressive strength.",
+    testimonials: pickReviews(["Felicity W.", "Dan H."]),
     faqs: [
       {
         q: "My physio discharged me, but I do not feel ready for a normal gym. Is this for me?",
@@ -279,7 +338,7 @@ export const PERSONAS: Persona[] = [
       },
       {
         q: "I have a specific injury (back, knee, shoulder). Can you actually work around it?",
-        a: "Yes, and we have done so for many members. Tell us on the consultation call. Our head coach holds an MSc in Sport Physiology. Where useful, we coordinate around your physio's advice. If we are not the right fit, we will say so honestly.",
+        a: "Yes, and we have done so for many members. Tell us on the consultation call. Our head coach holds an MSc in Sport Physiology. Every programme starts with what your physio said you can and cannot do, and we build from their notes. If we are not the right fit, we will say so honestly.",
       },
       {
         q: "How heavy will I be lifting?",
@@ -294,12 +353,13 @@ export const PERSONAS: Persona[] = [
         a: COMMON_FAQS.after,
       },
     ],
-    ctaPrimary: "Book a free call",
+    ctaPrimary: "Book a strength assessment call",
     formIntro: {
       eyebrow: "Step 01 · Arrange a call",
       title: "Tell us your history.",
       body:
         "Leave your details and we will call. We will ask about your injury, the physio you have been through, and what you want next. No pressure, no sales script.",
+      submitLabel: "Book a strength assessment call",
     },
     finalCta: {
       title: "Ready for the next step after physio?",
@@ -354,7 +414,7 @@ export const PERSONAS: Persona[] = [
         {
           headline: "I have a heart history, or osteoporosis, or arthritis.",
           body:
-            "Tell us on the consultation call. Our head coach holds an MSc in Sport Physiology. Resistance training, properly programmed, is well established as cardioprotective and as the strongest non-pharmacological lever for bone health.",
+            "Tell us on the consultation call. Our head coach holds an MSc in Sport Physiology. Resistance training, properly programmed, has well-established cardiovascular and bone-health benefits when paired with appropriate medical care.",
         },
       ],
     },
@@ -368,7 +428,7 @@ export const PERSONAS: Persona[] = [
           number: "01",
           title: "Evidence-based loading",
           body:
-            "Progressive resistance protocols backed by current literature on bone, muscle and balance in older adults. We can talk you through the why if you want.",
+            "Progressive resistance protocols informed by the Royal Osteoporosis Society's Strong, Steady and Straight consensus and current literature on bone, muscle and balance in older adults. We can talk you through the why if you want.",
         },
         {
           number: "02",
@@ -395,15 +455,17 @@ export const PERSONAS: Persona[] = [
       "The single most powerful intervention against that decline is progressive resistance training, started in any decade.",
       "Six weeks is enough to feel the difference and see the data. The hard part is starting; we make starting easy.",
     ],
+    programmeFraming:
+      "Two phases. The first three weeks set the movement patterns that protect joints and bones. The next three are where progressive overload starts moving the dial.",
     testimonials: pickReviews(["Julie F.", "Felicity W."]),
     faqs: [
       {
         q: "Will this actually improve my bone density?",
-        a: "Properly loaded progressive resistance training is the strongest non-pharmacological lever there is for bone density in adults over 50. Light weights and walking are not enough on their own. We follow evidence-based protocols and we are happy to walk you through the literature.",
+        a: "Published evidence (Watson et al., LIFTMOR RCT, 2018) shows supervised high-intensity resistance and impact training can improve bone mineral density in postmenopausal women with low bone mass. We follow the supervised, screened approach the trial used, in line with the Royal Osteoporosis Society's Strong, Steady and Straight consensus. Light weights and walking on their own are not enough.",
       },
       {
         q: "I have osteoporosis. Is this safe?",
-        a: "Yes, with proper monitoring. Resistance training, correctly progressed, is recommended for osteoporosis management. Tell us on the consultation call so we can plan around your DEXA history and any medication. If we are not the right fit, we will say so honestly.",
+        a: "Yes, with proper monitoring. Resistance training, correctly progressed, is recommended for osteoporosis management. Tell us on the consultation call so we can plan around your DEXA history and any medication. On the call we will also ask about any vertebral fracture history; the programme avoids loaded spinal flexion in line with Royal Osteoporosis Society guidance. If we are not the right fit, we will say so honestly.",
       },
       {
         q: "I am also caring for my partner. I cannot commit to a 12-week.",
@@ -519,11 +581,17 @@ export const PERSONAS: Persona[] = [
       "Six weeks of structured, paced rebuild beats six months of stop-start solo attempts.",
       "Most members tell us, weeks in, that they wish they had been given permission to start small sooner.",
     ],
+    programmeFraming:
+      "Two phases. The first three weeks build a baseline you can repeat without crashing. The next three layer load on top, slowly.",
     testimonials: pickReviews(["L T", "Alistair W."]),
     faqs: [
       {
+        q: "Do you do graded exercise therapy?",
+        a: "No. We don't do graded exercise therapy. We work session-to-session with how your body is responding, including post-exertional symptoms that show up 24 to 72 hours after training. If a session triggered a crash, we change the next one rather than push through it.",
+      },
+      {
         q: "Is this safe for long COVID or post-viral fatigue?",
-        a: "Yes, with the right approach. We use adaptive pacing: load and volume flex on the day, based on how you are. We do not push through a fatigue crash. Tell us about your history on the consultation call so we can plan well. If we are not the right fit, we will say so honestly.",
+        a: "Yes, with the right approach. We use adaptive pacing: load and volume flex on the day, based on how you are. We do not push through a fatigue crash, and we plan around the post-exertional malaise window of 24 to 72 hours that often follows a hard session. Our approach is informed by the AHA's 2024 scientific statement on exercise intolerance in PASC and current best-practice guidance for long COVID. Tell us about your history on the consultation call so we can plan well. If we are not the right fit, we will say so honestly.",
       },
       {
         q: "What if I have a bad week and miss two sessions?",
@@ -542,12 +610,13 @@ export const PERSONAS: Persona[] = [
         a: COMMON_FAQS.after,
       },
     ],
-    ctaPrimary: "Email us your story",
+    ctaPrimary: "Tell us your story",
     formIntro: {
       eyebrow: "Step 01 · Tell us your story",
       title: "No pressure, no judgement.",
       body:
         "Leave your details, and a few words on what you have been through if you would like. We will call you to talk it through. We will be honest about whether the 6-week fits.",
+      submitLabel: "Send my story",
     },
     finalCta: {
       title: "Ready to rebuild?",
