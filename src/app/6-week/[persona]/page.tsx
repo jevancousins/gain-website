@@ -11,12 +11,14 @@ import {
   HeartPulse,
   Sparkles,
   CheckCircle2,
+  Star,
+  ExternalLink,
 } from "lucide-react";
 import { Section, H2, CTAButton, Pill, Lede, Testimonial } from "@/components/ui";
 import { Folio, Kicker, Rule, Caption } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { LeadForm } from "@/components/lead-form";
-import { IMAGES, SITE } from "@/lib/utils";
+import { IMAGES, SITE, GOOGLE_RATING } from "@/lib/utils";
 import { PERSONA_SLUGS, getPersona } from "../personas";
 
 const TIERS = [
@@ -116,6 +118,13 @@ export default async function PersonaLandingPage({
   const persona = getPersona(slug);
   if (!persona) notFound();
 
+  // Folio numbers shift by 1 after the pillars block when an extra
+  // first-session walkthrough is rendered (currently Caroline only).
+  const folio = (n: number) => {
+    const adjusted = persona.firstSession && n >= 4 ? n + 1 : n;
+    return String(adjusted).padStart(2, "0");
+  };
+
   return (
     <>
       {/* ——— Slim header (logo only, no nav) ——— */}
@@ -146,7 +155,7 @@ export default async function PersonaLandingPage({
       <section className="relative bg-ink">
         <div className="border-b border-paper/10">
           <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
-            <Folio number="01" label="6-Week Programme" />
+            <Folio number={folio(1)} label="6-Week Programme" />
             <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
               {persona.adKicker}
             </span>
@@ -196,6 +205,7 @@ export default async function PersonaLandingPage({
                 eyebrow={persona.formIntro.eyebrow}
                 title={persona.formIntro.title}
                 body={persona.formIntro.body}
+                submitLabel={persona.formIntro.submitLabel}
               />
             </div>
           </aside>
@@ -206,7 +216,7 @@ export default async function PersonaLandingPage({
       <Section tone="ink-soft">
         <div className="grid lg:grid-cols-12 gap-12">
           <div className="lg:col-span-5">
-            <Folio number="02" label="What we hear most" />
+            <Folio number={folio(2)} label="What we hear most" />
             <H2 className="mt-6">
               {persona.problemMirror.title}
               <span className="display-italic font-medium text-flame">
@@ -241,7 +251,7 @@ export default async function PersonaLandingPage({
       <Section tone="ink">
         <div className="grid md:grid-cols-12 gap-10 items-end mb-10">
           <div className="md:col-span-7">
-            <Folio number="03" label="The Gain difference" />
+            <Folio number={folio(3)} label="The Gain difference" />
             <H2 className="mt-6">
               {persona.pillars.title}
               <span className="display-italic font-medium text-flame">
@@ -273,11 +283,57 @@ export default async function PersonaLandingPage({
         <Rule tone="paper" />
       </Section>
 
+      {/* ——— First session walkthrough (persona-specific) ——— */}
+      {persona.firstSession && (
+        <Section tone="ink-mid">
+          <div className="grid lg:grid-cols-12 gap-12">
+            <div className="lg:col-span-5">
+              <Folio number="04" label="Inside the studio" />
+              <H2 className="mt-6">
+                {persona.firstSession.title}
+                <span className="display-italic font-medium text-flame">
+                  {" "}
+                  {persona.firstSession.italic}
+                </span>
+              </H2>
+              <p className="mt-6 text-paper/75 text-[1.02rem] leading-[1.72] max-w-md">
+                {persona.firstSession.intro}
+              </p>
+            </div>
+            <div className="lg:col-span-7">
+              <Rule tone="paper" className="mb-8" />
+              <ol className="space-y-7">
+                {persona.firstSession.steps.map((step) => (
+                  <li
+                    key={step.time}
+                    className="grid grid-cols-12 gap-x-6 border-l border-ink-line pl-6"
+                  >
+                    <div className="col-span-12 sm:col-span-2">
+                      <p className="display text-2xl text-flame tabular-nums leading-none">
+                        {step.time}
+                      </p>
+                    </div>
+                    <p className="col-span-12 sm:col-span-10 text-paper/80 text-[1rem] leading-[1.7] mt-2 sm:mt-0">
+                      {step.body}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+              {persona.firstSession.footnote && (
+                <p className="mt-10 text-[0.95rem] italic text-paper/65 leading-relaxed max-w-2xl">
+                  {persona.firstSession.footnote}
+                </p>
+              )}
+            </div>
+          </div>
+        </Section>
+      )}
+
       {/* ——— Why now ——— */}
       <Section tone="ink-soft">
         <div className="grid lg:grid-cols-12 gap-10 items-start">
           <div className="lg:col-span-4">
-            <Folio number="04" label="Why six weeks" />
+            <Folio number={folio(4)} label="Why six weeks" />
             <H2 className="mt-6">
               Six weeks is the
               <span className="display-italic font-medium text-flame">
@@ -304,7 +360,7 @@ export default async function PersonaLandingPage({
       <Section tone="ink" id="how">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-16">
           <div className="lg:col-span-5">
-            <Folio number="05" label="The 6-week programme" />
+            <Folio number={folio(5)} label="The 6-week programme" />
             <h2 className="display mt-6 text-[clamp(2rem,5vw,3.75rem)] text-paper leading-[1.02]">
               The structure.
               <span className="block display-italic font-medium text-flame mt-2">
@@ -312,9 +368,7 @@ export default async function PersonaLandingPage({
               </span>
             </h2>
             <p className="mt-8 text-paper/75 leading-[1.72] text-[1.02rem]">
-              A short, structured block to learn the lifts, build a habit, and
-              feel real strength gains. Most members start here to test the
-              waters before committing to the full transformation.
+              {persona.programmeFraming}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-2">
@@ -408,7 +462,7 @@ export default async function PersonaLandingPage({
       <Section tone="ink-soft">
         <div className="grid md:grid-cols-12 gap-10 items-end mb-12">
           <div className="md:col-span-7">
-            <Folio number="06" label="What you get" />
+            <Folio number={folio(6)} label="What you get" />
             <H2 className="mt-6">Three things every member gets.</H2>
           </div>
           <p className="md:col-span-5 text-paper/70 text-[1.02rem] leading-relaxed">
@@ -441,11 +495,28 @@ export default async function PersonaLandingPage({
         <Rule tone="paper" />
       </Section>
 
+      {/* ——— Slim mid-page CTA strip ——— */}
+      <section className="bg-flame text-ink">
+        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-10 md:py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <p className="display-tight text-2xl md:text-[1.65rem] text-ink leading-[1.2] max-w-2xl">
+            Six people per session, expert coaching, no jargon. Six weeks to
+            see what proper strength training feels like.
+          </p>
+          <CTAButton
+            href="#enquire"
+            variant="solid-black"
+            className="hover:!bg-ink hover:!text-flame shrink-0"
+          >
+            {persona.ctaPrimary}
+          </CTAButton>
+        </div>
+      </section>
+
       {/* ——— How it works ——— */}
       <Section tone="ink">
         <div className="grid md:grid-cols-12 gap-12">
           <div className="md:col-span-5">
-            <Folio number="07" label="How it works" />
+            <Folio number={folio(7)} label="How it works" />
             <H2 className="mt-6">From enquiry to first session.</H2>
             <Lede className="mt-6">
               The path is the same for everyone. A short call, an induction,
@@ -491,7 +562,7 @@ export default async function PersonaLandingPage({
         <Section tone="ink-soft">
           <div className="grid md:grid-cols-12 gap-10 items-end mb-12">
             <div className="md:col-span-7">
-              <Folio number="08" label="What members say" />
+              <Folio number={folio(8)} label="What members say" />
               <H2 className="mt-6">
                 Real members,
                 <span className="display-italic font-medium text-flame">
@@ -505,6 +576,30 @@ export default async function PersonaLandingPage({
               today.
             </p>
           </div>
+
+          <a
+            href={GOOGLE_RATING.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mb-8 flex flex-wrap items-center gap-4 border border-ink-line bg-ink/40 px-5 py-4 hover:border-flame transition-colors"
+          >
+            <span className="flex items-center gap-1 text-flame" aria-hidden>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
+              ))}
+            </span>
+            <span className="text-sm font-semibold text-paper tabular-nums">
+              {GOOGLE_RATING.stars.toFixed(1)} on Google
+            </span>
+            <span className="h-3 w-px bg-paper/20" aria-hidden />
+            <span className="text-sm text-paper/70 tabular-nums">
+              {GOOGLE_RATING.count} reviews
+            </span>
+            <span className="ml-auto inline-flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.22em] text-flame group-hover:text-paper transition-colors">
+              Read on Google <ExternalLink size={13} />
+            </span>
+          </a>
+
           <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
             {persona.testimonials.map((r) => (
               <Testimonial key={r.author} quote={r.text} name={r.author} />
@@ -513,11 +608,29 @@ export default async function PersonaLandingPage({
         </Section>
       )}
 
+      {/* ——— Risk reversal: no contracts ——— */}
+      <Section tone="ink" containerClass="!py-14 md:!py-16">
+        <div className="border border-flame/40 bg-ink-soft p-7 md:p-10 grid md:grid-cols-12 gap-6 md:gap-10 items-start">
+          <div className="md:col-span-3">
+            <Kicker>No contracts</Kicker>
+            <p className="mt-3 display-tight text-2xl md:text-[1.6rem] text-paper leading-[1.15]">
+              The 6-week is the 6-week.
+            </p>
+          </div>
+          <p className="md:col-span-9 text-paper/80 text-[1.02rem] leading-[1.72] max-w-3xl">
+            No contracts. No auto-renewal. No tie-in beyond the programme you
+            signed up for. After the 6-week, monthly rolling membership only
+            if it is working for you. If it is not, we will tell you on the
+            consultation call before you book.
+          </p>
+        </div>
+      </Section>
+
       {/* ——— FAQs ——— */}
       <Section tone="ink">
         <div className="grid md:grid-cols-12 gap-10">
           <div className="md:col-span-4">
-            <Folio number="09" label="Frequently asked" />
+            <Folio number={folio(9)} label="Frequently asked" />
             <H2 className="mt-6">Questions we get most.</H2>
             <p className="mt-6 text-paper/65 max-w-sm text-[0.98rem] leading-relaxed">
               Something else on your mind? Ask on the consultation call. That
@@ -578,6 +691,7 @@ export default async function PersonaLandingPage({
               eyebrow={persona.formIntro.eyebrow}
               title={persona.formIntro.title}
               body={persona.formIntro.body}
+              submitLabel={persona.formIntro.submitLabel}
             />
           </div>
         </div>

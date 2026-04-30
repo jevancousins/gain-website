@@ -13,12 +13,14 @@ export function LeadForm({
   eyebrow,
   title,
   body,
+  submitLabel,
 }: {
   source?: string;
   className?: string;
   eyebrow?: string;
   title?: string;
   body?: string;
+  submitLabel?: string;
 }) {
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">(
     "idle"
@@ -207,7 +209,7 @@ export function LeadForm({
           </>
         ) : (
           <>
-            Book a free call <ArrowRight size={15} strokeWidth={2.4} />
+            {submitLabel ?? "Book a free call"} <ArrowRight size={15} strokeWidth={2.4} />
           </>
         )}
       </button>
