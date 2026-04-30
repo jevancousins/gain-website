@@ -212,7 +212,7 @@ export const PERSONAS: Persona[] = [
       },
       {
         q: "Will I be the oldest one there?",
-        a: "Almost certainly not. Our typical members are 40 to 65. A meaningful share have never trained before. You will not be the odd one out.",
+        a: "Almost certainly not. Our typical members are 40 to 75. A meaningful share have never trained before. You will not be the odd one out.",
       },
       {
         q: "What if I have a condition or an injury history?",
