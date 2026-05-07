@@ -250,7 +250,7 @@ export function Pill({
 
 export function FinalCTA({
   title = "Ready to feel stronger?",
-  body = "Leave your details and we'll call you for a short, no-pressure chat. If it sounds like a fit, we'll invite you in to see the studio.",
+  body = "Book a free consultation: pick a time for a phone call or an in-person visit. No pressure, no obligation.",
 }: {
   title?: string;
   body?: string;
@@ -270,11 +270,11 @@ export function FinalCTA({
           <p className="lede text-lg md:text-xl text-ink/85 max-w-md">{body}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <CTAButton
-              href="/contact"
+              href="/contact#book"
               variant="solid-black"
               className="hover:!bg-ink hover:!text-flame"
             >
-              Enquire now
+              Book a consultation
             </CTAButton>
             <CTAButton
               href="/about"

@@ -5,7 +5,7 @@ const ROUTES = [
   { path: "/about", title: /About/i, h1: /Empowering adults/i },
   { path: "/facilities", title: /Facilities/i, h1: /Gym\.|And studio/i },
   { path: "/programmes", title: /Programmes/i, h1: /Build real strength/i },
-  { path: "/contact", title: /Contact/i, h1: /Leave your details/i },
+  { path: "/contact", title: /Contact/i, h1: /Pick a time/i },
   { path: "/faqs", title: /FAQ/i, h1: /./ },
   { path: "/privacy", title: /Privacy/i, h1: /handle your information/i },
   { path: "/terms", title: /Terms/i, h1: /house rules/i },
