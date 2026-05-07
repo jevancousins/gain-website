@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import { Section, H2, Pill, Lede } from "@/components/ui";
 import { LeadForm } from "@/components/lead-form";
+import { CalEmbed } from "@/components/cal-embed";
 import { Folio, Kicker, Rule } from "@/components/editorial";
-import { MapPin, Phone, Clock } from "lucide-react";
+import { MapPin, Phone, Clock, CalendarCheck } from "lucide-react";
 import { SITE } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Get in touch with Gain Strength Therapy in Eastbourne. Leave your details and we'll call you back — or pick up the phone.",
+    "Book a free consultation with Gain Strength Therapy in Eastbourne. Pick a time for a phone call or in-person visit, or leave your details and we'll call you back.",
 };
 
 export default function ContactPage() {
@@ -19,28 +20,46 @@ export default function ContactPage() {
           <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
             <Folio number="01" label="Contact" />
             <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
-              We reply within one working day
+              Free · No obligation
             </span>
           </div>
         </div>
 
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-14 md:pt-20 pb-10">
           <div className="max-w-3xl">
-            <Kicker>Say hello</Kicker>
+            <Kicker>Book a consultation</Kicker>
             <h1 className="display mt-6 text-[clamp(2.75rem,7vw,6rem)] text-paper">
-              Leave your details.
-              <span className="block display-italic font-medium text-flame"> We&rsquo;ll call you back.</span>
+              Pick a time.
+              <span className="block display-italic font-medium text-flame"> We&rsquo;ll take it from there.</span>
             </h1>
             <Lede className="mt-8">
-              Every new member starts with a short, no-pressure phone call. No
-              20-minute speed-date, no online calendar to wrestle with &mdash;
-              just an honest conversation.
+              Every new member starts with a free, no-pressure consultation.
+              Choose a phone call or come in and see the studio in person.
             </Lede>
           </div>
         </div>
       </section>
 
-      <Section tone="ink">
+      {/* ——— Booking embed (primary path) ——— */}
+      <Section tone="ink" id="book">
+        <div className="mb-8 flex items-end justify-between flex-wrap gap-3">
+          <div>
+            <Kicker>
+              <CalendarCheck size={11} className="inline mr-1 align-middle" /> Choose a slot
+            </Kicker>
+            <H2 className="mt-4">Book your free consultation.</H2>
+            <p className="mt-3 text-paper/65 text-sm max-w-xl leading-relaxed">
+              Pick between a phone call or an in-person visit at the studio.
+              30 minutes, completely free, no obligation.
+            </p>
+          </div>
+          <Pill tone="flame">Free · 30 min</Pill>
+        </div>
+        <CalEmbed link="gainstrengththerapy/consultation" />
+      </Section>
+
+      {/* ——— Callback form (alternative path) ——— */}
+      <Section tone="ink-soft" id="callback">
         <div className="grid lg:grid-cols-12 gap-10">
           <div className="lg:col-span-5 space-y-6">
             <div className="border border-ink-line bg-ink-soft p-7">
@@ -54,7 +73,7 @@ export default function ContactPage() {
                 </span>
               </address>
               <p className="mt-4 text-sm text-paper/60 leading-relaxed">
-                Near Eastbourne town centre &mdash; about a 15-minute walk
+                Near Eastbourne town centre: about a 15-minute walk
                 from the railway station. On-street parking only, so arrive
                 a few minutes early.
               </p>
@@ -80,7 +99,7 @@ export default function ContactPage() {
               </a>
               <p className="mt-3 text-sm text-paper/65 leading-relaxed flex gap-2 items-start">
                 <Phone size={14} className="text-flame mt-0.5 shrink-0" />
-                <span>If we&rsquo;re coaching, leave a message or fill in the form &mdash; we&rsquo;ll come back within one working day.</span>
+                <span>If we&rsquo;re coaching, leave a message or fill in the form: we&rsquo;ll come back within one working day.</span>
               </p>
             </div>
 
@@ -105,7 +124,12 @@ export default function ContactPage() {
 
           <div className="lg:col-span-7">
             <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
-              <H2>Leave your details.</H2>
+              <div>
+                <H2>Prefer we call you?</H2>
+                <p className="mt-2 text-paper/60 text-sm">
+                  Leave your details and we&rsquo;ll get back to you within one working day.
+                </p>
+              </div>
               <Pill tone="paper">Reply &lt; 1 working day</Pill>
             </div>
             <LeadForm source="contact-page" />
