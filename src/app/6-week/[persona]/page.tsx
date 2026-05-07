@@ -13,11 +13,13 @@ import {
   CheckCircle2,
   Star,
   ExternalLink,
+  CalendarCheck,
 } from "lucide-react";
 import { Section, H2, CTAButton, Pill, Lede, Testimonial } from "@/components/ui";
 import { Folio, Kicker, Rule, Caption } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { LeadForm } from "@/components/lead-form";
+import { CalEmbed } from "@/components/cal-embed";
 import { IMAGES, SITE, GOOGLE_RATING } from "@/lib/utils";
 import { PERSONA_SLUGS, getPersona } from "../personas";
 
@@ -178,8 +180,8 @@ export default async function PersonaLandingPage({
               <CTAButton href="#enquire" variant="primary">
                 {persona.ctaPrimary}
               </CTAButton>
-              <CTAButton href="#how" variant="ghost">
-                See how it works
+              <CTAButton href="#book" variant="ghost">
+                Pick a time
               </CTAButton>
             </div>
 
@@ -502,13 +504,23 @@ export default async function PersonaLandingPage({
             Six people per session, expert coaching, no jargon. Six weeks to
             see what proper strength training feels like.
           </p>
-          <CTAButton
-            href="#enquire"
-            variant="solid-black"
-            className="hover:!bg-ink hover:!text-flame shrink-0"
-          >
-            {persona.ctaPrimary}
-          </CTAButton>
+          <div className="flex flex-wrap gap-3 shrink-0">
+            <CTAButton
+              href="#book"
+              variant="solid-black"
+              className="hover:!bg-ink hover:!text-flame"
+            >
+              Book a consultation
+            </CTAButton>
+            <CTAButton
+              href="#enquire"
+              variant="ghost"
+              className="!text-ink !border-ink/80 hover:!bg-ink hover:!text-flame hover:!border-ink"
+              icon="none"
+            >
+              Or leave your details
+            </CTAButton>
+          </div>
         </div>
       </section>
 
@@ -522,8 +534,11 @@ export default async function PersonaLandingPage({
               The path is the same for everyone. A short call, an induction,
               then weekly sessions with proper support around them.
             </Lede>
-            <div className="mt-8">
-              <CTAButton href="#enquire" variant="primary">
+            <div className="mt-8 flex flex-wrap gap-3">
+              <CTAButton href="#book" variant="primary">
+                Book a consultation
+              </CTAButton>
+              <CTAButton href="#enquire" variant="ghost">
                 {persona.ctaPrimary}
               </CTAButton>
             </div>
@@ -657,6 +672,32 @@ export default async function PersonaLandingPage({
               ))}
             </div>
             <Rule tone="paper" />
+          </div>
+        </div>
+      </Section>
+
+      {/* ——— Inline booking embed ——— */}
+      <Section tone="ink-soft" id="book">
+        <div className="grid lg:grid-cols-12 gap-10 items-start">
+          <div className="lg:col-span-4">
+            <Folio number={folio(10)} label="Book now" />
+            <H2 className="mt-6">
+              Prefer to pick
+              <span className="display-italic font-medium text-flame">
+                {" "}
+                a time yourself?
+              </span>
+            </H2>
+            <p className="mt-6 text-paper/70 text-[1.02rem] leading-relaxed max-w-sm">
+              Choose a phone call or an in-person visit at the studio.
+              30 minutes, completely free, no obligation.
+            </p>
+            <div className="mt-6">
+              <Pill tone="flame">Free · 30 min</Pill>
+            </div>
+          </div>
+          <div className="lg:col-span-8">
+            <CalEmbed link="gainstrengththerapy/consultation" />
           </div>
         </div>
       </Section>
