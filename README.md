@@ -94,11 +94,11 @@ In development, leads also append to `.data/leads.jsonl` for easy inspection.
 
 ## Before launch checklist
 
-- [ ] Replace placeholder phone (`01323 000 000`) and email (`hello@gainstrengththerapy.com`) in `src/lib/utils.ts` and all components
-- [ ] Fill in real team bios on `/about`
-- [ ] Replace SVG placeholders with real photography
-- [ ] Add real favicon + OG image (`/public/og.jpg`)
-- [ ] Set up Cal.com account + consultation event type; paste the link into `NEXT_PUBLIC_CALCOM_LINK`
+- [x] Replace placeholder phone (`01323 000 000`) and email (`hello@gainstrengththerapy.com`) in `src/lib/utils.ts` and all components
+- [x] Fill in real team bios on `/about`
+- [x] Replace SVG placeholders with real photography
+- [x] Add real favicon + OG image (`/public/og.jpg`)
+- [x] Set up Cal.com account + consultation event type; paste the link into `NEXT_PUBLIC_CALCOM_LINK`
 - [ ] Write proper `/privacy` and `/terms` content
 - [ ] Wire `LEAD_WEBHOOK_URL` to your workflow destination
 - [ ] Run Lighthouse / a11y sweep in production mode
