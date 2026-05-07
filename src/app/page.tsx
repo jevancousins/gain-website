@@ -9,11 +9,11 @@ import {
   Lede,
   Pill,
 } from "@/components/ui";
-import { Folio, Rule, PullQuote, Caption } from "@/components/editorial";
+import { Folio, Rule } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { HeroVideo } from "@/components/hero-video";
 import { SITE, IMAGES, GOOGLE_RATING, REVIEWS } from "@/lib/utils";
-import { Dumbbell, Users, HeartPulse, Compass, Star, ArrowDown, PhoneCall, MapPin, Handshake, ExternalLink } from "lucide-react";
+import { Dumbbell, Users, HeartPulse, Compass, Star, ArrowDown, PhoneCall, Handshake, ExternalLink, ClipboardCheck } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -210,62 +210,11 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* ——— 04 · HOW IT WORKS — the real funnel ——— */}
-      <Section tone="ink">
-        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16">
-          <div className="lg:col-span-5">
-            <Folio number="04" label="How to start" />
-            <H2 className="mt-6">Three simple steps.</H2>
-            <Lede className="mt-6">
-              No pushy forms, no 20-minute speed-date. Leave your details
-              and we&rsquo;ll call you.
-            </Lede>
-            <div className="mt-10">
-              <CTAButton href="/contact" variant="primary">Enquire now</CTAButton>
-            </div>
-
-            <div className="mt-14 hidden lg:block">
-              <Photo
-                src={IMAGES.gymStretching}
-                alt="A coach warming up with a member in the gym"
-                aspect="aspect-[4/5]"
-                tone="warm"
-                sizes="(min-width: 1024px) 35vw, 100vw"
-              />
-              <Caption>Warm-up in the gym at Dursley Road.</Caption>
-            </div>
-          </div>
-
-          <ol className="lg:col-span-7 border-t border-ink-line">
-            {[
-              { n: "01", icon: <PhoneCall size={16} />, t: "Leave your details", d: "Use the enquiry form. We'll call you back for a short, no-pressure chat to understand your goals and any injury history." },
-              { n: "02", icon: <MapPin size={16} />, t: "In-person consultation", d: "If it sounds like a fit, you'll be invited to the studio to meet us, see the space, and talk through how training would look for you." },
-              { n: "03", icon: <Handshake size={16} />, t: "Join if you want to", d: "We talk membership at the consultation. No contracts, no pressure — just an honest path forward if it's right." },
-            ].map((s) => (
-              <li key={s.n} className="border-b border-ink-line py-10 grid grid-cols-12 gap-x-8 gap-y-3 items-start">
-                <div className="col-span-12 md:col-span-2">
-                  <span className="display text-4xl md:text-5xl text-flame font-black tabular-nums leading-none">
-                    {s.n}
-                  </span>
-                </div>
-                <div className="col-span-12 md:col-span-10">
-                  <div className="flex items-center gap-3 text-flame mb-2">
-                    {s.icon}
-                  </div>
-                  <h3 className="display-tight text-2xl md:text-[1.8rem] text-paper">{s.t}</h3>
-                  <p className="mt-3 text-paper/70 text-[0.98rem] leading-relaxed max-w-lg">{s.d}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </Section>
-
-      {/* ——— 05 · SOCIAL PROOF ——— */}
+      {/* ——— 04 · SOCIAL PROOF ——— */}
       <Section tone="ink-soft">
         <div className="grid lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-5">
-            <Folio number="05" label="Members" />
+            <Folio number="04" label="Members" />
             <H2 className="mt-6">Real members. Real progress.</H2>
             <Lede className="mt-6">
               {`We're rated ${GOOGLE_RATING.stars.toFixed(1)} stars on Google across ${GOOGLE_RATING.count} reviews — read what members actually say about training here.`}
@@ -337,7 +286,7 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* ——— 06 · FACILITIES SNAPSHOT ——— */}
+      {/* ——— 05 · FACILITIES SNAPSHOT ——— */}
       <Section tone="ink">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           <div className="lg:col-span-5 order-2 lg:order-1">
@@ -351,7 +300,7 @@ export default function HomePage() {
           </div>
 
           <div className="lg:col-span-7 order-1 lg:order-2">
-            <Folio number="06" label="The Gym" />
+            <Folio number="05" label="The Gym" />
             <H2 className="mt-6">A small, fully-equipped gym &mdash; where the classes happen.</H2>
             <Lede className="mt-6">
               The gym is the heart of Gain. Classes run as small-group
@@ -379,11 +328,11 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* ——— 07 · PROGRAMMES LADDER — 6-week and 12-week ——— */}
+      {/* ——— 06 · HOW TO START — programmes + process ——— */}
       <Section tone="ink-soft">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-end mb-14">
           <div className="lg:col-span-7">
-            <Folio number="07" label="How most members start" />
+            <Folio number="06" label="How to start" />
             <h2 className="display mt-6 text-[clamp(2.5rem,6vw,5rem)] text-paper leading-[0.95]">
               Two structured paths,<br />
               <span className="display-italic font-medium text-flame">one clear next step.</span>
@@ -464,6 +413,26 @@ export default function HomePage() {
           </Link>
           .
         </p>
+
+        <Rule tone="paper" className="mt-14" />
+        <div className="mt-14 grid md:grid-cols-3 gap-8">
+          {[
+            { icon: <PhoneCall size={18} />, t: "Book a consultation", d: "Pick a time for a free 30-minute call or in-person visit. We learn your goals and answer your questions." },
+            { icon: <ClipboardCheck size={18} />, t: "Induction and baseline", d: "A short one-to-one before your first group session. Movement assessment, tracking exercise, weekly schedule." },
+            { icon: <Handshake size={18} />, t: "Join if you want to", d: "No contracts, no pressure. We talk membership at the consultation and you decide." },
+          ].map((s) => (
+            <div key={s.t} className="flex gap-4">
+              <span className="mt-1 text-flame shrink-0">{s.icon}</span>
+              <div>
+                <h3 className="display-tight text-lg text-paper">{s.t}</h3>
+                <p className="mt-2 text-paper/65 text-sm leading-relaxed">{s.d}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-10 text-center">
+          <CTAButton href="/contact#book" variant="primary">Book a consultation</CTAButton>
+        </div>
       </Section>
 
       <FinalCTA />
