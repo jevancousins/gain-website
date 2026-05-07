@@ -417,9 +417,9 @@ export default function HomePage() {
         <Rule tone="paper" className="mt-14" />
         <div className="mt-14 grid md:grid-cols-3 gap-8">
           {[
-            { icon: <PhoneCall size={18} />, t: "Book a consultation", d: "Pick a time for a free 30-minute call or in-person visit. We learn your goals and answer your questions." },
-            { icon: <ClipboardCheck size={18} />, t: "Induction and baseline", d: "A short one-to-one before your first group session. Movement assessment, tracking exercise, weekly schedule." },
-            { icon: <Handshake size={18} />, t: "Join if you want to", d: "No contracts, no pressure. We talk membership at the consultation and you decide." },
+            { icon: <PhoneCall size={18} />, t: "Book a free consultation", d: "Pick a time for a 30-minute phone call or in-person visit. We learn your goals, you ask your questions." },
+            { icon: <Handshake size={18} />, t: "Choose your programme", d: "If it's a good fit, pick your 6-week or 12-week path and get started." },
+            { icon: <ClipboardCheck size={18} />, t: "Induction and first session", d: "A short one-to-one to set your baseline, then straight into coached group training." },
           ].map((s) => (
             <div key={s.t} className="flex gap-4">
               <span className="mt-1 text-flame shrink-0">{s.icon}</span>
