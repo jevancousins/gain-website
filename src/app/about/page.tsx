@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Section, H2, FeatureCard, FinalCTA, Lede } from "@/components/ui";
+import { Section, H2, FinalCTA, Lede } from "@/components/ui";
 import { Photo } from "@/components/photo";
 import { Folio, Kicker, Rule, PullQuote } from "@/components/editorial";
 import { IMAGES, TEAM } from "@/lib/utils";
 
 const HALLUM = TEAM[0];
-import { Award, Compass, HeartPulse, MessageCircle, GraduationCap, Trophy, Stethoscope } from "lucide-react";
+import { GraduationCap, Trophy, Stethoscope } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "About",
@@ -30,24 +30,25 @@ export default function AboutPage() {
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-14 md:pt-20 pb-16 md:pb-24">
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-end">
             <div className="lg:col-span-7">
-              <Kicker>Our story</Kicker>
+              <Kicker>The gym for people who don&rsquo;t like gyms</Kicker>
               <h1 className="display mt-6 text-[clamp(2rem,4.2vw,3.75rem)] text-paper max-w-[20ch]">
-                Empowering adults to unlock their strength
-                <span className="display-italic font-medium text-flame"> and take control of their health.</span>
+                Built for the people
+                <span className="display-italic font-medium text-flame"> traditional gyms leave behind.</span>
               </h1>
             </div>
             <div className="lg:col-span-5">
               <Lede>
-                Gain Strength Therapy is Eastbourne&rsquo;s specialist small
-                group strength training studio. We bridge the gap between
-                physio and the gym &mdash; for adults who need expert guidance
-                to build strength safely.
+                Gain exists because traditional gyms fail complete beginners,
+                people recovering from injury, and anyone managing a health
+                condition.
               </Lede>
               <p className="mt-5 text-paper/60 text-sm leading-relaxed max-w-md">
-                Post-rehab, returning after illness, managing a long-term
-                condition, or starting from scratch. Plenty of our members
-                walked in having never trained before. You will be in good
-                company.
+                If you&rsquo;ve never trained before, walking into a commercial
+                gym is overwhelming. Rows of equipment you don&rsquo;t
+                understand, nobody to help, and the constant feeling you
+                don&rsquo;t belong. Gain changes that. This is a safe space
+                where you can start from zero, build strength at your own pace,
+                and actually feel comfortable doing it.
               </p>
             </div>
           </div>
@@ -76,7 +77,7 @@ export default function AboutPage() {
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           <div className="lg:col-span-5">
             <Folio number="02" label="Meet Hallum" />
-            <H2 className="mt-6">Why I started Gain.</H2>
+            <H2 className="mt-6">The story behind Gain.</H2>
             <div className="mt-8">
               <Photo
                 src={HALLUM.photo}
@@ -92,25 +93,59 @@ export default function AboutPage() {
             <Rule tone="paper" className="mb-10" />
             <div className="space-y-6 text-[1.05rem] text-paper/80 leading-[1.72] prose-body">
               <p className="dropcap">
-                I grew up around sport, studied it at university, and spent
-                time working with professional clubs as a sports scientist.
-                What I saw along the way &mdash; and what eventually pulled
-                me back to Eastbourne to start Gain &mdash; is that most of
-                the best ideas about strength and longevity never make it out
-                of the academy or the elite-sport bubble.
+                In 2020, I ruptured my ACL and meniscus playing football. I got
+                surgery one month before the first lockdown, but with no gyms
+                open, I had to rehabilitate completely on my own. It was one of
+                the hardest times of my life &mdash; going from a sporty
+                20-year-old to not being able to walk, in loads of pain, on top
+                of the isolation we all went through during lockdown.
               </p>
               <p>
-                There is also a gap on the other side. People finish physio
-                and are sent away pain-free but nowhere near strong. Adults
-                with osteoporosis, type 2 diabetes, post-surgical recovery,
-                or long COVID are told to lift weights but rarely shown how.
-                Commercial gyms were not built for them, and one-to-one
-                training is out of reach.
+                I had two choices: accept my fate and hope my leg strength
+                would return naturally, or take control of the rehab process
+                myself. I chose the latter.
               </p>
               <p>
-                Gain is my answer to that gap: a small private studio, small
-                groups, proper coaching, and the space to train without
-                being watched, judged or rushed.
+                I was in the middle of my sport science degree, so I knew how
+                to research the best methods for recovery. With no equipment
+                available, I had to get creative to make sure I was progressing
+                each week. On average, it takes someone a year to get back to
+                where they were. Some people never return to playing sport. I
+                was back running within a year. Six years on, I&rsquo;m still
+                playing football with no knee issues.
+              </p>
+              <p>
+                That experience taught me something crucial: most people
+                don&rsquo;t need fancy equipment or complicated programmes.
+                They need someone who understands their body, cares whether
+                they improve, and guides them through the process safely.
+              </p>
+            </div>
+
+            <Rule tone="paper" className="my-10" />
+
+            <div className="space-y-6 text-[1.05rem] text-paper/80 leading-[1.72] prose-body">
+              <p>
+                During my master&rsquo;s degree, I worked at a commercial gym
+                as a personal trainer. It became clear how many people were
+                struggling with injuries, pain, or health conditions they
+                didn&rsquo;t know how to manage during exercise. From my own
+                experience, my education, and analysing research, I was able to
+                help hundreds of people get out of pain, build strength, and
+                actually enjoy exercise again. The majority just needed to get
+                stronger, more mobile, and learn how to modify exercises in
+                ways that would help them.
+              </p>
+              <p>
+                When I got the opportunity to open a small gym studio, I
+                couldn&rsquo;t turn it down. I wanted to create a space for
+                people who found big gyms intimidating. Somewhere they could
+                improve their health in a safe, non-judgmental environment.
+              </p>
+              <p>
+                That&rsquo;s what Gain is. A place where someone actually cares
+                whether you get better. Where the approach is gradual,
+                personalised, and pressure-free.
               </p>
             </div>
 
@@ -137,8 +172,7 @@ export default function AboutPage() {
                   <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Experience</span>
                 </div>
                 <p className="text-paper text-[0.98rem] leading-relaxed">
-                  <strong className="font-semibold">Sports scientist</strong>{" "}
-                  at Fulham FC and Bath City FC
+                  <strong className="font-semibold">5 years of coaching experience</strong>
                 </p>
               </div>
 
@@ -162,77 +196,16 @@ export default function AboutPage() {
       <Section tone="flame" containerClass="!py-28 md:!py-36">
         <div className="max-w-4xl">
           <PullQuote
-            quote="I created Gain to provide a personal and supportive space where anyone can build strength and confidence at their own pace."
+            quote="Most people don't need fancy equipment or complicated programmes. They need someone who understands their body, cares whether they improve, and guides them through the process safely."
             attribution="Hallum Cousins, Founder"
             tone="ink"
           />
         </div>
       </Section>
 
-      {/* ——— Philosophy / Approach ——— */}
-      <Section tone="ink">
-        <div className="grid lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-4">
-            <Folio number="03" label="Our Approach" />
-            <H2 className="mt-6">Strength is the best medicine we&rsquo;ve got.</H2>
-          </div>
-          <div className="lg:col-span-7 lg:col-start-6">
-            <Rule tone="paper" className="mb-10" />
-            <div className="space-y-6 text-[1.05rem] text-paper/75 leading-[1.72] prose-body">
-              <p className="dropcap">
-                Every session at Gain is led by a qualified personal trainer,
-                backed by advanced qualifications and university degrees.
-                Your coach watches every rep, adjusts every session, and
-                keeps you progressing week on week.
-              </p>
-              <p>
-                We believe in tailored coaching that fits into your
-                lifestyle. No two bodies arrive in the same shape, so we read
-                yours &mdash; injuries, mobility, confidence, energy &mdash;
-                and build from there. You&rsquo;ll never be asked to do
-                something you aren&rsquo;t ready for.
-              </p>
-              <p>
-                The studio is designed to feel like the opposite of a
-                commercial gym: private, welcoming, free from crowds and
-                distractions. A place where you&rsquo;ll be known, greeted,
-                and quietly pushed to do your best work.
-              </p>
-            </div>
-          </div>
-        </div>
-      </Section>
-
-      {/* ——— Values ——— */}
-      <Section tone="ink-soft">
-        <div className="mb-12">
-          <Folio number="04" label="Our Standards" />
-          <H2 className="mt-6 max-w-2xl">The standards we hold ourselves to.</H2>
-        </div>
-        <Rule tone="paper" />
-        <div className="grid md:grid-cols-2 border-l border-r border-b border-ink-line">
-          <FeatureCard n="01" icon={<HeartPulse size={18} />} title="Expert guidance">
-            Advanced qualifications, university degrees, and hands-on
-            coaching experience. You&rsquo;re paying for real expertise
-            &mdash; not someone reading off a clipboard.
-          </FeatureCard>
-          <FeatureCard n="02" icon={<Compass size={18} />} title="Personalised coaching">
-            Every session is tailored to fit your ability and lifestyle. We
-            adjust as you adjust. Nothing is ever &ldquo;one-size-fits-all.&rdquo;
-          </FeatureCard>
-          <FeatureCard n="03" icon={<Award size={18} />} title="Private &amp; supportive">
-            A welcoming environment without the crowds, the mirrors, or the
-            posing. Quiet rooms, familiar faces, conversations that matter.
-          </FeatureCard>
-          <FeatureCard n="04" icon={<MessageCircle size={18} />} title="Direct, honest coaching">
-            We&rsquo;ll tell you what&rsquo;s working and what isn&rsquo;t.
-            When to rest, when to ease off, when to push. You&rsquo;re paying
-            for judgement, not cheerleading.
-          </FeatureCard>
-        </div>
-      </Section>
-
-      <FinalCTA />
+      <FinalCTA
+        body="If you haven't found a gym that you feel comfortable enough to keep going, book a consultation with us. We'll talk through your situation, show you the space and work out whether Gain is right for you."
+      />
     </>
   );
 }
