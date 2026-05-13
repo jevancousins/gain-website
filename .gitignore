@@ -49,3 +49,9 @@ next-env.d.ts
 /blob-report/
 /playwright/.cache/
 /.playwright-cli/
+
+# claude code local config
+.claude/
+
+# raw unprocessed photo originals
+public/media/raw/
