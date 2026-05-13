@@ -63,7 +63,7 @@ export default function AboutPage() {
             </div>
             <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4 md:gap-6 md:pt-16">
               <Photo src={IMAGES.gymLunges} alt="Members doing lunges in the gym" aspect="aspect-square" />
-              <Photo src={IMAGES.gymStretching} alt="Warm-up in the gym" aspect="aspect-square" />
+              <Photo src={IMAGES.gymMemberDumbbellLunge} alt="Senior female member performing a dumbbell lunge" aspect="aspect-square" />
               <Photo src={IMAGES.gymBoxCoaching} alt="Box step-up coaching" aspect="aspect-square" tone="warm" />
               <Photo src={IMAGES.gymGroupClass} alt="Hallum coaching a small-group class in the gym" aspect="aspect-square" />
             </div>

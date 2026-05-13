@@ -26,8 +26,8 @@ export function SiteFooter() {
       <div className="border-b border-ink-line">
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-10 md:py-12">
           <p className="display text-[clamp(1.75rem,3.5vw,3rem)] text-paper leading-[1.05] max-w-5xl">
-            Train smarter. Move better.
-            <span className="display-italic text-flame"> Build lasting strength.</span>
+            The gym for people
+            <span className="display-italic text-flame"> who don&rsquo;t like gyms.</span>
           </p>
         </div>
       </div>
@@ -40,9 +40,9 @@ export function SiteFooter() {
             </span>
           </div>
           <p className="mt-6 max-w-sm text-paper/65 leading-relaxed">
-            A friendly, uplifting environment where you&rsquo;ll train
-            smarter, move better, and build lasting strength. Specialist
-            small group strength training in Eastbourne.
+            The gym for people who don&rsquo;t like gyms. Specialist
+            small group strength training in Eastbourne for beginners,
+            older adults, and post-rehab clients.
           </p>
           <div className="mt-7 flex gap-2">
             <Link href={SITE.social.instagram} aria-label="Instagram" className="p-2.5 border border-paper/40 hover:border-flame hover:text-flame transition-colors">
@@ -95,7 +95,7 @@ export function SiteFooter() {
             href="/contact"
             className="mt-4 inline-flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.22em] text-flame hover:text-paper transition-colors"
           >
-            Enquire now →
+            Get started →
           </Link>
         </div>
       </div>

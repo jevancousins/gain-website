@@ -49,7 +49,7 @@ export function Folio({
           tone === "ink" ? "bg-ink/30" : "bg-paper/30"
         )}
       />
-      <span className="text-[0.72rem] font-bold tracking-[0.24em] uppercase">
+      <span className="text-[0.82rem] font-bold tracking-[0.22em] uppercase">
         {label}
       </span>
     </div>
