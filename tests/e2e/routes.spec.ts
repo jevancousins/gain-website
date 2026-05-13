@@ -2,7 +2,7 @@ import { test, expect } from "./fixtures";
 
 const ROUTES = [
   { path: "/", title: /Gain Strength Therapy/i, h1: /The gym/i },
-  { path: "/about", title: /About/i, h1: /Empowering adults/i },
+  { path: "/about", title: /About/i, h1: /Built for the people/i },
   { path: "/facilities", title: /Facilities/i, h1: /Gym\.|And studio/i },
   { path: "/programmes", title: /Programmes/i, h1: /Build real strength/i },
   { path: "/contact", title: /Contact/i, h1: /Leave your details/i },
