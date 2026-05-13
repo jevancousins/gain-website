@@ -21,8 +21,6 @@ export const metadata: Metadata = {
     "Two structured strength programmes for adults in Eastbourne. The 6-week is a focused start; the 12-week is a full transformation. Small groups of six, expert coaching, post-rehab specialists.",
 };
 
-type Tier = { freq: string; price: string; perSession: string };
-
 type ProgrammeCard = {
   weeks: 6 | 12;
   eyebrow: string;
@@ -32,7 +30,6 @@ type ProgrammeCard = {
   bestFor: string;
   outcomes: string;
   phases: { label: string; weeks: string; focus: string }[];
-  tiers: Tier[];
   ctaLabel: string;
   source: string;
 };
@@ -62,12 +59,7 @@ const PROGRAMMES: ProgrammeCard[] = [
           "Progressive strength. Increase load and complexity carefully, refine technique under weight, finish with a final assessment.",
       },
     ],
-    tiers: [
-      { freq: "1 session / week", price: "£119", perSession: "£14.83 / session" },
-      { freq: "2 sessions / week", price: "£199", perSession: "£14.08 / session" },
-      { freq: "3 sessions / week", price: "£269", perSession: "£13.28 / session" },
-    ],
-    ctaLabel: "Enquire about the 6-week",
+    ctaLabel: "Get started",
     source: "programmes-6-week",
   },
   {
@@ -100,27 +92,11 @@ const PROGRAMMES: ProgrammeCard[] = [
           "Consolidation. Higher intensity, peak performance in your tracked lift, and a smooth handover into ongoing training if you want it.",
       },
     ],
-    tiers: [
-      { freq: "1 session / week", price: "£209", perSession: "£14.92 / session" },
-      { freq: "2 sessions / week", price: "£359", perSession: "£13.71 / session" },
-      { freq: "3 sessions / week", price: "£479", perSession: "£12.47 / session" },
-    ],
-    ctaLabel: "Enquire about the 12-week",
+    ctaLabel: "Get started",
     source: "programmes-12-week",
   },
 ];
 
-const MEMBERSHIP_TIERS: Tier[] = [
-  { freq: "1 session / week", price: "£60 / month", perSession: "£15.00 / session" },
-  { freq: "2 sessions / week", price: "£110 / month", perSession: "£13.75 / session" },
-  { freq: "3 sessions / week", price: "£155 / month", perSession: "£12.92 / session" },
-];
-
-const PT_TIERS: Tier[] = [
-  { freq: "Single session", price: "£50", perSession: "Pay as you go" },
-  { freq: "4 session pack", price: "£180", perSession: "£45 / session" },
-  { freq: "8 session pack", price: "£320", perSession: "£40 / session" },
-];
 
 const FAQS = [
   {
@@ -145,7 +121,7 @@ const FAQS = [
   },
   {
     q: "Do you do 1-to-1 personal training?",
-    a: "Yes. Single sessions are £50, with packs at £180 for 4 and £320 for 8. Most members get better results from small-group sessions at a fraction of the cost, but 1-to-1 is available for specific goals or if a private setting suits you better.",
+    a: "Yes. Most members get better results from small-group sessions, but 1-to-1 is available for specific goals or if a private setting suits you better. We cover pricing on the consultation call.",
   },
   {
     q: "What is the consultation call?",
@@ -373,36 +349,19 @@ export default function ProgrammesPage() {
                 </ol>
               </div>
 
-              <div>
-                <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame mb-5">
+              <div className="border border-flame/40 bg-ink-soft p-7">
+                <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame mb-4">
                   Pricing
                 </p>
-                <div className="grid sm:grid-cols-3 border border-ink-line">
-                  {p.tiers.map((t, i) => (
-                    <div
-                      key={t.freq}
-                      className={`p-6 ${
-                        i < p.tiers.length - 1
-                          ? "border-b sm:border-b-0 sm:border-r border-ink-line"
-                          : ""
-                      }`}
-                    >
-                      <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-paper/55">
-                        {t.freq}
-                      </p>
-                      <p className="display mt-3 text-3xl text-paper tabular-nums">
-                        {t.price}
-                      </p>
-                      <p className="mt-1 text-xs text-paper/55 tabular-nums">
-                        {t.perSession}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-3 text-xs italic text-paper/55">
-                  All packages include induction, weekly WhatsApp support, and
-                  the mid-programme phone check-in.
+                <p className="text-paper/80 text-[0.98rem] leading-relaxed">
+                  We talk through pricing, frequency, and payment options on the
+                  consultation call. No hidden fees, no pressure.
                 </p>
+                <div className="mt-5">
+                  <CTAButton href="#enquire" variant="primary">
+                    Get started
+                  </CTAButton>
+                </div>
               </div>
             </div>
           </div>
@@ -432,32 +391,16 @@ export default function ProgrammesPage() {
 
           <div className="lg:col-span-7">
             <Rule tone="paper" className="mb-8" />
-            <div className="grid sm:grid-cols-3 border border-ink-line">
-              {MEMBERSHIP_TIERS.map((t, i) => (
-                <div
-                  key={t.freq}
-                  className={`p-6 ${
-                    i < MEMBERSHIP_TIERS.length - 1
-                      ? "border-b sm:border-b-0 sm:border-r border-ink-line"
-                      : ""
-                  }`}
-                >
-                  <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-paper/55">
-                    {t.freq}
-                  </p>
-                  <p className="display mt-3 text-3xl text-paper tabular-nums">
-                    {t.price}
-                  </p>
-                  <p className="mt-1 text-xs text-paper/55 tabular-nums">
-                    {t.perSession}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <p className="mt-3 text-xs italic text-paper/55">
-              Members who joined Gain before the new pricing keep their
-              original rates. Loyalty is rewarded.
+            <p className="text-paper/75 leading-[1.72] text-[1.02rem] max-w-2xl">
+              Membership rates and frequency options are discussed on the
+              consultation call. We will find the schedule that fits your
+              life and walk you through pricing before you commit to anything.
             </p>
+            <div className="mt-8">
+              <CTAButton href="#enquire" variant="primary">
+                Get started
+              </CTAButton>
+            </div>
           </div>
         </div>
       </Section>
@@ -484,27 +427,15 @@ export default function ProgrammesPage() {
 
           <div className="lg:col-span-7">
             <Rule tone="paper" className="mb-8" />
-            <div className="grid sm:grid-cols-3 border border-ink-line">
-              {PT_TIERS.map((t, i) => (
-                <div
-                  key={t.freq}
-                  className={`p-6 ${
-                    i < PT_TIERS.length - 1
-                      ? "border-b sm:border-b-0 sm:border-r border-ink-line"
-                      : ""
-                  }`}
-                >
-                  <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-paper/55">
-                    {t.freq}
-                  </p>
-                  <p className="display mt-3 text-3xl text-paper tabular-nums">
-                    {t.price}
-                  </p>
-                  <p className="mt-1 text-xs text-paper/55 tabular-nums">
-                    {t.perSession}
-                  </p>
-                </div>
-              ))}
+            <p className="text-paper/75 leading-[1.72] text-[1.02rem] max-w-2xl">
+              1-to-1 sessions are available as single bookings or packs.
+              We will talk you through pricing and options on the consultation
+              call.
+            </p>
+            <div className="mt-8">
+              <CTAButton href="#enquire" variant="primary">
+                Get started
+              </CTAButton>
             </div>
           </div>
         </div>
@@ -522,7 +453,7 @@ export default function ProgrammesPage() {
             </Lede>
             <div className="mt-8">
               <CTAButton href="#enquire" variant="primary">
-                Start with a free call
+                Get started
               </CTAButton>
             </div>
           </div>

@@ -58,7 +58,7 @@ export default async function OgImage() {
               color: "#ffffff",
             }}
           >
-            Train smarter.
+            The gym.
           </div>
           <div
             style={{
@@ -70,7 +70,7 @@ export default async function OgImage() {
               color: "rgba(255,255,255,0.92)",
             }}
           >
-            Move better.
+            For people
           </div>
           <div
             style={{
@@ -81,7 +81,7 @@ export default async function OgImage() {
               color: "#FC832C",
             }}
           >
-            Build lasting strength.
+            who don&apos;t like gyms.
           </div>
         </div>
 

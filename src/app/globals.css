@@ -191,6 +191,10 @@ body {
   text-underline-offset: 7px;
 }
 
+/* Hide scrollbar for horizontal scroll strips */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
 /* Form input reset on dark */
 input[type="text"], input[type="email"], input[type="tel"], textarea, select {
   color-scheme: dark;

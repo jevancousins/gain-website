@@ -43,7 +43,7 @@ export default function FacilitiesPage() {
                 next door is available for hire.
               </Lede>
               <div className="mt-8 flex flex-wrap gap-3">
-                <CTAButton href="/contact" variant="primary">Enquire now</CTAButton>
+                <CTAButton href="/contact" variant="primary">Get started</CTAButton>
                 <CTAButton href="#gym" variant="ghost">Take the tour</CTAButton>
               </div>
             </div>

@@ -47,7 +47,7 @@ export type Persona = {
     eyebrow: string;
     title: string;
     body: string;
-    // Lead-form submit button label. Defaults to "Book a free call".
+    // Lead-form submit button label. Defaults to "Get started".
     submitLabel?: string;
   };
   finalCta: {
@@ -227,7 +227,7 @@ export const PERSONAS: Persona[] = [
         a: COMMON_FAQS.after,
       },
     ],
-    ctaPrimary: "Book a free call",
+    ctaPrimary: "Get started",
     formIntro: {
       eyebrow: "Step 01 · Arrange a call",
       title: "Start with a free call.",
@@ -353,13 +353,13 @@ export const PERSONAS: Persona[] = [
         a: COMMON_FAQS.after,
       },
     ],
-    ctaPrimary: "Book a strength assessment call",
+    ctaPrimary: "Get started",
     formIntro: {
       eyebrow: "Step 01 · Arrange a call",
       title: "Tell us your history.",
       body:
         "Leave your details and we will call. We will ask about your injury, the physio you have been through, and what you want next. No pressure, no sales script.",
-      submitLabel: "Book a strength assessment call",
+      submitLabel: "Get started",
     },
     finalCta: {
       title: "Ready for the next step after physio?",
@@ -480,7 +480,7 @@ export const PERSONAS: Persona[] = [
         a: COMMON_FAQS.after,
       },
     ],
-    ctaPrimary: "Book a consultation call",
+    ctaPrimary: "Get started",
     formIntro: {
       eyebrow: "Step 01 · Arrange a call",
       title: "Ask us anything.",
@@ -610,13 +610,13 @@ export const PERSONAS: Persona[] = [
         a: COMMON_FAQS.after,
       },
     ],
-    ctaPrimary: "Tell us your story",
+    ctaPrimary: "Get started",
     formIntro: {
       eyebrow: "Step 01 · Tell us your story",
       title: "No pressure, no judgement.",
       body:
         "Leave your details, and a few words on what you have been through if you would like. We will call you to talk it through. We will be honest about whether the 6-week fits.",
-      submitLabel: "Send my story",
+      submitLabel: "Get started",
     },
     finalCta: {
       title: "Ready to rebuild?",

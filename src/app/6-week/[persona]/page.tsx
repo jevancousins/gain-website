@@ -21,11 +21,6 @@ import { LeadForm } from "@/components/lead-form";
 import { IMAGES, SITE, GOOGLE_RATING } from "@/lib/utils";
 import { PERSONA_SLUGS, getPersona } from "../personas";
 
-const TIERS = [
-  { freq: "1 session / week", price: "£119", perSession: "£14.83 / session" },
-  { freq: "2 sessions / week", price: "£199", perSession: "£14.08 / session" },
-  { freq: "3 sessions / week", price: "£269", perSession: "£13.28 / session" },
-];
 
 const PHASES = [
   {
@@ -178,8 +173,8 @@ export default async function PersonaLandingPage({
               <CTAButton href="#enquire" variant="primary">
                 {persona.ctaPrimary}
               </CTAButton>
-              <CTAButton href="#book" variant="ghost">
-                Pick a time
+              <CTAButton href="#how" variant="ghost">
+                How it works
               </CTAButton>
             </div>
 
@@ -423,36 +418,19 @@ export default async function PersonaLandingPage({
               </ol>
             </div>
 
-            <div>
-              <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame mb-5">
+            <div className="border border-flame/40 bg-ink-soft p-7">
+              <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame mb-4">
                 Pricing
               </p>
-              <div className="grid sm:grid-cols-3 border border-ink-line">
-                {TIERS.map((t, i) => (
-                  <div
-                    key={t.freq}
-                    className={`p-6 ${
-                      i < TIERS.length - 1
-                        ? "border-b sm:border-b-0 sm:border-r border-ink-line"
-                        : ""
-                    }`}
-                  >
-                    <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-paper/55">
-                      {t.freq}
-                    </p>
-                    <p className="display mt-3 text-3xl text-paper tabular-nums">
-                      {t.price}
-                    </p>
-                    <p className="mt-1 text-xs text-paper/55 tabular-nums">
-                      {t.perSession}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-3 text-xs italic text-paper/55">
-                All packages include induction, weekly WhatsApp support, and
-                the mid-programme phone check-in.
+              <p className="text-paper/80 text-[0.98rem] leading-relaxed">
+                We talk through pricing, frequency, and payment options on the
+                consultation call. No hidden fees, no pressure.
               </p>
+              <div className="mt-5">
+                <CTAButton href="#enquire" variant="primary">
+                  Get started
+                </CTAButton>
+              </div>
             </div>
           </div>
         </div>
@@ -508,7 +486,7 @@ export default async function PersonaLandingPage({
               variant="solid-black"
               className="hover:!bg-ink hover:!text-flame"
             >
-              Book a consultation
+              Get started
             </CTAButton>
             <CTAButton
               href="#enquire"
@@ -534,7 +512,7 @@ export default async function PersonaLandingPage({
             </Lede>
             <div className="mt-8 flex flex-wrap gap-3">
               <CTAButton href="#book" variant="primary">
-                Book a consultation
+                Get started
               </CTAButton>
               <CTAButton href="#enquire" variant="ghost">
                 {persona.ctaPrimary}

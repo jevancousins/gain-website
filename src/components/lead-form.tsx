@@ -209,7 +209,7 @@ export function LeadForm({
           </>
         ) : (
           <>
-            {submitLabel ?? "Book a free call"} <ArrowRight size={15} strokeWidth={2.4} />
+            {submitLabel ?? "Get started"} <ArrowRight size={15} strokeWidth={2.4} />
           </>
         )}
       </button>

@@ -249,8 +249,8 @@ export function Pill({
 /* ——— Final CTA band ——— */
 
 export function FinalCTA({
-  title = "Ready to feel stronger?",
-  body = "Book a free consultation: pick a time for a phone call or an in-person visit. No pressure, no obligation.",
+  title = "Still thinking it over?",
+  body = "That is completely fine. Get in touch and we will answer your questions honestly, with no pressure to sign up.",
 }: {
   title?: string;
   body?: string;
@@ -260,7 +260,7 @@ export function FinalCTA({
       <div className="grid md:grid-cols-12 gap-10 md:gap-16 items-end">
         <div className="md:col-span-7">
           <span className="inline-block text-[0.68rem] font-bold uppercase tracking-[0.28em] text-ink/75">
-            Start here · Step 01
+            No pressure
           </span>
           <h2 className="display mt-6 text-[clamp(2.25rem,6vw,5.25rem)] text-ink">
             {title}
@@ -270,11 +270,11 @@ export function FinalCTA({
           <p className="lede text-lg md:text-xl text-ink/85 max-w-md">{body}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <CTAButton
-              href="/contact#book"
+              href="/contact"
               variant="solid-black"
               className="hover:!bg-ink hover:!text-flame"
             >
-              Book a consultation
+              Get in touch
             </CTAButton>
             <CTAButton
               href="/about"
