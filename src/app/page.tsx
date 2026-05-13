@@ -134,7 +134,7 @@ export default function HomePage() {
                   {p.t}
                 </h3>
               </div>
-              <p className="col-span-12 md:col-span-8 mt-3 md:mt-0 text-paper/70 text-[0.98rem] leading-relaxed line-clamp-2 md:line-clamp-none">
+              <p className="col-span-12 md:col-span-8 mt-3 md:mt-0 text-paper/70 text-[0.98rem] leading-relaxed">
                 {p.d}
               </p>
             </li>
