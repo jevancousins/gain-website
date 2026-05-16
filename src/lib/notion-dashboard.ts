@@ -1,6 +1,7 @@
 import { fetchMembershipSummaryByCustomer } from "@/lib/teamup-memberships";
 import { teamupGet } from "@/lib/teamup";
 import { detectExpansionTriggers, type SessionSlot } from "@/lib/teamup-events";
+import { fetchMetaAdsMonthly, type MetaAdsSummary } from "@/lib/meta-ads";
 
 const NOTION_API = "https://api.notion.com/v1";
 const NOTION_VERSION = "2022-06-28";
@@ -43,6 +44,7 @@ export type DashboardMetrics = {
     slotsAtThreshold: SessionSlot[];
     topSlots: SessionSlot[];
   };
+  metaAds: MetaAdsSummary;
 };
 
 type ActiveMembershipRow = {
@@ -160,6 +162,7 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     revenueRows,
     membershipSummaries,
     expansionTriggers,
+    metaAds,
   ] = await Promise.all([
     fetchActiveCustomerMemberships(),
     countMembersByStatus(membersDbId, null),
@@ -167,6 +170,7 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     fetchTeamupRevenueRows(financesDbId),
     fetchMembershipSummaryByCustomer(),
     detectExpansionTriggers(14, 5),
+    fetchMetaAdsMonthly(6),
   ]);
 
   // Programme breakdown: count + MRR contribution per programme name.
@@ -246,6 +250,7 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
       slotsAtThreshold: expansionTriggers.slotsAtThreshold,
       topSlots: expansionTriggers.allSlots.slice(0, 8),
     },
+    metaAds,
     // membershipSummaries is unused here but kept in scope above for clarity
     ...{ membershipSummariesCount: membershipSummaries.size as number },
   } as DashboardMetrics;
@@ -310,6 +315,34 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
     const chartUrl = revenueLineChartUrl(m);
     if (chartUrl) blocks.push(image(chartUrl));
     blocks.push(paragraph(`Net invoice revenue per month, GBP.`));
+  }
+
+  // Meta Ads spend section
+  if (m.metaAds.months.length > 0 || m.metaAds.last30Days) {
+    blocks.push(heading2("Meta Ads spend"));
+    if (m.metaAds.last30Days) {
+      const a = m.metaAds.last30Days;
+      const cplText = a.costPerLead !== null ? ` (${sym}${a.costPerLead.toFixed(2)} per lead)` : "";
+      blocks.push(
+        callout(
+          "📣",
+          `${sym}${a.spend.toFixed(2)} spent in the last 30 days, generating ${a.leads} lead${a.leads === 1 ? "" : "s"}${cplText}. ${a.impressions.toLocaleString()} impressions, ${a.clicks} clicks.`,
+        ),
+      );
+    }
+    if (m.metaAds.months.length > 0) {
+      const chartUrl = metaAdsChartUrl(m);
+      if (chartUrl) blocks.push(image(chartUrl));
+      blocks.push(paragraph("Monthly ad spend (bars) vs leads generated (line)."));
+      for (const month of m.metaAds.months) {
+        const cplText = month.costPerLead !== null ? ` | CPL ${sym}${month.costPerLead.toFixed(2)}` : "";
+        blocks.push(
+          bullet(
+            `${month.month}: ${sym}${month.spend.toFixed(2)} spend, ${month.leads} leads, ${month.landingPageViews} LPVs${cplText}`,
+          ),
+        );
+      }
+    }
   }
 
   // Programme MRR contribution as a horizontal bar chart (recurring only).
@@ -462,6 +495,59 @@ function programmeBarChartUrl(
     },
   };
   return quickChartUrl(config, 700, Math.max(220, labels.length * 40 + 80));
+}
+
+function metaAdsChartUrl(m: DashboardMetrics): string | null {
+  if (m.metaAds.months.length === 0) return null;
+  const labels = m.metaAds.months.map((r) => r.month);
+  const spendData = m.metaAds.months.map((r) => r.spend);
+  const leadsData = m.metaAds.months.map((r) => r.leads);
+  const config = {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Spend (£)",
+          data: spendData,
+          backgroundColor: "rgba(234,67,53,0.6)",
+          yAxisID: "y",
+        },
+        {
+          label: "Leads",
+          data: leadsData,
+          type: "line",
+          borderColor: "#1f6feb",
+          backgroundColor: "rgba(31,111,235,0.15)",
+          fill: false,
+          tension: 0.25,
+          pointRadius: 4,
+          yAxisID: "y1",
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        title: { display: true, text: "Meta Ads: monthly spend vs leads" },
+        datalabels: { display: false },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          position: "left",
+          ticks: { callback: "function(v){return '£'+v}" },
+          title: { display: true, text: "Spend (£)" },
+        },
+        y1: {
+          beginAtZero: true,
+          position: "right",
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: "Leads" },
+        },
+      },
+    },
+  };
+  return quickChartUrl(config, 700, 320);
 }
 
 function quickChartUrl(config: unknown, width: number, height: number): string {
