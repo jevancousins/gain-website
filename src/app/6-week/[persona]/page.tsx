@@ -18,7 +18,8 @@ import { Section, H2, CTAButton, Pill, Lede, Testimonial } from "@/components/ui
 import { Folio, Kicker, Rule, Caption } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { LeadForm } from "@/components/lead-form";
-import { IMAGES, SITE, GOOGLE_RATING } from "@/lib/utils";
+import { IMAGES, SITE } from "@/lib/utils";
+import { getGoogleRating } from "@/lib/google-rating";
 import { PERSONA_SLUGS, getPersona } from "../personas";
 
 
@@ -109,7 +110,10 @@ export default async function PersonaLandingPage({
 }: {
   params: Promise<{ persona: string }>;
 }) {
-  const { persona: slug } = await params;
+  const [{ persona: slug }, GOOGLE_RATING] = await Promise.all([
+    params,
+    getGoogleRating(),
+  ]);
   const persona = getPersona(slug);
   if (!persona) notFound();
 

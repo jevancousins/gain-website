@@ -20,6 +20,7 @@ export const SITE = {
   },
   phone: "+44 1323 370022",
   phoneHref: "+441323370022",
+  bookingUrl: "https://cal.com/gainstrengththerapy/consultation",
   /**
    * Enquiry status. Toggle to "waitlist" when Hallum is at capacity; the
    * nav strip, footer callouts, and any "new enquiries open" dots read
@@ -43,17 +44,18 @@ export const SITE = {
 };
 
 /**
- * Live Google rating, verified 2026-04-23 from the Maps listing
- * (kgmid: /g/11ld82lbxg). Bump the count when it climbs.
+ * Fallback Google rating, used when the Places API is unavailable.
+ * The live value is fetched by src/lib/google-rating.ts and cached
+ * with a daily revalidation triggered by the google-reviews cron.
  */
 export const GOOGLE_RATING = {
   stars: 5.0,
-  count: 22,
+  count: 24,
   href: "https://share.google/VbfM3tGyhVSDRZUIZ",
 };
 
 /**
- * Curated slice of the 22 five-star Google reviews. Each entry is
+ * Curated slice of the five-star Google reviews. Each entry is
  * verbatim excerpts from a public Google review (pulled 2026-04-23);
  * selection covers the niche audiences (first-timer / anxious,
  * injury / illness recovery, older adults) plus a strength-for-performance
