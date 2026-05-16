@@ -558,11 +558,13 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
   // P&L
   blocks.push(heading2("Profit & Loss"));
   const p = m.pnl;
-  const profitEmoji = p.netProfit >= 0 ? "✅" : "🔴";
+  const isCurrentMonthPartial = p.month === m.generatedAt.slice(0, 7);
+  const profitEmoji = p.netProfit >= 0 ? "✅" : isCurrentMonthPartial ? "📊" : "🔴";
+  const partialNote = isCurrentMonthPartial ? " (month-to-date; revenue will increase as invoices land)" : "";
   blocks.push(
     callout(
       profitEmoji,
-      `${p.month}: ${sym}${p.revenue.toFixed(0)} revenue − ${sym}${p.totalCosts.toFixed(0)} costs = ${sym}${p.netProfit.toFixed(0)} net profit`,
+      `${p.month}: ${sym}${p.revenue.toFixed(0)} revenue − ${sym}${p.totalCosts.toFixed(0)} costs = ${sym}${p.netProfit.toFixed(0)} net${partialNote}`,
     ),
   );
   blocks.push(paragraph("Fixed monthly costs:"));
