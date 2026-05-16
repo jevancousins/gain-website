@@ -45,6 +45,29 @@ export type DashboardMetrics = {
     topSlots: SessionSlot[];
   };
   metaAds: MetaAdsSummary;
+  leadFunnel: {
+    total: number;
+    byStatus: Record<string, number>;
+    monthlyVolume: Array<{ month: string; count: number; converted: number }>;
+    conversionRate: number | null;
+    avgDaysToConvert: number | null;
+  };
+  pnl: {
+    month: string;
+    revenue: number;
+    fixedCosts: number;
+    adSpend: number;
+    totalCosts: number;
+    netProfit: number;
+    fixedBreakdown: Array<{ item: string; amount: number }>;
+    monthlyHistory: Array<{
+      month: string;
+      revenue: number;
+      adSpend: number;
+      totalCosts: number;
+      netProfit: number;
+    }>;
+  };
 };
 
 type ActiveMembershipRow = {
@@ -149,6 +172,130 @@ async function fetchTeamupRevenueRows(financesDbId: string) {
   return rows;
 }
 
+const LEADS_DB_ID = "3e2ca304-ebd8-4cea-8202-d0003bf94a6f";
+
+const FIXED_COSTS: Array<{ item: string; amount: number }> = [
+  { item: "Rent", amount: 1500 },
+  { item: "Utilities", amount: 150 },
+  { item: "Insurance", amount: 100 },
+  { item: "Software/systems", amount: 100 },
+  { item: "Marketing (non-ads)", amount: 400 },
+  { item: "Miscellaneous", amount: 250 },
+];
+
+const TOTAL_FIXED = FIXED_COSTS.reduce((sum, c) => sum + c.amount, 0);
+
+type LeadRow = {
+  status: string;
+  firstContact: string | null;
+  hasConvertedMember: boolean;
+};
+
+async function fetchAllLeads(): Promise<LeadRow[]> {
+  const { token } = notionConfig();
+  const rows: LeadRow[] = [];
+  let cursor: string | undefined = undefined;
+  while (true) {
+    const body: Record<string, unknown> = { page_size: 100 };
+    if (cursor) body.start_cursor = cursor;
+    const res = await fetch(`${NOTION_API}/databases/${LEADS_DB_ID}/query`, {
+      method: "POST",
+      headers: notionHeaders(token),
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(`Notion leads query failed: ${res.status} ${await res.text()}`);
+    const data = (await res.json()) as {
+      results: Array<{
+        properties: {
+          Status?: { select?: { name: string } | null };
+          "First Contact"?: { date?: { start: string } | null };
+          "Converted Member"?: { relation?: Array<{ id: string }> };
+        };
+      }>;
+      next_cursor: string | null;
+      has_more: boolean;
+    };
+    for (const row of data.results) {
+      rows.push({
+        status: row.properties.Status?.select?.name ?? "Unknown",
+        firstContact: row.properties["First Contact"]?.date?.start ?? null,
+        hasConvertedMember: (row.properties["Converted Member"]?.relation?.length ?? 0) > 0,
+      });
+    }
+    if (!data.has_more || !data.next_cursor) break;
+    cursor = data.next_cursor;
+  }
+  return rows;
+}
+
+function buildLeadFunnel(leads: LeadRow[]) {
+  const byStatus: Record<string, number> = {};
+  for (const l of leads) {
+    byStatus[l.status] = (byStatus[l.status] ?? 0) + 1;
+  }
+
+  const converted = leads.filter((l) => l.status === "Converted" || l.hasConvertedMember);
+  const conversionRate = leads.length > 0 ? round2((converted.length / leads.length) * 100) : null;
+
+  // Monthly volume (last 6 months)
+  const monthMap = new Map<string, { count: number; converted: number }>();
+  for (const l of leads) {
+    if (!l.firstContact) continue;
+    const month = l.firstContact.slice(0, 7);
+    const entry = monthMap.get(month) ?? { count: 0, converted: 0 };
+    entry.count += 1;
+    if (l.status === "Converted" || l.hasConvertedMember) entry.converted += 1;
+    monthMap.set(month, entry);
+  }
+  const monthlyVolume = Array.from(monthMap.entries())
+    .map(([month, v]) => ({ month, ...v }))
+    .sort((a, b) => (a.month < b.month ? 1 : -1))
+    .slice(0, 6)
+    .reverse();
+
+  return {
+    total: leads.length,
+    byStatus,
+    monthlyVolume,
+    conversionRate,
+    avgDaysToConvert: null as number | null,
+  };
+}
+
+function buildPnl(
+  monthlyRevenue: Array<{ month: string; net: number }>,
+  metaAdsMonths: Array<{ month: string; spend: number }>,
+) {
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentRevenue = monthlyRevenue.find((r) => r.month === currentMonth)?.net ?? 0;
+  const currentAdSpend = metaAdsMonths.find((m) => m.month === currentMonth)?.spend ?? 0;
+  const totalCosts = TOTAL_FIXED + currentAdSpend;
+
+  const monthlyHistory = monthlyRevenue.map((r) => {
+    const adSpend = metaAdsMonths.find((m) => m.month === r.month)?.spend ?? 0;
+    const costs = TOTAL_FIXED + adSpend;
+    return {
+      month: r.month,
+      revenue: r.net,
+      adSpend,
+      totalCosts: costs,
+      netProfit: round2(r.net - costs),
+    };
+  });
+
+  return {
+    month: currentMonth,
+    revenue: currentRevenue,
+    fixedCosts: TOTAL_FIXED,
+    adSpend: currentAdSpend,
+    totalCosts,
+    netProfit: round2(currentRevenue - totalCosts),
+    fixedBreakdown: FIXED_COSTS,
+    monthlyHistory,
+  };
+}
+
 export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
   const membersDbId = process.env.NOTION_MEMBERS_DB_ID;
   const financesDbId = process.env.NOTION_FINANCES_DB_ID;
@@ -163,6 +310,7 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     membershipSummaries,
     expansionTriggers,
     metaAds,
+    allLeads,
   ] = await Promise.all([
     fetchActiveCustomerMemberships(),
     countMembersByStatus(membersDbId, null),
@@ -171,6 +319,7 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     fetchMembershipSummaryByCustomer(),
     detectExpansionTriggers(14, 5),
     fetchMetaAdsMonthly(6),
+    fetchAllLeads(),
   ]);
 
   // Programme breakdown: count + MRR contribution per programme name.
@@ -251,6 +400,8 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
       topSlots: expansionTriggers.allSlots.slice(0, 8),
     },
     metaAds,
+    leadFunnel: buildLeadFunnel(allLeads),
+    pnl: buildPnl(monthlyRevenue, metaAds.months),
     // membershipSummaries is unused here but kept in scope above for clarity
     ...{ membershipSummariesCount: membershipSummaries.size as number },
   } as DashboardMetrics;
@@ -377,6 +528,64 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
     }
   }
 
+  // Lead funnel
+  if (m.leadFunnel.total > 0) {
+    blocks.push(heading2("Lead funnel"));
+    const f = m.leadFunnel;
+    const statusLine = Object.entries(f.byStatus)
+      .sort((a, b) => b[1] - a[1])
+      .map(([s, n]) => `${s}: ${n}`)
+      .join(" | ");
+    blocks.push(
+      callout(
+        "🎯",
+        `${f.total} total leads. Conversion rate: ${f.conversionRate !== null ? f.conversionRate + "%" : "N/A"}`,
+      ),
+    );
+    blocks.push(paragraph(statusLine));
+    if (f.monthlyVolume.length > 0) {
+      const chartUrl = leadFunnelChartUrl(m);
+      if (chartUrl) blocks.push(image(chartUrl));
+      for (const mv of f.monthlyVolume) {
+        const rate = mv.count > 0 ? round2((mv.converted / mv.count) * 100) : 0;
+        blocks.push(
+          bullet(`${mv.month}: ${mv.count} leads, ${mv.converted} converted (${rate}%)`),
+        );
+      }
+    }
+  }
+
+  // P&L
+  blocks.push(heading2("Profit & Loss"));
+  const p = m.pnl;
+  const profitEmoji = p.netProfit >= 0 ? "✅" : "🔴";
+  blocks.push(
+    callout(
+      profitEmoji,
+      `${p.month}: ${sym}${p.revenue.toFixed(0)} revenue − ${sym}${p.totalCosts.toFixed(0)} costs = ${sym}${p.netProfit.toFixed(0)} net profit`,
+    ),
+  );
+  blocks.push(paragraph("Fixed monthly costs:"));
+  for (const c of p.fixedBreakdown) {
+    blocks.push(bullet(`${c.item}: ${sym}${c.amount}`));
+  }
+  blocks.push(bullet(`Meta Ads (variable): ${sym}${p.adSpend.toFixed(2)}`));
+  blocks.push(bullet(`Total costs: ${sym}${p.totalCosts.toFixed(0)}`));
+
+  if (p.monthlyHistory.length > 1) {
+    blocks.push(heading2("Month-over-month P&L"));
+    const pnlChartUrl = pnlHistoryChartUrl(m);
+    if (pnlChartUrl) blocks.push(image(pnlChartUrl));
+    for (const h of p.monthlyHistory) {
+      const sign = h.netProfit >= 0 ? "+" : "";
+      blocks.push(
+        bullet(
+          `${h.month}: ${sym}${h.revenue.toFixed(0)} rev − ${sym}${h.totalCosts.toFixed(0)} costs = ${sign}${sym}${h.netProfit.toFixed(0)}`,
+        ),
+      );
+    }
+  }
+
   blocks.push(heading2("Session capacity (last 14 days)"));
   if (m.capacity.slotsAtThreshold.length > 0) {
     blocks.push(
@@ -428,6 +637,83 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
   );
 
   return blocks;
+}
+
+function leadFunnelChartUrl(m: DashboardMetrics): string | null {
+  if (m.leadFunnel.monthlyVolume.length === 0) return null;
+  const labels = m.leadFunnel.monthlyVolume.map((r) => r.month);
+  const totalData = m.leadFunnel.monthlyVolume.map((r) => r.count);
+  const convertedData = m.leadFunnel.monthlyVolume.map((r) => r.converted);
+  const config = {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Leads",
+          data: totalData,
+          backgroundColor: "rgba(31,111,235,0.6)",
+        },
+        {
+          label: "Converted",
+          data: convertedData,
+          backgroundColor: "rgba(45,164,78,0.8)",
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        title: { display: true, text: "Monthly leads vs conversions" },
+        datalabels: { display: true, color: "#222" },
+      },
+      scales: { y: { beginAtZero: true } },
+    },
+  };
+  return quickChartUrl(config, 700, 300);
+}
+
+function pnlHistoryChartUrl(m: DashboardMetrics): string | null {
+  if (m.pnl.monthlyHistory.length === 0) return null;
+  const labels = m.pnl.monthlyHistory.map((r) => r.month);
+  const revenueData = m.pnl.monthlyHistory.map((r) => r.revenue);
+  const costsData = m.pnl.monthlyHistory.map((r) => r.totalCosts);
+  const profitData = m.pnl.monthlyHistory.map((r) => r.netProfit);
+  const config = {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Revenue (£)",
+          data: revenueData,
+          backgroundColor: "rgba(45,164,78,0.6)",
+        },
+        {
+          label: "Costs (£)",
+          data: costsData,
+          backgroundColor: "rgba(234,67,53,0.5)",
+        },
+        {
+          label: "Net Profit (£)",
+          data: profitData,
+          type: "line",
+          borderColor: "#1f6feb",
+          backgroundColor: "rgba(31,111,235,0.1)",
+          fill: false,
+          tension: 0.25,
+          pointRadius: 4,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        title: { display: true, text: "Monthly P&L (£)" },
+        datalabels: { display: false },
+      },
+      scales: { y: { ticks: { callback: "function(v){return '£'+v}" } } },
+    },
+  };
+  return quickChartUrl(config, 700, 320);
 }
 
 function revenueLineChartUrl(m: DashboardMetrics): string | null {
