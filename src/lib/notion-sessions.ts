@@ -58,23 +58,62 @@ async function fetchLatestSessionDate(token: string): Promise<string | null> {
   return data.results[0]?.properties["Date & Time"]?.date?.start ?? null;
 }
 
+async function fetchExistingEventIds(token: string): Promise<Set<number>> {
+  const ids = new Set<number>();
+  let hasMore = true;
+  let startCursor: string | undefined;
+
+  while (hasMore) {
+    const body: Record<string, unknown> = {
+      page_size: 100,
+      filter_properties: ["TeamUp Event ID"],
+    };
+    if (startCursor) body.start_cursor = startCursor;
+
+    const res = await fetch(`${NOTION_API}/databases/${SESSIONS_DB_ID}/query`, {
+      method: "POST",
+      headers: notionHeaders(token),
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    if (!res.ok) break;
+    const data = (await res.json()) as {
+      results: Array<{
+        properties: { "TeamUp Event ID"?: { number: number | null } };
+      }>;
+      has_more: boolean;
+      next_cursor: string | null;
+    };
+
+    for (const page of data.results) {
+      const eventId = page.properties["TeamUp Event ID"]?.number;
+      if (eventId) ids.add(eventId);
+    }
+
+    hasMore = data.has_more;
+    startCursor = data.next_cursor ?? undefined;
+  }
+
+  return ids;
+}
+
 async function fetchTeamUpEventsSince(since: string): Promise<TeamUpEvent[]> {
   const all: TeamUpEvent[] = [];
-  let offset = 0;
-  const limit = 100;
-  let totalCount: number | null = null;
+  const now = new Date().toISOString();
+  let pageNum = 1;
 
-  while (totalCount === null || offset < totalCount) {
+  while (true) {
     const page = await teamupGet<TeamUpPage>("/events", {
-      query: { limit, offset },
+      query: { page: pageNum },
     });
-    if (totalCount === null) totalCount = page.count ?? 0;
     if (page.results.length === 0) break;
 
     for (const ev of page.results) {
-      if (ev.starts_at > since) all.push(ev);
+      if (ev.starts_at > since && ev.starts_at <= now) all.push(ev);
     }
-    offset += limit;
+
+    if (!page.next) break;
+    pageNum++;
   }
 
   return all;
@@ -90,6 +129,7 @@ async function createSessionPage(
     Type: { select: { name: classifyType(event.name) } },
     "Attendance Count": { number: event.attending_count ?? 0 },
     Capacity: { number: event.max_occupancy ?? 6 },
+    "TeamUp Event ID": { number: event.id },
   };
 
   const res = await fetch(`${NOTION_API}/pages`, {
@@ -110,6 +150,7 @@ function sleep(ms: number) {
 
 export async function syncNewSessions(): Promise<{
   synced: number;
+  skipped: number;
   errors: number;
   since: string | null;
 }> {
@@ -118,6 +159,8 @@ export async function syncNewSessions(): Promise<{
 
   const latestDate = await fetchLatestSessionDate(token);
   const since = latestDate ?? "2024-01-01T00:00:00";
+
+  const existingIds = await fetchExistingEventIds(token);
 
   const newEvents = await fetchTeamUpEventsSince(since);
 
@@ -129,9 +172,14 @@ export async function syncNewSessions(): Promise<{
   });
 
   let synced = 0;
+  let skipped = 0;
   let errors = 0;
 
   for (const event of groupSessions) {
+    if (existingIds.has(event.id)) {
+      skipped++;
+      continue;
+    }
     try {
       await createSessionPage(token, event);
       synced++;
@@ -142,5 +190,5 @@ export async function syncNewSessions(): Promise<{
     }
   }
 
-  return { synced, errors, since };
+  return { synced, skipped, errors, since };
 }
