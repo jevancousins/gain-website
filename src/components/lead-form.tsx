@@ -194,7 +194,7 @@ export function LeadForm({
       <label className="flex gap-3 items-start text-sm cursor-pointer text-paper/70">
         <input type="checkbox" name="newsletter" className="mt-1 h-4 w-4 accent-flame" />
         <span className="leading-snug">
-          Yes, I&rsquo;m happy to receive occasional updates from Gain Strength Therapy. Unsubscribe anytime.
+          I&rsquo;d like to receive occasional tips, programme updates and news from Gain. You can unsubscribe at any time.
         </span>
       </label>
 

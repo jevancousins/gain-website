@@ -5,6 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const NEWSLETTER_CONSENT_TEXT_V1 =
+  "I'd like to receive occasional tips, programme updates and news from Gain. You can unsubscribe at any time.";
+
 export const SITE = {
   name: "Gain Strength Therapy",
   shortName: "GAIN",
@@ -20,6 +23,7 @@ export const SITE = {
   },
   phone: "+44 1323 370022",
   phoneHref: "+441323370022",
+  bookingUrl: "https://cal.com/gainstrengththerapy/consultation",
   /**
    * Enquiry status. Toggle to "waitlist" when Hallum is at capacity; the
    * nav strip, footer callouts, and any "new enquiries open" dots read
@@ -43,17 +47,18 @@ export const SITE = {
 };
 
 /**
- * Live Google rating, verified 2026-04-23 from the Maps listing
- * (kgmid: /g/11ld82lbxg). Bump the count when it climbs.
+ * Fallback Google rating, used when the Places API is unavailable.
+ * The live value is fetched by src/lib/google-rating.ts and cached
+ * with a daily revalidation triggered by the google-reviews cron.
  */
 export const GOOGLE_RATING = {
   stars: 5.0,
-  count: 22,
+  count: 24,
   href: "https://share.google/VbfM3tGyhVSDRZUIZ",
 };
 
 /**
- * Curated slice of the 22 five-star Google reviews. Each entry is
+ * Curated slice of the five-star Google reviews. Each entry is
  * verbatim excerpts from a public Google review (pulled 2026-04-23);
  * selection covers the niche audiences (first-timer / anxious,
  * injury / illness recovery, older adults) plus a strength-for-performance
@@ -110,6 +115,8 @@ export const REVIEWS: Review[] = [
  */
 export const IMAGES = {
   logo: "/media/logo.png",
+  logoLight: "/media/logo-light.png",
+  logoOnFlame: "/media/logo-on-flame.png",
 
   // ——— GYM — Hallum coaching / member scenes ———
   gymBoxCoaching: "/media/gym/box-coaching.jpg",
@@ -194,11 +201,25 @@ export const IMAGE_META: Record<string, ImageMeta> = {
   // ——— BRAND ———
 
   "/media/logo.png": {
-    description: "Gain Strength Therapy circular wordmark logo.",
+    description: "Gain wordmark logo: white GAIN text with orange runner, for dark backgrounds.",
     people: [],
     setting: "brand",
     status: "current",
-    tags: ["logo", "brand", "wordmark"],
+    tags: ["logo", "brand", "wordmark", "dark-bg"],
+  },
+  "/media/logo-light.png": {
+    description: "Gain wordmark logo: dark GAIN text with orange runner, for light/cream backgrounds.",
+    people: [],
+    setting: "brand",
+    status: "current",
+    tags: ["logo", "brand", "wordmark", "light-bg"],
+  },
+  "/media/logo-on-flame.png": {
+    description: "Gain wordmark logo: white GAIN text with dark runner, for flame/orange backgrounds.",
+    people: [],
+    setting: "brand",
+    status: "current",
+    tags: ["logo", "brand", "wordmark", "flame-bg"],
   },
 
   // ——— HEADSHOTS ———
