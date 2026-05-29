@@ -7,7 +7,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Section, H2, CTAButton, Lede, Testimonial } from "@/components/ui";
-import { Folio, Kicker, Rule } from "@/components/editorial";
+import { Folio, Rule } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { LeadForm } from "@/components/lead-form";
 import { IMAGES, REVIEWS, SITE } from "@/lib/utils";
@@ -134,27 +134,25 @@ export default async function GeneralLandingPage() {
 
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-14 md:pt-20 pb-16 md:pb-24 grid lg:grid-cols-12 gap-10 lg:gap-16">
           <div className="lg:col-span-7 relative">
-            <Kicker>Not a gym. Not a class.</Kicker>
             <h1 className="display mt-6 text-[clamp(2.5rem,7.5vw,6.25rem)] text-paper leading-[1.02]">
-              Get strong again.
-              <br />
+              Not sure where to start with
               <span className="display-italic font-medium text-flame">
-                Six people. One coach.
+                {" "}strength training?
               </span>
             </h1>
-            <Lede className="mt-10">
-              Small-group strength training for adults in Eastbourne who want
-              proper coaching in a private studio. Whether you are starting
-              from scratch, rebuilding after injury, or done with big gyms:
-              start with a free call.
+            <p className="mt-6 text-lg md:text-xl text-paper/70 max-w-xl leading-relaxed">
+              You are not alone, and you do not need to figure it out by yourself.
+            </p>
+            <Lede className="mt-8">
+              Most people in their 40s, 50s, and 60s know they should be doing
+              something, but walk into a gym and feel completely lost. At Gain,
+              an MSc-qualified coach builds your programme around your body, your
+              history, and your goals from day one.
             </Lede>
 
-            <div className="mt-10 flex flex-wrap gap-3">
+            <div className="mt-10">
               <CTAButton href="#enquire" variant="primary">
-                Book a free call
-              </CTAButton>
-              <CTAButton href={`tel:${SITE.phoneHref}`} variant="ghost" icon="none">
-                Or call {SITE.phone}
+                Start with a free consultation
               </CTAButton>
             </div>
 
