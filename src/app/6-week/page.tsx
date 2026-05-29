@@ -140,13 +140,11 @@ export default async function GeneralLandingPage() {
                 {" "}strength training?
               </span>
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-paper/70 max-w-xl leading-relaxed">
-              You are not alone, and you do not need to figure it out by yourself.
-            </p>
-            <Lede className="mt-8">
-              Most people in their 40s, 50s, and 60s know they should be doing
-              something, but walk into a gym and feel completely lost. At Gain,
-              an MSc-qualified coach builds your programme around your body, your
+            <Lede className="mt-10">
+              You are not alone, and you do not need to figure it out by
+              yourself. Most people in their 40s, 50s, and 60s know they should
+              be doing something, but walk into a gym and feel completely lost.
+              At Gain, your coach builds your programme around your body, your
               history, and your goals from day one.
             </Lede>
 
