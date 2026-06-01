@@ -101,6 +101,13 @@ export async function POST(request: Request) {
       name: "email",
       promise: sendLeadConfirmationEmail(lead, resendKey, fromEmail),
     });
+    const ownerEmail = process.env.LEAD_NOTIFY_EMAIL;
+    if (ownerEmail) {
+      tasks.push({
+        name: "notify",
+        promise: sendOwnerNotificationEmail(lead, resendKey, fromEmail, ownerEmail),
+      });
+    }
   }
 
   if (tasks.length > 0) {
@@ -294,6 +301,84 @@ ${programmeHtml}
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`Resend API ${res.status}: ${body}`);
+  }
+}
+
+async function sendOwnerNotificationEmail(
+  lead: Lead,
+  apiKey: string,
+  from: string,
+  to: string,
+) {
+  const safeName = escapeHtml(lead.firstName);
+  const safeEmail = escapeHtml(lead.email);
+  const safePhone = escapeHtml(lead.phoneRaw);
+  const safeSource = escapeHtml(lead.source || "unknown");
+  const safeMessage = lead.message ? escapeHtml(lead.message) : null;
+  const time = new Date(lead.createdAt).toLocaleString("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/London",
+  });
+
+  const textLines = [
+    `New enquiry from ${lead.firstName}`,
+    "",
+    `Name: ${lead.firstName}`,
+    `Email: ${lead.email}`,
+    `Phone: ${lead.phoneRaw}`,
+    `Source: ${lead.source || "unknown"}`,
+    `Time: ${time}`,
+  ];
+  if (lead.message) {
+    textLines.push("", `Message: ${lead.message}`);
+  }
+  textLines.push(
+    "",
+    `Reply to this email to reach ${lead.firstName} directly at ${lead.email}.`,
+  );
+  const text = textLines.join("\n");
+
+  const messageRow = safeMessage
+    ? `<tr><td style="padding:6px 0;color:#666;">Message</td><td style="padding:6px 0;">${safeMessage}</td></tr>`
+    : "";
+
+  const html = `<!doctype html>
+<html>
+<head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; line-height: 1.6; max-width: 480px; margin: 0 auto; padding: 24px;">
+<p style="font-weight:700; font-size:16px; margin-bottom:16px;">New enquiry from ${safeName}</p>
+<table style="width:100%; border-collapse:collapse; font-size:14px;">
+<tr><td style="padding:6px 0; color:#666; width:80px;">Name</td><td style="padding:6px 0;">${safeName}</td></tr>
+<tr><td style="padding:6px 0; color:#666;">Email</td><td style="padding:6px 0;"><a href="mailto:${safeEmail}" style="color:#FC832C;">${safeEmail}</a></td></tr>
+<tr><td style="padding:6px 0; color:#666;">Phone</td><td style="padding:6px 0;"><a href="tel:${safePhone}" style="color:#FC832C;">${safePhone}</a></td></tr>
+<tr><td style="padding:6px 0; color:#666;">Source</td><td style="padding:6px 0;">${safeSource}</td></tr>
+<tr><td style="padding:6px 0; color:#666;">Time</td><td style="padding:6px 0;">${escapeHtml(time)}</td></tr>
+${messageRow}
+</table>
+<p style="margin-top:20px; font-size:13px; color:#666;">Reply to this email to reach ${safeName} directly.</p>
+</body>
+</html>`;
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      reply_to: lead.email,
+      to: [to],
+      subject: `New enquiry: ${lead.firstName}`,
+      html,
+      text,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Resend notify API ${res.status}: ${body}`);
   }
 }
 
