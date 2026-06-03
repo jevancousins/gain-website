@@ -3,8 +3,6 @@ import { test, expect } from "./fixtures";
 const ROUTES = [
   { path: "/", title: /Gain Strength Therapy/i, h1: /The gym/i },
   { path: "/about", title: /About/i, h1: /Built for the people/i },
-  { path: "/facilities", title: /Facilities/i, h1: /Gym\.|And studio/i },
-  { path: "/programmes", title: /Programmes/i, h1: /Build real strength/i },
   { path: "/contact", title: /Contact/i, h1: /Leave your details/i },
   { path: "/faqs", title: /FAQ/i, h1: /./ },
   { path: "/privacy", title: /Privacy/i, h1: /handle your information/i },
@@ -41,9 +39,9 @@ for (const path of PERSONA_ROUTES) {
 
     // Persona landings should NOT link to the main site routes. We let
     // /privacy and /terms through (the slim landing footer is allowed to
-    // link to them) but block /about, /facilities, /programmes, /faqs and
-    // /contact, which are the main-site exit points the ChromeGate strips.
-    for (const exit of ["/about", "/facilities", "/programmes", "/faqs", "/contact"]) {
+    // link to them) but block /about, /faqs and /contact, which are the
+    // main-site exit points the ChromeGate strips.
+    for (const exit of ["/about", "/faqs", "/contact"]) {
       const matches = await page.locator(`a[href$="${exit}"]`).count();
       expect(
         matches,

@@ -3,8 +3,6 @@ import { test, expect } from "./fixtures";
 const PAGES = [
   "/",
   "/about",
-  "/facilities",
-  "/programmes",
   "/contact",
   "/faqs",
   "/6-week/beginner",

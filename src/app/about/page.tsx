@@ -10,7 +10,7 @@ import { GraduationCap, Trophy, Stethoscope } from "lucide-react";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Meet Hallum Cousins: MSc Sport Physiology, founder of Gain Strength Therapy in Eastbourne. Small-group strength programmes, a fully-equipped gym and studio, for adults who want to feel strong and capable for life.",
+    "Meet Hallum Cousins: MSc Sport Physiology, founder of Gain Strength Therapy in Eastbourne. Small-group strength programmes in a gym and studio, for adults who want to stay strong for life.",
 };
 
 export default function AboutPage() {
