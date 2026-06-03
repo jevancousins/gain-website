@@ -96,11 +96,21 @@ export async function POST(request: Request) {
 
   const resendKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.LEAD_FROM_EMAIL;
+  const notifyEmail = process.env.LEAD_NOTIFY_EMAIL;
   if (resendKey && fromEmail) {
     tasks.push({
       name: "email",
       promise: sendLeadConfirmationEmail(lead, resendKey, fromEmail),
     });
+    // Notify Hallum the instant an enquiry lands so he can call back fast.
+    // Reaches his inbox on laptop and phone; reply-to is set to the lead's
+    // own address so he can respond to them directly from the notification.
+    if (notifyEmail) {
+      tasks.push({
+        name: "notify",
+        promise: sendOwnerNotificationEmail(lead, resendKey, fromEmail, notifyEmail),
+      });
+    }
   }
 
   if (tasks.length > 0) {
@@ -131,6 +141,7 @@ async function writeLeadToJsonl(lead: Lead) {
 type Lead = {
   firstName: string;
   email: string;
+  phone: string; // normalised E.164-ish, for tel: links
   phoneRaw: string;
   message: string;
   source: string;
@@ -186,10 +197,33 @@ async function sendLeadConfirmationEmail(lead: Lead, apiKey: string, from: strin
   const phoneHref = SITE.phoneHref;
   const url = SITE.url;
 
+  // The booking link only appears once a Cal.com event type exists and the URL
+  // is set. Until then the email reads as a straight 48-hour call-back promise,
+  // so nothing looks broken if the link isn't configured yet. Accepts either a
+  // full URL or the Cal.com path form (e.g. "gainstrengththerapy/consultation").
+  const calLink = process.env.NEXT_PUBLIC_CALCOM_LINK?.trim();
+  const bookingUrl = calLink
+    ? /^https?:\/\//.test(calLink)
+      ? calLink
+      : `https://cal.com/${calLink.replace(/^\/+/, "")}`
+    : undefined;
+
   const text = [
     `Hi ${lead.firstName},`,
     "",
-    "Thanks for getting in touch with Gain Strength Therapy. We've received your enquiry and Hallum will be in touch soon to arrange a short phone call. If it sounds like a good fit, we'll invite you in to see the studio and meet your coach.",
+    "Thanks for getting in touch with Gain Strength Therapy. We've received your enquiry.",
+    "",
+    "The next step is a short, no-pressure consultation with Hallum: a phone or in-person chat about your goals, any injuries or health conditions, and whether Gain is the right fit for you.",
+    "",
+    ...(bookingUrl
+      ? [
+          `Book a time that suits you: ${bookingUrl}`,
+          "",
+          "Prefer us to call you? No problem. Hallum will be in touch within 48 hours, usually the same day.",
+        ]
+      : [
+          "Hallum will be in touch within 48 hours, usually the same day, to arrange it.",
+        ]),
     "",
     `If you need us sooner, give us a call on ${phone}.`,
     "",
@@ -199,11 +233,18 @@ async function sendLeadConfirmationEmail(lead: Lead, apiKey: string, from: strin
     url,
   ].join("\n");
 
+  const bookingHtml = bookingUrl
+    ? `<p style="margin: 24px 0;"><a href="${escapeHtml(bookingUrl)}" style="display: inline-block; background: #111; color: #fff; text-decoration: none; padding: 13px 22px; border-radius: 4px; font-weight: 600; font-size: 15px;">Book your free consultation &rarr;</a></p>
+<p>Prefer us to call you? No problem &mdash; Hallum will be in touch within 48 hours, usually the same day.</p>`
+    : `<p>Hallum will be in touch within 48 hours, usually the same day, to arrange it.</p>`;
+
   const html = `<!doctype html>
 <html>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111; line-height: 1.5; max-width: 540px; margin: 0 auto; padding: 24px;">
 <p>Hi ${safeName},</p>
-<p>Thanks for getting in touch with <strong>Gain Strength Therapy</strong>. We&rsquo;ve received your enquiry and Hallum will be in touch soon to arrange a short phone call. If it sounds like a good fit, we&rsquo;ll invite you in to see the studio and meet your coach.</p>
+<p>Thanks for getting in touch with <strong>Gain Strength Therapy</strong>. We&rsquo;ve received your enquiry.</p>
+<p>The next step is a short, no-pressure consultation with Hallum: a phone or in-person chat about your goals, any injuries or health conditions, and whether Gain is the right fit for you.</p>
+${bookingHtml}
 <p>If you need us sooner, give us a call on <a href="tel:${phoneHref}" style="color: #111;">${phone}</a>.</p>
 <p>Speak soon,<br>Hallum Cousins<br>Gain Strength Therapy</p>
 <p style="font-size: 12px; color: #666; margin-top: 32px;"><a href="${url}" style="color: #666;">${url.replace(/^https?:\/\//, "")}</a></p>
@@ -220,6 +261,87 @@ async function sendLeadConfirmationEmail(lead: Lead, apiKey: string, from: strin
       from,
       to: [lead.email],
       subject: "Thanks for your enquiry",
+      html,
+      text,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Resend API ${res.status}: ${body}`);
+  }
+}
+
+// Plain, scannable alert to Hallum so he can act on a new lead from his phone
+// lock screen or inbox. Reply-to is the lead's address, so hitting reply mails
+// the enquirer directly.
+async function sendOwnerNotificationEmail(
+  lead: Lead,
+  apiKey: string,
+  from: string,
+  to: string
+) {
+  const when = new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/London",
+  }).format(new Date(lead.createdAt));
+
+  const subject = `New enquiry: ${lead.firstName} — ${lead.phoneRaw}`;
+
+  const rows: Array<[string, string]> = [
+    ["Name", lead.firstName],
+    ["Phone", lead.phoneRaw],
+    ["Email", lead.email],
+    ["Source", lead.source || "unknown"],
+    ["Newsletter", lead.newsletter ? "Yes" : "No"],
+    ["Received", when],
+  ];
+
+  const text = [
+    "New website enquiry",
+    "",
+    ...rows.map(([k, v]) => `${k}: ${v}`),
+    "",
+    "Message:",
+    lead.message || "(none)",
+    "",
+    `Reply to this email to respond to ${lead.firstName} directly.`,
+  ].join("\n");
+
+  const rowsHtml = rows
+    .map(([k, v]) => {
+      let val = escapeHtml(v);
+      if (k === "Phone") val = `<a href="tel:${escapeHtml(lead.phone)}" style="color: #111;">${escapeHtml(lead.phoneRaw)}</a>`;
+      if (k === "Email") val = `<a href="mailto:${escapeHtml(lead.email)}" style="color: #111;">${escapeHtml(lead.email)}</a>`;
+      return `<tr><td style="padding: 4px 16px 4px 0; color: #666; vertical-align: top; white-space: nowrap;">${k}</td><td style="padding: 4px 0; font-weight: 600;">${val}</td></tr>`;
+    })
+    .join("\n");
+
+  const html = `<!doctype html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111; line-height: 1.5; max-width: 540px; margin: 0 auto; padding: 24px;">
+<h2 style="margin: 0 0 16px; font-size: 18px;">New website enquiry</h2>
+<table style="border-collapse: collapse; font-size: 15px;">
+${rowsHtml}
+</table>
+<p style="margin-top: 20px; color: #666;">Message</p>
+<p style="margin-top: 4px; padding: 12px 16px; background: #f5f5f5; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(lead.message) || "<em style='color:#999'>(none)</em>"}</p>
+<p style="font-size: 13px; color: #666; margin-top: 24px;">Reply to this email to respond to ${escapeHtml(lead.firstName)} directly.</p>
+</body>
+</html>`;
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      reply_to: lead.email,
+      subject,
       html,
       text,
     }),
