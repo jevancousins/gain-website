@@ -12,10 +12,12 @@ import {
 import { Folio, Rule } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { HeroVideo } from "@/components/hero-video";
-import { SITE, IMAGES, GOOGLE_RATING, REVIEWS } from "@/lib/utils";
+import { SITE, IMAGES, REVIEWS } from "@/lib/utils";
+import { getGoogleRating } from "@/lib/google-rating";
 import { Users, HeartPulse, Dumbbell, ArrowDown, PhoneCall, Handshake, ClipboardCheck, ExternalLink } from "lucide-react";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const GOOGLE_RATING = await getGoogleRating();
   return (
     <>
       {/* ——— HERO: Full-bleed video ——— */}

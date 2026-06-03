@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { SITE } from "@/lib/utils";
+import { SITE, NEWSLETTER_CONSENT_TEXT_V1 } from "@/lib/utils";
 
 type LeadPayload = {
   firstName?: string;
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
   if (!phone || !PHONE_RE.test(phone)) {
     return fieldError(
       "phone",
-      "Please enter a valid phone number — digits only, with an optional + prefix."
+      "Please enter a valid phone number: digits only, with an optional + prefix."
     );
   }
 
@@ -159,6 +159,14 @@ async function writeLeadToNotion(lead: Lead, token: string, databaseId: string) 
     "First Contact": { date: { start: lead.createdAt } },
     Newsletter: { checkbox: lead.newsletter },
   };
+  if (lead.newsletter) {
+    properties["Newsletter Consent Version"] = {
+      rich_text: [{ text: { content: NEWSLETTER_CONSENT_TEXT_V1 } }],
+    };
+    properties["Newsletter Consent At"] = {
+      date: { start: lead.createdAt },
+    };
+  }
   if (lead.message) {
     properties.Notes = { rich_text: [{ text: { content: lead.message } }] };
   }
@@ -191,63 +199,90 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
-async function sendLeadConfirmationEmail(lead: Lead, apiKey: string, from: string) {
+const PROGRAMME_ITEMS = [
+  { label: "Small group, individually adapted", body: "Up to 6 people train together, with exercises adapted to each person's level. Part of every session is dedicated to individualised work based on your goals." },
+  { label: "Two phases", body: "Weeks 1–3: learning techniques and building consistency. Weeks 4–6: adding load and seeing measurable strength changes. We test at the start and re-test at the end." },
+  { label: "Flexible frequency", body: "One, two or three sessions a week. We'll agree what fits during your consultation." },
+  { label: "No lock-in afterwards", body: "Most members move to a monthly direct debit. No contract, no automatic rollover; you decide each month." },
+];
+
+
+async function sendLeadConfirmationEmail(
+  lead: Lead,
+  apiKey: string,
+  from: string,
+) {
   const safeName = escapeHtml(lead.firstName);
   const phone = SITE.phone;
   const phoneHref = SITE.phoneHref;
   const url = SITE.url;
+  const bookingUrl = SITE.bookingUrl;
 
-  // The booking link only appears once a Cal.com event type exists and the URL
-  // is set. Until then the email reads as a straight 48-hour call-back promise,
-  // so nothing looks broken if the link isn't configured yet. Accepts either a
-  // full URL or the Cal.com path form (e.g. "gainstrengththerapy/consultation").
-  const calLink = process.env.NEXT_PUBLIC_CALCOM_LINK?.trim();
-  const bookingUrl = calLink
-    ? /^https?:\/\//.test(calLink)
-      ? calLink
-      : `https://cal.com/${calLink.replace(/^\/+/, "")}`
-    : undefined;
-
-  const text = [
+  const textParts = [
     `Hi ${lead.firstName},`,
     "",
-    "Thanks for getting in touch with Gain Strength Therapy. We've received your enquiry.",
+  ];
+  textParts.push(
+    "Thanks for your message. I wanted to reply quickly so you know we've received it and what the next step is.",
     "",
-    "The next step is a short, no-pressure consultation with Hallum: a phone or in-person chat about your goals, any injuries or health conditions, and whether Gain is the right fit for you.",
+    `Your free consultation takes up to 30 minutes and can be over the phone or in person at the gym. If you'd like to book a specific time, you can do that here: ${bookingUrl}`,
     "",
-    ...(bookingUrl
-      ? [
-          `Book a time that suits you: ${bookingUrl}`,
-          "",
-          "Prefer us to call you? No problem. Hallum will be in touch within 48 hours, usually the same day.",
-        ]
-      : [
-          "Hallum will be in touch within 48 hours, usually the same day, to arrange it.",
-        ]),
+    "Otherwise, I'll give you a ring within two working days on the number you shared.",
     "",
-    `If you need us sooner, give us a call on ${phone}.`,
+    "---------------------------------------",
+    "A few things worth knowing before we meet",
+    "---------------------------------------",
+    "",
+    ...PROGRAMME_ITEMS.map((item, i) => `${i + 1}. ${item.label}: ${item.body}`),
+    "",
+    "---------------------------------------",
+    "Preparing for your consultation",
+    "---------------------------------------",
+    "",
+    "I'll ask three things: what you want from training, any health or injury background I should know about, and what would feel like meaningful progress in six weeks. It's worth thinking about that last one before we speak.",
+    "",
+    "If the programme doesn't seem right for you, I'll be honest about that. This isn't a sales conversation.",
+    "",
+    "Reply to this email any time if something comes up before we speak.",
     "",
     "Speak soon,",
-    "Hallum Cousins",
+    "Hallum",
+    "",
     "Gain Strength Therapy",
-    url,
-  ].join("\n");
+    "Dursley Rd, Eastbourne, BN22 8DJ",
+    `${phone} · ${url}`,
+  );
+  const text = textParts.join("\n");
 
-  const bookingHtml = bookingUrl
-    ? `<p style="margin: 24px 0;"><a href="${escapeHtml(bookingUrl)}" style="display: inline-block; background: #111; color: #fff; text-decoration: none; padding: 13px 22px; border-radius: 4px; font-weight: 600; font-size: 15px;">Book your free consultation &rarr;</a></p>
-<p>Prefer us to call you? No problem &mdash; Hallum will be in touch within 48 hours, usually the same day.</p>`
-    : `<p>Hallum will be in touch within 48 hours, usually the same day, to arrange it.</p>`;
+  const programmeHtml = PROGRAMME_ITEMS
+    .map((item, i) => `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 16px;">
+<tr>
+<td style="width: 32px; vertical-align: top; padding-top: 2px;"><span style="display: inline-block; width: 24px; height: 24px; background: #FC832C; color: #fff; border-radius: 50%; text-align: center; line-height: 24px; font-weight: 700; font-size: 13px;">${i + 1}</span></td>
+<td style="padding-left: 12px;"><strong>${escapeHtml(item.label)}.</strong> ${escapeHtml(item.body)}</td>
+</tr>
+</table>`)
+    .join("\n");
 
   const html = `<!doctype html>
 <html>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111; line-height: 1.5; max-width: 540px; margin: 0 auto; padding: 24px;">
+<head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; line-height: 1.7; max-width: 540px; margin: 0 auto; padding: 24px;">
+<div style="display: none; max-height: 0; overflow: hidden;">Here&rsquo;s what to expect before your consultation.&#847;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
 <p>Hi ${safeName},</p>
-<p>Thanks for getting in touch with <strong>Gain Strength Therapy</strong>. We&rsquo;ve received your enquiry.</p>
-<p>The next step is a short, no-pressure consultation with Hallum: a phone or in-person chat about your goals, any injuries or health conditions, and whether Gain is the right fit for you.</p>
-${bookingHtml}
-<p>If you need us sooner, give us a call on <a href="tel:${phoneHref}" style="color: #111;">${phone}</a>.</p>
-<p>Speak soon,<br>Hallum Cousins<br>Gain Strength Therapy</p>
-<p style="font-size: 12px; color: #666; margin-top: 32px;"><a href="${url}" style="color: #666;">${url.replace(/^https?:\/\//, "")}</a></p>
+<p>Thanks for your message. I wanted to reply quickly so you know we&rsquo;ve received it and what the next step is.</p>
+<p>Your free consultation takes up to 30 minutes and can be over the phone or in person at the gym. If you&rsquo;d like to book a specific time:</p>
+<p style="margin: 20px 0;"><a href="${bookingUrl}" style="display: inline-block; background: #FC832C; color: #fff; padding: 14px 28px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 15px;">Book your consultation</a></p>
+<p>Otherwise, I&rsquo;ll give you a ring within two working days on the number you shared.</p>
+<hr style="border: none; border-top: 2px solid #FC832C; margin: 28px 0 20px; width: 40px;">
+<p style="font-weight: 700; font-size: 15px; color: #0a0a0a; margin-bottom: 16px;">A few things worth knowing before we meet</p>
+${programmeHtml}
+<hr style="border: none; border-top: 2px solid #FC832C; margin: 28px 0 20px; width: 40px;">
+<p style="font-weight: 700; font-size: 15px; color: #0a0a0a; margin-bottom: 8px;">Preparing for your consultation</p>
+<p>I&rsquo;ll ask three things: what you want from training, any health or injury background I should know about, and what would feel like meaningful progress in six weeks. It&rsquo;s worth thinking about that last one before we speak.</p>
+<p>If the programme doesn&rsquo;t seem right for you, I&rsquo;ll be honest about that. This isn&rsquo;t a sales conversation.</p>
+<p>Reply to this email any time if something comes up before we speak.</p>
+<p>Speak soon,<br>Hallum</p>
+<p style="font-size: 12px; color: #666; margin-top: 32px; border-top: 1px solid #eee; padding-top: 16px;">Gain Strength Therapy<br>Dursley Rd, Eastbourne, BN22 8DJ<br><a href="tel:${phoneHref}" style="color: #666;">${phone}</a> &middot; <a href="${url}" style="color: #666;">${url.replace(/^https?:\/\//, "")}</a></p>
 </body>
 </html>`;
 
@@ -259,8 +294,9 @@ ${bookingHtml}
     },
     body: JSON.stringify({
       from,
+      reply_to: "hallum@gainstrengththerapy.com",
       to: [lead.email],
-      subject: "Thanks for your enquiry",
+      subject: `Got your message, ${lead.firstName}`,
       html,
       text,
     }),
@@ -279,55 +315,58 @@ async function sendOwnerNotificationEmail(
   lead: Lead,
   apiKey: string,
   from: string,
-  to: string
+  to: string,
 ) {
-  const when = new Intl.DateTimeFormat("en-GB", {
+  const safeName = escapeHtml(lead.firstName);
+  const safeEmail = escapeHtml(lead.email);
+  const safePhone = escapeHtml(lead.phoneRaw);
+  // Normalised (E.164-ish) number for the tel: link so tap-to-call works
+  // reliably from the notification; the visible text keeps what they typed.
+  const telPhone = escapeHtml(lead.phone || lead.phoneRaw);
+  const safeSource = escapeHtml(lead.source || "unknown");
+  const safeMessage = lead.message ? escapeHtml(lead.message) : null;
+  const time = new Date(lead.createdAt).toLocaleString("en-GB", {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: "Europe/London",
-  }).format(new Date(lead.createdAt));
+  });
 
-  const subject = `New enquiry: ${lead.firstName} — ${lead.phoneRaw}`;
-
-  const rows: Array<[string, string]> = [
-    ["Name", lead.firstName],
-    ["Phone", lead.phoneRaw],
-    ["Email", lead.email],
-    ["Source", lead.source || "unknown"],
-    ["Newsletter", lead.newsletter ? "Yes" : "No"],
-    ["Received", when],
+  const textLines = [
+    `New enquiry from ${lead.firstName}`,
+    "",
+    `Name: ${lead.firstName}`,
+    `Email: ${lead.email}`,
+    `Phone: ${lead.phoneRaw}`,
+    `Source: ${lead.source || "unknown"}`,
+    `Time: ${time}`,
   ];
+  if (lead.message) {
+    textLines.push("", `Message: ${lead.message}`);
+  }
+  textLines.push(
+    "",
+    `Reply to this email to reach ${lead.firstName} directly at ${lead.email}.`,
+  );
+  const text = textLines.join("\n");
 
-  const text = [
-    "New website enquiry",
-    "",
-    ...rows.map(([k, v]) => `${k}: ${v}`),
-    "",
-    "Message:",
-    lead.message || "(none)",
-    "",
-    `Reply to this email to respond to ${lead.firstName} directly.`,
-  ].join("\n");
-
-  const rowsHtml = rows
-    .map(([k, v]) => {
-      let val = escapeHtml(v);
-      if (k === "Phone") val = `<a href="tel:${escapeHtml(lead.phone)}" style="color: #111;">${escapeHtml(lead.phoneRaw)}</a>`;
-      if (k === "Email") val = `<a href="mailto:${escapeHtml(lead.email)}" style="color: #111;">${escapeHtml(lead.email)}</a>`;
-      return `<tr><td style="padding: 4px 16px 4px 0; color: #666; vertical-align: top; white-space: nowrap;">${k}</td><td style="padding: 4px 0; font-weight: 600;">${val}</td></tr>`;
-    })
-    .join("\n");
+  const messageRow = safeMessage
+    ? `<tr><td style="padding:6px 0;color:#666;">Message</td><td style="padding:6px 0;">${safeMessage}</td></tr>`
+    : "";
 
   const html = `<!doctype html>
 <html>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111; line-height: 1.5; max-width: 540px; margin: 0 auto; padding: 24px;">
-<h2 style="margin: 0 0 16px; font-size: 18px;">New website enquiry</h2>
-<table style="border-collapse: collapse; font-size: 15px;">
-${rowsHtml}
+<head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; line-height: 1.6; max-width: 480px; margin: 0 auto; padding: 24px;">
+<p style="font-weight:700; font-size:16px; margin-bottom:16px;">New enquiry from ${safeName}</p>
+<table style="width:100%; border-collapse:collapse; font-size:14px;">
+<tr><td style="padding:6px 0; color:#666; width:80px;">Name</td><td style="padding:6px 0;">${safeName}</td></tr>
+<tr><td style="padding:6px 0; color:#666;">Email</td><td style="padding:6px 0;"><a href="mailto:${safeEmail}" style="color:#FC832C;">${safeEmail}</a></td></tr>
+<tr><td style="padding:6px 0; color:#666;">Phone</td><td style="padding:6px 0;"><a href="tel:${telPhone}" style="color:#FC832C;">${safePhone}</a></td></tr>
+<tr><td style="padding:6px 0; color:#666;">Source</td><td style="padding:6px 0;">${safeSource}</td></tr>
+<tr><td style="padding:6px 0; color:#666;">Time</td><td style="padding:6px 0;">${escapeHtml(time)}</td></tr>
+${messageRow}
 </table>
-<p style="margin-top: 20px; color: #666;">Message</p>
-<p style="margin-top: 4px; padding: 12px 16px; background: #f5f5f5; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(lead.message) || "<em style='color:#999'>(none)</em>"}</p>
-<p style="font-size: 13px; color: #666; margin-top: 24px;">Reply to this email to respond to ${escapeHtml(lead.firstName)} directly.</p>
+<p style="margin-top:20px; font-size:13px; color:#666;">Reply to this email to reach ${safeName} directly.</p>
 </body>
 </html>`;
 
@@ -339,9 +378,9 @@ ${rowsHtml}
     },
     body: JSON.stringify({
       from,
-      to: [to],
       reply_to: lead.email,
-      subject,
+      to: [to],
+      subject: `New enquiry: ${lead.firstName} — ${lead.phoneRaw}`,
       html,
       text,
     }),
@@ -349,6 +388,6 @@ ${rowsHtml}
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`Resend API ${res.status}: ${body}`);
+    throw new Error(`Resend notify API ${res.status}: ${body}`);
   }
 }
