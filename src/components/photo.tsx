@@ -52,7 +52,7 @@ export function Photo({
         <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-paper/5" />
       </div>
       {caption && (
-        <figcaption className="mt-3 text-xs italic text-paper/50 tracking-wide">
+        <figcaption className="mt-3 text-sm italic text-paper/50 tracking-wide">
           {caption}
         </figcaption>
       )}

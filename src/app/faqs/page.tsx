@@ -40,7 +40,7 @@ export default function FaqsPage() {
             </H2>
             <Lede className="mt-8">
               Can&rsquo;t find your question? Ask on the call or drop us an
-              email &mdash; we&rsquo;d rather answer than leave you wondering.
+              email, we&rsquo;d rather answer than leave you wondering.
             </Lede>
           </div>
         </div>

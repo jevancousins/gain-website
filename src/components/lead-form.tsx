@@ -94,8 +94,8 @@ export function LeadForm({
         <div className="flex gap-4 items-start">
           <CheckCircle2 className="text-flame shrink-0 mt-1" size={22} />
           <div>
-            <h2 className="display-tight text-2xl text-paper">Thanks &mdash; we&rsquo;ve got it.</h2>
-            <p className="mt-2 text-paper/70 leading-relaxed text-sm">
+            <h2 className="display-tight text-2xl text-paper">Thanks, we&rsquo;ve got it.</h2>
+            <p className="mt-2 text-paper/70 leading-relaxed text-base">
               We&rsquo;ll be in touch soon to arrange a short phone call.
               If it sounds like a good fit, we&rsquo;ll invite you in to see
               the studio and meet your coach.
@@ -119,7 +119,7 @@ export function LeadForm({
         <h2 className="display-tight mt-3 text-[1.7rem] md:text-[1.95rem] leading-[1.05] text-paper">
           {title ?? "Start with a free call."}
         </h2>
-        <p className="mt-3 text-sm text-paper/65 leading-relaxed">
+        <p className="mt-3 text-base text-paper/65 leading-relaxed">
           {body ??
             "Leave your details and we'll call to learn about your goals. No pressure, and if we're a fit, we'll invite you in for an in-person consultation."}
         </p>
@@ -191,7 +191,7 @@ export function LeadForm({
         />
       </div>
 
-      <label className="flex gap-3 items-start text-sm cursor-pointer text-paper/70">
+      <label className="flex gap-3 items-start text-base cursor-pointer text-paper/70">
         <input type="checkbox" name="newsletter" className="mt-1 h-4 w-4 accent-flame" />
         <span className="leading-snug">
           Yes, I&rsquo;m happy to receive occasional updates from Gain Strength Therapy. Unsubscribe anytime.
@@ -220,11 +220,11 @@ export function LeadForm({
           className="flex items-start gap-2.5 border border-flame/50 bg-flame/10 p-3 rounded-sm"
         >
           <AlertCircle size={16} className="text-flame shrink-0 mt-0.5" />
-          <p className="text-sm text-paper leading-snug">{formError}</p>
+          <p className="text-base text-paper leading-snug">{formError}</p>
         </div>
       )}
 
-      <p className="text-[0.68rem] italic text-paper/55">
+      <p className="text-sm italic text-paper/55">
         Your call is free. No pressure, no obligation.
       </p>
     </form>
@@ -237,7 +237,7 @@ function FieldMessage({ id, msg }: { id: string; msg?: string }) {
     <p
       id={id}
       role="alert"
-      className="mt-2 flex items-start gap-1.5 text-[0.78rem] text-flame leading-snug"
+      className="mt-2 flex items-start gap-1.5 text-sm text-flame leading-snug"
     >
       <AlertCircle size={13} className="mt-0.5 shrink-0" />
       <span>{msg}</span>

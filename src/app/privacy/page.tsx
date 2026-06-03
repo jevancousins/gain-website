@@ -85,7 +85,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="display-tight text-2xl text-paper mb-4">8. Third-party links</h2>
             <p>
-              Our website may contain links to third-party websites. Their privacy practices are their own &mdash; we recommend reviewing their policies separately.
+              Our website may contain links to third-party websites. Their privacy practices are their own; we recommend reviewing their policies separately.
             </p>
           </section>
 

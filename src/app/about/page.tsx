@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Section, H2, FinalCTA, Lede } from "@/components/ui";
+import { Section, H2, FinalCTA, Lede, CTAButton } from "@/components/ui";
 import { Photo } from "@/components/photo";
 import { Folio, Kicker, Rule, PullQuote } from "@/components/editorial";
 import { IMAGES, TEAM } from "@/lib/utils";
@@ -10,7 +10,7 @@ import { GraduationCap, Trophy, Stethoscope } from "lucide-react";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Meet Hallum Cousins — MSc Sport Physiology, founder of Gain Strength Therapy in Eastbourne. Strength training for adults who want to feel strong and capable for life.",
+    "Meet Hallum Cousins: MSc Sport Physiology, founder of Gain Strength Therapy in Eastbourne. Small-group strength programmes, a fully-equipped gym and studio, for adults who want to feel strong and capable for life.",
 };
 
 export default function AboutPage() {
@@ -28,29 +28,18 @@ export default function AboutPage() {
         </div>
 
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-14 md:pt-20 pb-16 md:pb-24">
-          <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-end">
-            <div className="lg:col-span-7">
-              <Kicker>The gym for people who don&rsquo;t like gyms</Kicker>
-              <h1 className="display mt-6 text-[clamp(2rem,4.2vw,3.75rem)] text-paper max-w-[20ch]">
-                Built for the people
-                <span className="display-italic font-medium text-flame"> traditional gyms leave behind.</span>
-              </h1>
-            </div>
-            <div className="lg:col-span-5">
-              <Lede>
-                Gain exists because traditional gyms fail complete beginners,
-                people recovering from injury, and anyone managing a health
-                condition.
-              </Lede>
-              <p className="mt-5 text-paper/60 text-sm leading-relaxed max-w-md">
-                If you&rsquo;ve never trained before, walking into a commercial
-                gym is overwhelming. Rows of equipment you don&rsquo;t
-                understand, nobody to help, and the constant feeling you
-                don&rsquo;t belong. Gain changes that. This is a safe space
-                where you can start from zero, build strength at your own pace,
-                and actually feel comfortable doing it.
-              </p>
-            </div>
+          <div>
+            <Kicker>The gym for people who don&rsquo;t like gyms</Kicker>
+            <h1 className="display mt-6 text-[clamp(2rem,4.2vw,3.75rem)] text-paper">
+              Built for the people<br />
+              <span className="display-italic font-medium text-flame">traditional gyms leave behind.</span>
+            </h1>
+            <Lede className="mt-10 max-w-none">
+              Gain exists for the people traditional gyms leave behind:
+              complete beginners, anyone recovering from injury, and people
+              managing a health condition. It is a calm, judgement-free space
+              where you can start from zero and build strength at your own pace.
+            </Lede>
           </div>
         </div>
       </section>
@@ -73,11 +62,11 @@ export default function AboutPage() {
       </section>
 
       {/* ——— Meet Hallum ——— */}
-      <Section tone="ink">
+      <Section tone="ink-mid">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           <div className="lg:col-span-5">
             <Folio number="02" label="Meet Hallum" />
-            <H2 className="mt-6">The story behind Gain.</H2>
+            <H2 className="mt-6">The story <span className="display-italic font-medium text-flame">behind Gain.</span></H2>
             <div className="mt-8">
               <Photo
                 src={HALLUM.photo}
@@ -96,7 +85,7 @@ export default function AboutPage() {
                 In 2020, I ruptured my ACL and meniscus playing football. I got
                 surgery one month before the first lockdown, but with no gyms
                 open, I had to rehabilitate completely on my own. It was one of
-                the hardest times of my life &mdash; going from a sporty
+                the hardest times of my life, going from a sporty
                 20-year-old to not being able to walk, in loads of pain, on top
                 of the isolation we all went through during lockdown.
               </p>
@@ -157,11 +146,11 @@ export default function AboutPage() {
                   <GraduationCap size={18} />
                   <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Education</span>
                 </div>
-                <p className="text-paper text-[0.98rem] leading-relaxed">
+                <p className="text-paper text-[1.0625rem] leading-relaxed">
                   <strong className="font-semibold">MSc Sport Physiology</strong>,
                   University of Brighton
                 </p>
-                <p className="mt-1 text-paper/65 text-sm leading-relaxed">
+                <p className="mt-1 text-paper/65 text-base leading-relaxed">
                   BSc Sports Science, University of Bath
                 </p>
               </div>
@@ -171,7 +160,7 @@ export default function AboutPage() {
                   <Trophy size={18} />
                   <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Experience</span>
                 </div>
-                <p className="text-paper text-[0.98rem] leading-relaxed">
+                <p className="text-paper text-[1.0625rem] leading-relaxed">
                   <strong className="font-semibold">5 years of coaching experience</strong>
                 </p>
               </div>
@@ -181,7 +170,7 @@ export default function AboutPage() {
                   <Stethoscope size={18} />
                   <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Coaching</span>
                 </div>
-                <p className="text-paper text-[0.98rem] leading-relaxed">
+                <p className="text-paper text-[1.0625rem] leading-relaxed">
                   Qualified personal trainer. Specialist focus on
                   post-rehabilitation progression, chronic conditions, and
                   strength for life after 40.
@@ -200,6 +189,83 @@ export default function AboutPage() {
             attribution="Hallum Cousins, Founder"
             tone="ink"
           />
+        </div>
+      </Section>
+
+      {/* ——— Facilities ——— */}
+      <Section tone="ink-soft">
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+          <div className="lg:col-span-4">
+            <Folio number="03" label="Facilities" />
+            <H2 className="mt-6">The gym &amp; <span className="display-italic font-medium text-flame">the studio.</span></H2>
+            <p className="mt-6 text-paper/70 text-[1.0625rem] leading-relaxed">
+              Two spaces under one roof in Eastbourne: a fully-equipped
+              strength gym, and a softer studio for the quieter work.
+            </p>
+          </div>
+          <div className="lg:col-span-8 grid sm:grid-cols-2 gap-6">
+            <div>
+              <Photo src={IMAGES.gymInteriorWide} alt="The Gain gym floor with members training" aspect="aspect-[4/5]" sizes="(min-width: 1024px) 30vw, 100vw" />
+              <h3 className="display-tight text-xl text-paper mt-4">The gym</h3>
+              <p className="mt-2 text-paper/65 text-base leading-relaxed">
+                Small-group personal training, never more than six per session.
+                Power racks, free weights, cables and more.
+              </p>
+            </div>
+            <div>
+              <Photo src={IMAGES.studioYoga} alt="The Gain studio set up for yoga and mobility work" aspect="aspect-[4/5]" tone="warm" sizes="(min-width: 1024px) 30vw, 100vw" />
+              <h3 className="display-tight text-xl text-paper mt-4">The studio</h3>
+              <p className="mt-2 text-paper/65 text-base leading-relaxed">
+                A softer room with natural light, available to hire for yoga,
+                mobility and recovery work.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* ——— Programmes ——— */}
+      <Section tone="ink">
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+          <div className="lg:col-span-4">
+            <Folio number="04" label="Programmes" />
+            <H2 className="mt-6">Two ways to <span className="display-italic font-medium text-flame">start training.</span></H2>
+            <p className="mt-6 text-paper/70 text-[1.0625rem] leading-relaxed">
+              Every member starts with a structured strength programme, run as
+              small-group personal training with never more than six in the room.
+            </p>
+            <div className="mt-8">
+              <CTAButton href="/contact" variant="primary">
+                Book a consultation
+              </CTAButton>
+            </div>
+          </div>
+          <div className="lg:col-span-8">
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div className="border border-ink-line bg-ink-soft p-7">
+                <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame">Start here</span>
+                <h3 className="display-tight text-2xl text-paper mt-3">6-week start</h3>
+                <p className="mt-3 text-paper/70 text-base leading-relaxed">
+                  A focused block to learn the lifts, build the habit, and feel
+                  real strength gains. The easiest way to test how we work.
+                </p>
+              </div>
+              <div className="border border-ink-line bg-ink-soft p-7">
+                <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame">Full transformation</span>
+                <h3 className="display-tight text-2xl text-paper mt-3">12-week transformation</h3>
+                <p className="mt-3 text-paper/70 text-base leading-relaxed">
+                  Three phases that take you from learning the lifts to
+                  consolidating real, measurable strength. The deepest change
+                  and best value per session.
+                </p>
+              </div>
+            </div>
+            <p className="mt-5 border-l-2 border-flame/60 pl-4 text-paper/65 text-base leading-relaxed">
+              When your programme ends, you can keep training on a rolling
+              monthly membership: same sessions, no fixed contract, cancel
+              anytime.
+            </p>
+          </div>
         </div>
       </Section>
 

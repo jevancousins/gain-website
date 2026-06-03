@@ -12,7 +12,7 @@ import { usePathname } from "next/navigation";
  * effect: clicking a nav link from halfway down one page often leaves you
  * halfway down the next, hiding the section header at the top.
  *
- * Hash anchors (e.g. /programmes#six) are honoured by skipping the reset.
+ * Hash anchors (e.g. /6-week/beginner#book) are honoured by skipping the reset.
  */
 export function ScrollToTop() {
   const pathname = usePathname();

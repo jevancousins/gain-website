@@ -6,14 +6,13 @@ import {
   FeatureCard,
   FinalCTA,
   Stat,
-  Lede,
   Pill,
 } from "@/components/ui";
 import { Folio, Rule } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { HeroVideo } from "@/components/hero-video";
 import { SITE, IMAGES, GOOGLE_RATING, REVIEWS } from "@/lib/utils";
-import { Users, HeartPulse, Dumbbell, ArrowDown, PhoneCall, Handshake, ClipboardCheck, ExternalLink } from "lucide-react";
+import { Users, HeartPulse, Dumbbell, ArrowDown, ExternalLink } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -94,23 +93,12 @@ export default function HomePage() {
 
       {/* ——— 02 · WHO WE HELP ——— */}
       <Section tone="ink-soft">
-        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16">
-          <div className="lg:col-span-7">
-            <Folio number="02" label="Who we help" />
-            <H2 className="mt-6">
-              Built for people most gyms
-              <span className="display-italic font-medium text-flame">
-                {" "}were not built for.
-              </span>
-            </H2>
-          </div>
-          <div className="lg:col-span-5 flex items-end">
-            <Lede>
-              Whether you are brand new to training, rebuilding after injury,
-              or looking to stay strong and independent as you get older,
-              this is the place.
-            </Lede>
-          </div>
+        <div>
+          <Folio number="02" label="Who we help" />
+          <H2 className="mt-6">
+            Built for people most gyms<br />
+            <span className="display-italic font-medium text-flame">were not built for.</span>
+          </H2>
         </div>
 
         <ul className="mt-14 border-t border-ink-line">
@@ -134,7 +122,7 @@ export default function HomePage() {
                   {p.t}
                 </h3>
               </div>
-              <p className="col-span-12 md:col-span-8 mt-3 md:mt-0 text-paper/70 text-[0.98rem] leading-relaxed">
+              <p className="col-span-12 md:col-span-8 mt-3 md:mt-0 text-paper/70 text-[1.0625rem] leading-relaxed">
                 {p.d}
               </p>
             </li>
@@ -148,23 +136,23 @@ export default function HomePage() {
         </div>
       </Section>
 
+      {/* ——— Visual break: inside Gain ——— */}
+      <Section tone="flame" containerClass="!py-14 md:!py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+          <Photo src={IMAGES.gymInteriorWide} alt="Wide view of the Gain gym floor with members training" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
+          <Photo src={IMAGES.gymGroupClass} alt="Hallum coaching a small group through a warm-up" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
+          <Photo src={IMAGES.gainSignGroup} alt="Hallum and four members posing together in front of the GAIN sign" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
+        </div>
+      </Section>
+
       {/* ——— 03 · HOW WE HELP ——— */}
       <Section tone="ink">
-        <div className="mb-14 grid md:grid-cols-12 gap-10 items-end">
-          <div className="md:col-span-7">
-            <Folio number="03" label="How we help" />
-            <H2 className="mt-6">
-              Expert-led training in a space
-              <em className="display-italic font-medium text-flame"> that actually works for you.</em>
-            </H2>
-          </div>
-          <div className="md:col-span-5">
-            <p className="prose-body text-paper/75 text-[1.05rem]">
-              Everything we do is built around three things: personal
-              attention, qualified coaching, and a space where you feel
-              comfortable.
-            </p>
-          </div>
+        <div className="mb-14">
+          <Folio number="03" label="How we help" />
+          <H2 className="mt-6">
+            Expert-led training in a space<br />
+            <em className="display-italic font-medium text-flame">that actually works for you.</em>
+          </H2>
         </div>
 
         <Rule tone="paper" />
@@ -193,9 +181,6 @@ export default function HomePage() {
           <div className="lg:col-span-5">
             <Folio number="04" label="Members" />
             <H2 className="mt-6">Real members. Real progress.</H2>
-            <Lede className="mt-6">
-              {`We're rated ${GOOGLE_RATING.stars.toFixed(1)} stars on Google across ${GOOGLE_RATING.count} reviews — read what members actually say about training here.`}
-            </Lede>
             <div className="mt-8 flex items-center gap-8">
               <Stat value={GOOGLE_RATING.stars.toFixed(1)} label="★ Google" />
               <div className="h-10 w-px bg-ink-line" />
@@ -205,110 +190,106 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="lg:col-span-7">
-            {REVIEWS.length > 0 ? (
-              <div className="grid sm:grid-cols-2 gap-5">
-                {REVIEWS.map((r, i) => (
-                  <figure key={i} className="flex flex-col gap-5 bg-ink-soft border border-ink-line p-7 h-full">
-                    <div className="flex items-center gap-1 text-flame">
-                      {Array.from({ length: r.rating ?? 5 }).map((_, k) => (
-                        <svg key={k} width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                          <path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7-6.3-3.8L5.7 21.2l1.7-7L2 9.5l7.1-.6L12 2z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <blockquote className="display-tight text-lg md:text-xl text-paper leading-[1.3]">
-                      &ldquo;{r.text}&rdquo;
-                    </blockquote>
-                    <figcaption className="mt-auto pt-5 border-t border-ink-line flex items-baseline justify-between">
-                      <span className="text-sm font-semibold text-paper">{r.author}</span>
-                      <span className="text-xs uppercase tracking-[0.18em] text-paper/55">Google</span>
-                    </figcaption>
-                  </figure>
-                ))}
+          {/* Member celebration photos */}
+          <div className="lg:col-span-7 -mx-6 md:mx-0">
+            <div className="flex md:grid md:grid-cols-2 gap-3 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory scroll-pl-6 md:scroll-pl-0 px-6 md:px-0 pb-4 md:pb-0 scrollbar-hide">
+              <div className="snap-start shrink-0 w-[70vw] md:w-auto md:mt-8">
+                <Photo src={IMAGES.gainSignTwoMembers} alt="Two members posing at GAIN sign" aspect="aspect-[3/4]" sizes="(min-width: 768px) 29vw, 70vw" />
               </div>
-            ) : (
-              <a
-                href={GOOGLE_RATING.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group block bg-ink-soft border border-paper/40 hover:border-flame transition-colors p-10 md:p-14 h-full"
-              >
-                <div className="flex items-center gap-2 text-flame">
-                  {Array.from({ length: 5 }).map((_, k) => (
-                    <svg key={k} width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                      <path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7-6.3-3.8L5.7 21.2l1.7-7L2 9.5l7.1-.6L12 2z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="display mt-6 text-[clamp(1.75rem,3.5vw,3rem)] text-paper leading-[1.05]">
-                  {GOOGLE_RATING.stars.toFixed(1)} stars · {GOOGLE_RATING.count} reviews
-                </p>
-                <p className="mt-4 text-paper/70 leading-relaxed max-w-lg">
-                  Every one of our reviews is from a real member. Read what
-                  they&rsquo;ve written, in their own words, on Google.
-                </p>
-                <span className="mt-8 inline-flex items-center gap-2 text-[0.82rem] font-bold uppercase tracking-[0.22em] text-flame group-hover:text-paper transition-colors">
-                  Read the reviews <ExternalLink size={14} />
-                </span>
-              </a>
-            )}
+              <div className="snap-start shrink-0 w-[70vw] md:w-auto">
+                <Photo src={IMAGES.gainSignTwoFemaleMembers} alt="Two members hugging at GAIN sign" aspect="aspect-[3/4]" sizes="(min-width: 768px) 29vw, 70vw" />
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Member celebration photos */}
-        <div className="mt-14 -mx-6 md:mx-0">
-          <div className="flex md:grid md:grid-cols-12 gap-3 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory scroll-pl-6 md:scroll-pl-0 px-6 md:px-0 pb-4 md:pb-0 scrollbar-hide">
-            <div className="snap-start shrink-0 w-[70vw] md:w-auto md:col-span-3 md:mt-8">
-              <Photo src={IMAGES.gainSignFemaleMember} alt="Member pointing at GAIN sign" aspect="aspect-[3/4]" sizes="(min-width: 768px) 25vw, 70vw" />
+        {/* Reviews */}
+        <div className="mt-14">
+          {REVIEWS.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {REVIEWS.map((r, i) => (
+                <figure key={i} className="flex flex-col gap-5 bg-ink-soft border border-ink-line p-7 h-full">
+                  <div className="flex items-center gap-1 text-flame">
+                    {Array.from({ length: r.rating ?? 5 }).map((_, k) => (
+                      <svg key={k} width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                        <path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7-6.3-3.8L5.7 21.2l1.7-7L2 9.5l7.1-.6L12 2z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <blockquote className="display-tight text-lg md:text-xl text-paper leading-[1.3]">
+                    &ldquo;{r.text}&rdquo;
+                  </blockquote>
+                  <figcaption className="mt-auto pt-5 border-t border-ink-line flex items-baseline justify-between">
+                    <span className="text-sm font-semibold text-paper">{r.author}</span>
+                    <span className="text-xs uppercase tracking-[0.18em] text-paper/55">Google</span>
+                  </figcaption>
+                </figure>
+              ))}
             </div>
-            <div className="snap-start shrink-0 w-[70vw] md:w-auto md:col-span-3">
-              <Photo src={IMAGES.gainSignTwoMembers} alt="Two members posing at GAIN sign" aspect="aspect-[3/4]" sizes="(min-width: 768px) 25vw, 70vw" />
-            </div>
-            <div className="snap-start shrink-0 w-[70vw] md:w-auto md:col-span-3 md:mt-8">
-              <Photo src={IMAGES.gainSignMemberOrange} alt="Member with thumbs up at GAIN sign" aspect="aspect-[3/4]" sizes="(min-width: 768px) 25vw, 70vw" />
-            </div>
-            <div className="snap-start shrink-0 w-[70vw] md:w-auto md:col-span-3">
-              <Photo src={IMAGES.gainSignTwoFemaleMembers} alt="Two members hugging at GAIN sign" aspect="aspect-[3/4]" sizes="(min-width: 768px) 25vw, 70vw" />
-            </div>
-          </div>
+          ) : (
+            <a
+              href={GOOGLE_RATING.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block bg-ink-soft border border-paper/40 hover:border-flame transition-colors p-10 md:p-14 h-full"
+            >
+              <div className="flex items-center gap-2 text-flame">
+                {Array.from({ length: 5 }).map((_, k) => (
+                  <svg key={k} width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7-6.3-3.8L5.7 21.2l1.7-7L2 9.5l7.1-.6L12 2z" />
+                  </svg>
+                ))}
+              </div>
+              <p className="display mt-6 text-[clamp(1.75rem,3.5vw,3rem)] text-paper leading-[1.05]">
+                {GOOGLE_RATING.stars.toFixed(1)} stars · {GOOGLE_RATING.count} reviews
+              </p>
+              <p className="mt-4 text-paper/70 leading-relaxed max-w-lg">
+                Every one of our reviews is from a real member. Read what
+                they&rsquo;ve written, in their own words, on Google.
+              </p>
+              <span className="mt-8 inline-flex items-center gap-2 text-[0.82rem] font-bold uppercase tracking-[0.22em] text-flame group-hover:text-paper transition-colors">
+                Read the reviews <ExternalLink size={14} />
+              </span>
+            </a>
+          )}
         </div>
       </Section>
 
       {/* ——— 05 · HOW TO START ——— */}
       <Section tone="ink" id="start">
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-end mb-14">
-          <div className="lg:col-span-7">
-            <Folio number="05" label="How to start" />
-            <h2 className="display mt-6 text-[clamp(2.5rem,6vw,5rem)] text-paper leading-[0.95]">
-              Three simple steps<span className="text-flame">.</span><br />
-              <span className="display-italic font-medium text-flame">No commitment until you are ready.</span>
-            </h2>
-          </div>
-          <div className="lg:col-span-5">
-            <p className="text-paper/75 lede text-lg md:text-xl">
-              Every new member starts with a short consultation. No
-              pressure, no hard sell. Just an honest conversation about
-              what you need.
-            </p>
-          </div>
+        <div className="mb-14">
+          <Folio number="05" label="How to start" />
+          <h2 className="display mt-6 text-[clamp(2rem,4.2vw,3.4rem)] text-paper leading-[1.02]">
+            Three simple steps<span className="text-flame">.</span><br />
+            <span className="display-italic font-medium text-flame">No commitment until you are ready.</span>
+          </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <ol className="relative grid gap-10 md:grid-cols-3 md:gap-8">
+          {/* Connector line linking the steps (desktop) */}
+          <span
+            aria-hidden
+            className="hidden md:block absolute left-[16.666%] right-[16.666%] top-8 h-0.5 bg-flame/30"
+          />
           {[
-            { icon: <PhoneCall size={18} />, t: "Book a free chat", d: "Pick a time for a 30-minute phone call or in-person visit. We learn your goals, you ask your questions." },
-            { icon: <Handshake size={18} />, t: "Choose a programme", d: "If it is a good fit, pick a programme that suits your needs and budget, and get started." },
-            { icon: <ClipboardCheck size={18} />, t: "Start with your 1-to-1 induction", d: "A short one-to-one session to set your baseline and ease you in, then straight into coached group training." },
-          ].map((s) => (
-            <div key={s.t} className="flex gap-4">
-              <span className="mt-1 text-flame shrink-0">{s.icon}</span>
-              <div>
-                <h3 className="display-tight text-lg text-paper">{s.t}</h3>
-                <p className="mt-2 text-paper/65 text-sm leading-relaxed">{s.d}</p>
+            { t: "Book a free chat", d: "Pick a time for a 30-minute phone call or in-person visit. We learn your goals, you ask your questions." },
+            { t: "Choose a programme", d: "If it is a good fit, pick a programme that suits your needs and budget, and get started." },
+            { t: "Start with your 1-to-1 induction", d: "A short one-to-one session to set your baseline and ease you in, then straight into coached group training." },
+          ].map((s, i) => (
+            <li key={s.t} className="relative flex items-start gap-5 md:block md:text-center">
+              {/* Numbered node — sits on top of the connector line */}
+              <span className="relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-flame bg-ink md:mx-auto">
+                <span className="display-tight text-xl text-flame tabular-nums">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </span>
+              <div className="md:mt-6">
+                <h3 className="display-tight text-xl text-paper mt-2">{s.t}</h3>
+                <p className="mt-2 text-paper/65 text-base leading-relaxed md:mx-auto md:max-w-xs">{s.d}</p>
               </div>
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
         <div className="mt-10 text-center">
           <CTAButton href="/contact" variant="primary">Get started</CTAButton>
         </div>
