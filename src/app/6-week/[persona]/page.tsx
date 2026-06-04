@@ -273,7 +273,7 @@ export default async function PersonaLandingPage({
               <h3 className="mt-5 display-tight text-xl md:text-[1.4rem] text-paper leading-[1.15]">
                 {p.title}
               </h3>
-              <p className="mt-3 text-paper/70 text-[0.98rem] leading-relaxed">
+              <p className="mt-3 text-paper/70 text-[1.0625rem] leading-relaxed">
                 {p.body}
               </p>
             </div>
@@ -319,7 +319,7 @@ export default async function PersonaLandingPage({
                 ))}
               </ol>
               {persona.firstSession.footnote && (
-                <p className="mt-10 text-[0.95rem] italic text-paper/65 leading-relaxed max-w-2xl">
+                <p className="mt-10 text-base italic text-paper/65 leading-relaxed max-w-2xl">
                   {persona.firstSession.footnote}
                 </p>
               )}
@@ -355,6 +355,15 @@ export default async function PersonaLandingPage({
         </div>
       </Section>
 
+      {/* ——— Visual break: inside Gain ——— */}
+      <Section tone="flame" containerClass="!py-14 md:!py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+          <Photo src={IMAGES.gymWideNew} alt="Wide view of the Gain gym floor with members training" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
+          <Photo src={IMAGES.gymFloorSession} alt="Members training across the gym floor in a group session" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
+          <Photo src={IMAGES.gymStretching} alt="Hallum coaching an older member through a warm-up stretch" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
+        </div>
+      </Section>
+
       {/* ——— Programme structure + pricing ——— */}
       <Section tone="ink" id="how">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-16">
@@ -376,7 +385,7 @@ export default async function PersonaLandingPage({
               <Pill tone="paper">Pay in full or instalments</Pill>
             </div>
 
-            <ul className="mt-8 space-y-3 text-[0.98rem] text-paper/75">
+            <ul className="mt-8 space-y-3 text-[1.0625rem] text-paper/75">
               {[
                 "Free 30-minute consultation call",
                 "20 to 30 minute one-to-one induction",
@@ -414,7 +423,7 @@ export default async function PersonaLandingPage({
                         {phase.weeks}
                       </p>
                     </div>
-                    <p className="col-span-12 sm:col-span-9 text-paper/75 text-[0.98rem] leading-relaxed mt-2 sm:mt-0">
+                    <p className="col-span-12 sm:col-span-9 text-paper/75 text-[1.0625rem] leading-relaxed mt-2 sm:mt-0">
                       {phase.focus}
                     </p>
                   </li>
@@ -426,7 +435,7 @@ export default async function PersonaLandingPage({
               <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame mb-4">
                 Pricing
               </p>
-              <p className="text-paper/80 text-[0.98rem] leading-relaxed">
+              <p className="text-paper/80 text-[1.0625rem] leading-relaxed">
                 We talk through pricing, frequency, and payment options on the
                 consultation call. No hidden fees, no pressure.
               </p>
@@ -445,7 +454,7 @@ export default async function PersonaLandingPage({
         <div className="grid md:grid-cols-12 gap-10 items-end mb-12">
           <div className="md:col-span-7">
             <Folio number={folio(6)} label="What you get" />
-            <H2 className="mt-6">Three things every member gets.</H2>
+            <H2 className="mt-6">Three things <span className="display-italic font-medium text-flame">every member gets.</span></H2>
           </div>
           <p className="md:col-span-5 text-paper/70 text-[1.02rem] leading-relaxed">
             The three commitments that run through every Gain programme. We
@@ -468,7 +477,7 @@ export default async function PersonaLandingPage({
               <h3 className="display-tight text-xl md:text-2xl text-paper leading-[1.15]">
                 {f.t}
               </h3>
-              <p className="mt-3 text-paper/70 text-[0.98rem] leading-relaxed">
+              <p className="mt-3 text-paper/70 text-[1.0625rem] leading-relaxed">
                 {f.d}
               </p>
             </div>
@@ -509,11 +518,7 @@ export default async function PersonaLandingPage({
         <div className="grid md:grid-cols-12 gap-12">
           <div className="md:col-span-5">
             <Folio number={folio(7)} label="How it works" />
-            <H2 className="mt-6">From enquiry to first session.</H2>
-            <Lede className="mt-6">
-              The path is the same for everyone. A short call, an induction,
-              then weekly sessions with proper support around them.
-            </Lede>
+            <H2 className="mt-6">From enquiry to <span className="display-italic font-medium text-flame">first session.</span></H2>
             <div className="mt-8 flex flex-wrap gap-3">
               <CTAButton href="#book" variant="primary">
                 Get started
@@ -542,7 +547,7 @@ export default async function PersonaLandingPage({
                   <h3 className="display-tight text-2xl md:text-[1.8rem] text-paper">
                     {s.t}
                   </h3>
-                  <p className="mt-3 text-paper/70 text-[0.98rem] leading-relaxed max-w-lg">
+                  <p className="mt-3 text-paper/70 text-[1.0625rem] leading-relaxed max-w-lg">
                     {s.d}
                   </p>
                 </div>
@@ -626,8 +631,8 @@ export default async function PersonaLandingPage({
         <div className="grid md:grid-cols-12 gap-10">
           <div className="md:col-span-4">
             <Folio number={folio(9)} label="Frequently asked" />
-            <H2 className="mt-6">Questions we get most.</H2>
-            <p className="mt-6 text-paper/65 max-w-sm text-[0.98rem] leading-relaxed">
+            <H2 className="mt-6">Questions <span className="display-italic font-medium text-flame">we get most.</span></H2>
+            <p className="mt-6 text-paper/65 max-w-sm text-[1.0625rem] leading-relaxed">
               Something else on your mind? Ask on the consultation call. That
               is what it is for.
             </p>
@@ -669,7 +674,7 @@ export default async function PersonaLandingPage({
             <p className="lede mt-8 text-lg md:text-xl text-ink/85 max-w-md">
               {persona.finalCta.body}
             </p>
-            <p className="mt-8 text-sm text-ink/75 leading-relaxed max-w-md">
+            <p className="mt-8 text-base text-ink/75 leading-relaxed max-w-md">
               Prefer to talk? Call us on{" "}
               <a
                 href={`tel:${SITE.phoneHref}`}

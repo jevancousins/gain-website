@@ -151,7 +151,7 @@ export function Caption({
   tone?: "paper" | "ink";
 }) {
   return (
-    <p className={cn("mt-2.5 text-xs italic tracking-wide", tone === "ink" ? "text-ink/55" : "text-paper/50")}>
+    <p className={cn("mt-2.5 text-sm italic tracking-wide", tone === "ink" ? "text-ink/55" : "text-paper/50")}>
       {children}
     </p>
   );

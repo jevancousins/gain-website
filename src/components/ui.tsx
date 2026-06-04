@@ -191,7 +191,7 @@ export function FeatureCard({
         )}
       </div>
       <h3 className="display-tight text-[1.4rem] md:text-[1.55rem] text-paper leading-[1.15]">{title}</h3>
-      <div className="mt-4 text-[0.95rem] text-paper/65 leading-relaxed">
+      <div className="mt-4 text-[1.0625rem] text-paper/65 leading-relaxed">
         {children}
       </div>
     </article>

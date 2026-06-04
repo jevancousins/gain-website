@@ -8,7 +8,7 @@ import { SITE } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Get in touch with Gain Strength Therapy in Eastbourne. Leave your details and we'll call you back — or pick up the phone.",
+    "Get in touch with Gain Strength Therapy in Eastbourne. Leave your details and we'll call you back, or pick up the phone.",
 };
 
 export default function ContactPage() {
@@ -58,7 +58,7 @@ export default function ContactPage() {
                 {SITE.address.city}, {SITE.address.postcode}
               </span>
             </address>
-            <p className="mt-4 text-sm text-paper/60 leading-relaxed">
+            <p className="mt-4 text-base text-paper/60 leading-relaxed">
               Near Eastbourne town centre: about a 15-minute walk from the
               railway station. On-street parking only.
             </p>
@@ -82,7 +82,7 @@ export default function ContactPage() {
             >
               {SITE.phone}
             </a>
-            <p className="mt-3 text-sm text-paper/65 leading-relaxed flex gap-2 items-start">
+            <p className="mt-3 text-base text-paper/65 leading-relaxed flex gap-2 items-start">
               <Phone size={14} className="text-flame mt-0.5 shrink-0" />
               <span>If we&rsquo;re coaching, leave a message or fill in the form: we&rsquo;ll come back within one working day.</span>
             </p>
@@ -95,7 +95,7 @@ export default function ContactPage() {
             <Rule tone="paper" className="mt-5" />
             <ul className="divide-y divide-ink-line">
               {SITE.hours.map((h) => (
-                <li key={h.day} className="flex justify-between py-3 text-sm">
+                <li key={h.day} className="flex justify-between py-3 text-base">
                   <span className="text-paper font-semibold">{h.day}</span>
                   <span className={h.open ? "text-paper/70 tabular-nums" : "text-paper/55 italic"}>
                     {h.open ? `${h.open} – ${h.close}` : "Closed"}

@@ -64,7 +64,7 @@ export function SiteFooter() {
               {SITE.address.postcode}
             </span>
           </address>
-          <div className="mt-5 space-y-2 text-sm text-paper/70">
+          <div className="mt-5 space-y-2 text-base text-paper/70">
             <a href={`tel:${SITE.phoneHref}`} className="flex items-center gap-2 hover:text-flame">
               <Phone size={13} /> {SITE.phone}
             </a>
@@ -76,9 +76,8 @@ export function SiteFooter() {
 
         <div className="md:col-span-2">
           <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Explore</h3>
-          <ul className="mt-5 space-y-2.5 text-paper/75 text-sm">
+          <ul className="mt-5 space-y-2.5 text-paper/75 text-base">
             <li><Link href="/about" className="link-quiet hover:text-paper">About</Link></li>
-            <li><Link href="/facilities" className="link-quiet hover:text-paper">Facilities</Link></li>
             <li><Link href="/contact" className="link-quiet hover:text-paper">Enquire</Link></li>
             <li><Link href="/contact" className="link-quiet hover:text-paper">Contact</Link></li>
             <li><Link href="/contact" className="link-quiet hover:text-paper">Book</Link></li>
@@ -87,7 +86,7 @@ export function SiteFooter() {
 
         <div className="md:col-span-2">
           <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Get in touch</h3>
-          <p className="mt-5 text-paper/70 text-sm leading-relaxed">
+          <p className="mt-5 text-paper/70 text-base leading-relaxed">
             Every new member starts with a short phone call. Leave your
             details and we&rsquo;ll be in touch.
           </p>

@@ -21,7 +21,7 @@ const isPreview = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "producti
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — Strength training in Eastbourne`,
+    default: `${SITE.name}: Strength training in Eastbourne`,
     template: `%s · ${SITE.name}`,
   },
   description: SITE.description,
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     locale: "en_GB",
     url: SITE.url,
     siteName: SITE.name,
-    title: `${SITE.name} — Strength training in Eastbourne`,
+    title: `${SITE.name}: Strength training in Eastbourne`,
     description: SITE.description,
   },
   twitter: {

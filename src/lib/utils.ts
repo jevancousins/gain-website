@@ -149,6 +149,7 @@ export const IMAGES = {
   gainSignTwoMembers: "/media/gym/gain-sign-two-members.jpg",
   gainSignMemberOrange: "/media/gym/gain-sign-member-orange.jpg",
   gainSignTwoFemaleMembers: "/media/gym/gain-sign-two-female-members.jpg",
+  gainSignGroup: "/media/gym/gain-sign-group.jpg",
 
   // ——— GYM — RECEPTION (real photos, May 2026) ———
   gymMemberBlockBalance: "/media/gym/member-block-balance.jpg",
@@ -442,6 +443,15 @@ export const IMAGE_META: Record<string, ImageMeta> = {
     setting: "gym",
     status: "current",
     tags: ["GAIN sign", "social proof", "female members", "friendship", "hugging", "celebration", "middle-aged", "community", "milestone"],
+  },
+
+  "/media/gym/gain-sign-group.jpg": {
+    description:
+      "Hallum and four members (male and female) posing together in front of the GAIN wall sign in the gym. Energetic group shot showing the community and mixed demographics.",
+    people: ["Hallum Cousins (coach)", "Four members (mixed, male and female)"],
+    setting: "gym",
+    status: "current",
+    tags: ["GAIN sign", "social proof", "group", "community", "mixed group", "Hallum", "members", "celebration", "atmosphere"],
   },
 
   // ——— GYM — RECEPTION / front-of-house (real photos, May 2026) ———

@@ -7,9 +7,8 @@ import { Menu, X } from "lucide-react";
 import { cn, IMAGES, SITE } from "@/lib/utils";
 
 const NAV = [
+  { href: "/", label: "Home" },
   { href: "/about", label: "About" },
-  { href: "/facilities", label: "Facilities" },
-  { href: "/programmes", label: "Programmes" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -49,7 +48,7 @@ export function SiteNav() {
           href="/"
           className="flex items-center shrink-0"
           onClick={() => setOpen(false)}
-          aria-label="Gain Strength Therapy — home"
+          aria-label="Gain Strength Therapy, home"
         >
           <span className="relative h-9 w-[5.6rem] md:h-10 md:w-[6.25rem]">
             <Image
