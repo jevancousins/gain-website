@@ -177,21 +177,21 @@ export default async function HomePage() {
 
       {/* ——— 04 · SOCIAL PROOF ——— */}
       <Section tone="ink-soft">
-        <div className="grid lg:grid-cols-12 gap-12 items-start">
-          <div className="lg:col-span-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          <div className="lg:col-span-5 min-w-0">
             <Folio number="04" label="Members" />
             <H2 className="mt-6">Real members. Real progress.</H2>
-            <div className="mt-8 flex items-center gap-8">
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4 sm:gap-8">
               <Stat value={GOOGLE_RATING.stars.toFixed(1)} label="★ Google" />
-              <div className="h-10 w-px bg-ink-line" />
+              <div className="hidden sm:block h-10 w-px bg-ink-line" />
               <Stat value={String(GOOGLE_RATING.count)} label="Reviews" />
-              <div className="h-10 w-px bg-ink-line" />
+              <div className="hidden sm:block h-10 w-px bg-ink-line" />
               <Stat value="6" label="Max per group" />
             </div>
           </div>
 
           {/* Member celebration photos */}
-          <div className="lg:col-span-7 -mx-6 md:mx-0">
+          <div className="lg:col-span-7 -mx-6 md:mx-0 min-w-0">
             <div className="flex md:grid md:grid-cols-2 gap-3 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory scroll-pl-6 md:scroll-pl-0 px-6 md:px-0 pb-4 md:pb-0 scrollbar-hide">
               <div className="snap-start shrink-0 w-[70vw] md:w-auto md:mt-8">
                 <Photo src={IMAGES.gainSignTwoMembers} alt="Two members posing at GAIN sign" aspect="aspect-[3/4]" sizes="(min-width: 768px) 29vw, 70vw" />
