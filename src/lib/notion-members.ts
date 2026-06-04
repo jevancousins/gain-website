@@ -4,6 +4,7 @@ import {
   fetchMembershipSummaryByCustomer,
   type MembershipSummary,
 } from "@/lib/teamup-memberships";
+import { copyConsentFromLeadToMember } from "@/lib/notion-leads";
 
 const NOTION_API = "https://api.notion.com/v1";
 const NOTION_VERSION = "2022-06-28";
@@ -304,6 +305,14 @@ export async function upsertCustomers(customers: TeamupCustomer[]): Promise<Sync
         });
         if (!res.ok) throw new Error(`create ${res.status}: ${(await res.text()).slice(0, 200)}`);
         result.created += 1;
+      }
+
+      if (c.email) {
+        try {
+          await copyConsentFromLeadToMember(c.email);
+        } catch (err) {
+          console.error(`[teamup sync] consent copy failed for ${c.email}`, (err as Error).message);
+        }
       }
     } catch (err) {
       result.errors.push({ id: c.id, reason: (err as Error).message });
