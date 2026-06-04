@@ -8,7 +8,7 @@ import { SITE } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Get in touch with Gain Strength Therapy in Eastbourne. Leave your details and we'll call you back, or pick up the phone.",
+    "Get in touch with Gain Strength Therapy in Eastbourne. Fill in the form to book a free consultation by phone or in person, or call us directly.",
 };
 
 export default function ContactPage() {
@@ -29,12 +29,13 @@ export default function ContactPage() {
             <Kicker>Say hello</Kicker>
             <h1 className="display mt-6 text-[clamp(2.75rem,7vw,6rem)] text-paper">
               Leave your details.
-              <span className="block display-italic font-medium text-flame"> We&rsquo;ll call you back.</span>
+              <span className="block display-italic font-medium text-flame"> Pick a time that suits.</span>
             </h1>
             <Lede className="mt-8">
-              Every new member starts with a short, no-pressure phone call. No
-              20-minute speed-date, no online calendar to wrestle with: just an
-              honest conversation.
+              Fill in the form and we&rsquo;ll email you a link to book your
+              free consultation, by phone, or in person if you&rsquo;d like to
+              see the gym first. It takes no more than 30 minutes. Prefer a
+              callback? Hallum will ring you within two working days.
             </Lede>
           </div>
 
@@ -84,7 +85,7 @@ export default function ContactPage() {
             </a>
             <p className="mt-3 text-base text-paper/65 leading-relaxed flex gap-2 items-start">
               <Phone size={14} className="text-flame mt-0.5 shrink-0" />
-              <span>If we&rsquo;re coaching, leave a message or fill in the form: we&rsquo;ll come back within one working day.</span>
+              <span>If we&rsquo;re coaching, leave a message or fill in the form and Hallum will get back to you within two working days.</span>
             </p>
           </div>
 

@@ -16,7 +16,7 @@ import { getGoogleRating } from "@/lib/google-rating";
 export const metadata: Metadata = {
   title: "6-Week Strength Programme | Gain Strength Therapy, Eastbourne",
   description:
-    "Small-group strength training for adults in Eastbourne. Post-rehab, beginners, over-40s. Max six per session, MSc-qualified coaching. Book a free consultation call.",
+    "Small-group strength training for adults in Eastbourne. Post-rehab, beginners, over-40s. Max six per session, MSc-qualified coaching. Book a free consultation.",
   robots: { index: false, follow: false },
 };
 
@@ -71,20 +71,20 @@ const TESTIMONIALS = [
 
 const FAQS = [
   {
-    q: "I haven’t trained in 20 years — will I keep up?",
+    q: "I haven’t trained in 20 years. Will I keep up?",
     a: "Yes. Everyone follows the same programme structure but at their own weight and speed. Most of our members started exactly where you are. There is nothing to keep up with.",
   },
   {
     q: "What if I have an injury or a health condition?",
-    a: "We work with members managing chronic pain, post-surgical recovery, osteoarthritis, osteoporosis, type 2 diabetes, and long COVID. Tell us on the consultation call and we will be honest about whether we are the right fit.",
+    a: "We work with members managing chronic pain, post-surgical recovery, osteoarthritis, osteoporosis, type 2 diabetes, and long COVID. Tell us in your consultation and we will be honest about whether we are the right fit.",
   },
   {
-    q: "What happens on the consultation call?",
-    a: "A 30-minute phone call. We ask about your goals, any injury or medical history, and what you have tried before. We explain how the programme works and answer your questions. If we are not the right fit, we will tell you and point you somewhere better.",
+    q: "What happens in your consultation?",
+    a: "No more than 30 minutes, by phone or in person if you'd like to see the gym first. We ask about your goals, any injury or medical history, and what you have tried before. We explain how the programme works and answer your questions. If we are not the right fit, we will tell you and point you somewhere better.",
   },
   {
     q: "How much does it cost?",
-    a: "We cover pricing, frequency, and payment options on the consultation call. No hidden fees. You can pay in full or in instalments.",
+    a: "We cover pricing, frequency, and payment options in your consultation. No hidden fees. You can pay in full or in instalments.",
   },
   {
     q: "What happens after the six weeks?",
@@ -171,9 +171,9 @@ export default async function GeneralLandingPage() {
               <LeadForm
                 source="6-week-general"
                 eyebrow="Step 01 &middot; No commitment"
-                title="Book a free consultation call."
-                body="Leave your details and we will ring you within two working days. 30 minutes, no pressure. If we are not the right fit, we will say so."
-                submitLabel="Book a free call"
+                title="Book a free consultation."
+                body="Leave your details and we'll email you a link to book your consultation, by phone or in person. No more than 30 minutes, no pressure. Prefer a callback? We'll ring you within two working days."
+                submitLabel="Book a free consultation"
               />
             </div>
           </aside>
@@ -320,7 +320,7 @@ export default async function GeneralLandingPage() {
 
         <div className="mt-10">
           <CTAButton href="#enquire" variant="primary">
-            Book a free call
+            Book a free consultation
           </CTAButton>
         </div>
       </Section>
@@ -330,7 +330,7 @@ export default async function GeneralLandingPage() {
         <div className="grid md:grid-cols-12 gap-10">
           <div className="md:col-span-4">
             <Folio number="06" label="Questions we hear" />
-            <H2 className="mt-6">Before you call.</H2>
+            <H2 className="mt-6">Before you book.</H2>
           </div>
           <div className="md:col-span-8">
             <Rule tone="paper" />
@@ -354,7 +354,7 @@ export default async function GeneralLandingPage() {
             <Rule tone="paper" />
             <div className="mt-8">
               <CTAButton href="#enquire" variant="primary">
-                Book a free call
+                Book a free consultation
               </CTAButton>
             </div>
           </div>
@@ -369,8 +369,9 @@ export default async function GeneralLandingPage() {
               Ready to feel stronger?
             </h2>
             <p className="lede mt-8 text-lg md:text-xl text-ink/85 max-w-md">
-              A 30-minute call. No pressure. If we are not the right fit,
-              we will tell you and point you somewhere better.
+              No more than 30 minutes, by phone or in person. No pressure. If
+              we are not the right fit, we will tell you and point you
+              somewhere better.
             </p>
             <p className="mt-8 text-sm text-ink/75 leading-relaxed max-w-md">
               Prefer to talk now? Call{" "}
@@ -386,9 +387,9 @@ export default async function GeneralLandingPage() {
             <LeadForm
               source="6-week-general"
               eyebrow="Step 01 &middot; No commitment"
-              title="Book a free consultation call."
-              body="Leave your details and we will ring you within two working days. 30 minutes, no pressure. If we are not the right fit, we will say so."
-              submitLabel="Book a free call"
+              title="Book a free consultation."
+              body="Leave your details and we'll email you a link to book your consultation, by phone or in person. No more than 30 minutes, no pressure. Prefer a callback? We'll ring you within two working days."
+              submitLabel="Book a free consultation"
             />
           </div>
         </div>
@@ -431,7 +432,7 @@ export default async function GeneralLandingPage() {
           href="#enquire"
           className="block w-full text-center rounded-sm bg-flame text-ink px-5 py-3.5 text-[0.82rem] font-bold uppercase tracking-[0.22em]"
         >
-          Book a free call
+          Book a free consultation
         </a>
       </div>
     </>
