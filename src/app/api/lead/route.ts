@@ -96,16 +96,19 @@ export async function POST(request: Request) {
 
   const resendKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.LEAD_FROM_EMAIL;
+  const notifyEmail = process.env.LEAD_NOTIFY_EMAIL;
   if (resendKey && fromEmail) {
     tasks.push({
       name: "email",
       promise: sendLeadConfirmationEmail(lead, resendKey, fromEmail),
     });
-    const ownerEmail = process.env.LEAD_NOTIFY_EMAIL;
-    if (ownerEmail) {
+    // Notify Hallum the instant an enquiry lands so he can call back fast.
+    // Reaches his inbox on laptop and phone; reply-to is set to the lead's
+    // own address so he can respond to them directly from the notification.
+    if (notifyEmail) {
       tasks.push({
         name: "notify",
-        promise: sendOwnerNotificationEmail(lead, resendKey, fromEmail, ownerEmail),
+        promise: sendOwnerNotificationEmail(lead, resendKey, fromEmail, notifyEmail),
       });
     }
   }
@@ -138,6 +141,7 @@ async function writeLeadToJsonl(lead: Lead) {
 type Lead = {
   firstName: string;
   email: string;
+  phone: string; // normalised E.164-ish, for tel: links
   phoneRaw: string;
   message: string;
   source: string;
@@ -304,6 +308,9 @@ ${programmeHtml}
   }
 }
 
+// Plain, scannable alert to Hallum so he can act on a new lead from his phone
+// lock screen or inbox. Reply-to is the lead's address, so hitting reply mails
+// the enquirer directly.
 async function sendOwnerNotificationEmail(
   lead: Lead,
   apiKey: string,
@@ -313,6 +320,9 @@ async function sendOwnerNotificationEmail(
   const safeName = escapeHtml(lead.firstName);
   const safeEmail = escapeHtml(lead.email);
   const safePhone = escapeHtml(lead.phoneRaw);
+  // Normalised (E.164-ish) number for the tel: link so tap-to-call works
+  // reliably from the notification; the visible text keeps what they typed.
+  const telPhone = escapeHtml(lead.phone || lead.phoneRaw);
   const safeSource = escapeHtml(lead.source || "unknown");
   const safeMessage = lead.message ? escapeHtml(lead.message) : null;
   const time = new Date(lead.createdAt).toLocaleString("en-GB", {
@@ -351,7 +361,7 @@ async function sendOwnerNotificationEmail(
 <table style="width:100%; border-collapse:collapse; font-size:14px;">
 <tr><td style="padding:6px 0; color:#666; width:80px;">Name</td><td style="padding:6px 0;">${safeName}</td></tr>
 <tr><td style="padding:6px 0; color:#666;">Email</td><td style="padding:6px 0;"><a href="mailto:${safeEmail}" style="color:#FC832C;">${safeEmail}</a></td></tr>
-<tr><td style="padding:6px 0; color:#666;">Phone</td><td style="padding:6px 0;"><a href="tel:${safePhone}" style="color:#FC832C;">${safePhone}</a></td></tr>
+<tr><td style="padding:6px 0; color:#666;">Phone</td><td style="padding:6px 0;"><a href="tel:${telPhone}" style="color:#FC832C;">${safePhone}</a></td></tr>
 <tr><td style="padding:6px 0; color:#666;">Source</td><td style="padding:6px 0;">${safeSource}</td></tr>
 <tr><td style="padding:6px 0; color:#666;">Time</td><td style="padding:6px 0;">${escapeHtml(time)}</td></tr>
 ${messageRow}
@@ -370,7 +380,7 @@ ${messageRow}
       from,
       reply_to: lead.email,
       to: [to],
-      subject: `New enquiry: ${lead.firstName}`,
+      subject: `New enquiry: ${lead.firstName} — ${lead.phoneRaw}`,
       html,
       text,
     }),
@@ -381,4 +391,3 @@ ${messageRow}
     throw new Error(`Resend notify API ${res.status}: ${body}`);
   }
 }
-
