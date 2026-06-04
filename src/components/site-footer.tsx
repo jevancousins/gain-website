@@ -87,8 +87,8 @@ export function SiteFooter() {
         <div className="md:col-span-2">
           <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Get in touch</h3>
           <p className="mt-5 text-paper/70 text-base leading-relaxed">
-            Every new member starts with a short phone call. Leave your
-            details and we&rsquo;ll be in touch.
+            Every new member starts with a free consultation, by phone or in
+            person. Leave your details and we&rsquo;ll send you a link to book.
           </p>
           <Link
             href="/contact"

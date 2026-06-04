@@ -60,11 +60,11 @@ const COMMON_FAQS = {
   often:
     "Two sessions a week is the sweet spot for most members and the frequency we recommend by default. One session a week works well for absolute beginners or busy schedules. Three is ideal for people with some training history or those moving on from physio.",
   payment:
-    "Yes. Pay in full upfront for simplicity, or split it into instalments. We confirm payment options on the consultation call before you book.",
+    "Yes. Pay in full upfront for simplicity, or split it into instalments. We confirm payment options in your consultation before you book.",
   after:
     "You can step into ongoing monthly membership at the same sessions, on a rolling monthly contract. Members who finish the 6-week often roll into the 12-week instead. There is no auto-enrolment; we talk options at your final session.",
   consultation:
-    "A 30 minute phone call before you enrol. We learn your goals, talk through any injury history or medical context, explain how the programme works, and answer your questions. No pressure, no sales script.",
+    "A consultation of no more than 30 minutes, by phone or in person if you'd like to see the gym first, before you enrol. We learn your goals, talk through any injury history or medical context, explain how the programme works, and answer your questions. No pressure, no sales script.",
   induction:
     "Your first 20 to 30 minutes at the studio, before your first group session. We assess your movement, choose one tracking exercise to measure progress, set your baseline, and walk you through the weekly structure.",
 };
@@ -121,7 +121,7 @@ export const PERSONAS: Persona[] = [
         {
           headline: "I have a health condition. Will I be safe?",
           body:
-            "Tell us on the consultation call. Our head coach holds an MSc in Sport Physiology and works regularly with members managing diabetes, arthritis, blood pressure, and more. We adapt the programme to you.",
+            "Tell us in your consultation. Our head coach holds an MSc in Sport Physiology and works regularly with members managing diabetes, arthritis, blood pressure, and more. We adapt the programme to you.",
         },
       ],
     },
@@ -171,7 +171,7 @@ export const PERSONAS: Persona[] = [
         {
           time: "0:05",
           body:
-            "A short chat. Anything that has changed since the consultation call, anything bothering you today, what you ate, how you slept. No tests, no clipboards.",
+            "A short chat. Anything that has changed since your consultation, anything bothering you today, what you ate, how you slept. No tests, no clipboards.",
         },
         {
           time: "0:10",
@@ -216,7 +216,7 @@ export const PERSONAS: Persona[] = [
       },
       {
         q: "What if I have a condition or an injury history?",
-        a: "Tell us on the consultation call before you enrol. Our head coach holds an MSc in Sport Physiology and we work regularly with members managing chronic back pain, type 2 diabetes, osteoarthritis, osteoporosis, and post-surgical recovery. We adapt the programme to you.",
+        a: "Tell us in your consultation before you enrol. Our head coach holds an MSc in Sport Physiology and we work regularly with members managing chronic back pain, type 2 diabetes, osteoarthritis, osteoporosis, and post-surgical recovery. We adapt the programme to you.",
       },
       {
         q: "How often will I need to come?",
@@ -229,15 +229,15 @@ export const PERSONAS: Persona[] = [
     ],
     ctaPrimary: "Get started",
     formIntro: {
-      eyebrow: "Step 01 · Arrange a call",
-      title: "Start with a free call.",
+      eyebrow: "Step 01 · Book your consultation",
+      title: "Start with a free consultation.",
       body:
-        "Leave your details and we will call to learn what you want from the next 6 weeks. No pressure. If we are not the right fit, we will say so honestly.",
+        "Leave your details and we'll email you a link to book a consultation about what you want from the next 6 weeks. No pressure. If we are not the right fit, we will say so honestly.",
     },
     finalCta: {
       title: "Ready to start?",
       body:
-        "Leave your details. We will call you for a no-pressure chat about whether the 6-week fits you.",
+        "Leave your details and we'll send you a link to book a no-pressure consultation about whether the 6-week fits you.",
     },
   },
 
@@ -282,7 +282,7 @@ export const PERSONAS: Persona[] = [
         {
           headline: "Generic gym programmes do not respect my history.",
           body:
-            "Tell us about your injury on the consultation call. We program around it, not despite it. Our head coach holds an MSc in Sport Physiology and works post-rehab daily.",
+            "Tell us about your injury in your consultation. We program around it, not despite it. Our head coach holds an MSc in Sport Physiology and works post-rehab daily.",
         },
         {
           headline: "I cannot afford another 12 weeks of physio.",
@@ -313,7 +313,7 @@ export const PERSONAS: Persona[] = [
           number: "03",
           title: "We work from your physio's notes, not around them",
           body:
-            "Every programme starts with what your physio said you can and cannot do. Bring their notes to the consultation call and we build the six weeks on top of them.",
+            "Every programme starts with what your physio said you can and cannot do. Bring their notes to your consultation and we build the six weeks on top of them.",
         },
         {
           number: "04",
@@ -338,7 +338,7 @@ export const PERSONAS: Persona[] = [
       },
       {
         q: "I have a specific injury (back, knee, shoulder). Can you actually work around it?",
-        a: "Yes, and we have done so for many members. Tell us on the consultation call. Our head coach holds an MSc in Sport Physiology. Every programme starts with what your physio said you can and cannot do, and we build from their notes. If we are not the right fit, we will say so honestly.",
+        a: "Yes, and we have done so for many members. Tell us in your consultation. Our head coach holds an MSc in Sport Physiology. Every programme starts with what your physio said you can and cannot do, and we build from their notes. If we are not the right fit, we will say so honestly.",
       },
       {
         q: "How heavy will I be lifting?",
@@ -358,13 +358,13 @@ export const PERSONAS: Persona[] = [
       eyebrow: "Step 01 · Arrange a call",
       title: "Tell us your history.",
       body:
-        "Leave your details and we will call. We will ask about your injury, the physio you have been through, and what you want next. No pressure, no sales script.",
+        "Leave your details and we'll email you a link to book a consultation. We will ask about your injury, the physio you have been through, and what you want next. No pressure, no sales script.",
       submitLabel: "Get started",
     },
     finalCta: {
       title: "Ready for the next step after physio?",
       body:
-        "Leave your details. We will call you for a no-pressure chat about your history and whether the 6-week fits.",
+        "Leave your details and we'll send you a link to book a no-pressure consultation about your history and whether the 6-week fits.",
     },
   },
 
@@ -414,7 +414,7 @@ export const PERSONAS: Persona[] = [
         {
           headline: "I have a heart history, or osteoporosis, or arthritis.",
           body:
-            "Tell us on the consultation call. Our head coach holds an MSc in Sport Physiology. Resistance training, properly programmed, has well-established cardiovascular and bone-health benefits when paired with appropriate medical care.",
+            "Tell us in your consultation. Our head coach holds an MSc in Sport Physiology. Resistance training, properly programmed, has well-established cardiovascular and bone-health benefits when paired with appropriate medical care.",
         },
       ],
     },
@@ -465,7 +465,7 @@ export const PERSONAS: Persona[] = [
       },
       {
         q: "I have osteoporosis. Is this safe?",
-        a: "Yes, with proper monitoring. Resistance training, correctly progressed, is recommended for osteoporosis management. Tell us on the consultation call so we can plan around your DEXA history and any medication. On the call we will also ask about any vertebral fracture history; the programme avoids loaded spinal flexion in line with Royal Osteoporosis Society guidance. If we are not the right fit, we will say so honestly.",
+        a: "Yes, with proper monitoring. Resistance training, correctly progressed, is recommended for osteoporosis management. Tell us in your consultation so we can plan around your DEXA history and any medication. In your consultation we will also ask about any vertebral fracture history; the programme avoids loaded spinal flexion in line with Royal Osteoporosis Society guidance. If we are not the right fit, we will say so honestly.",
       },
       {
         q: "I am also caring for my partner. I cannot commit to a 12-week.",
@@ -485,12 +485,12 @@ export const PERSONAS: Persona[] = [
       eyebrow: "Step 01 · Arrange a call",
       title: "Ask us anything.",
       body:
-        "Leave your details and we will call you for a 30 minute consultation. Bring your questions on bone health, programming, or your medical history. No pressure.",
+        "Leave your details and we'll email you a link to book a 30 minute consultation, by phone or in person. Bring your questions on bone health, programming, or your medical history. No pressure.",
     },
     finalCta: {
       title: "Ready to train properly?",
       body:
-        "Leave your details. We will call you for a no-pressure chat about your goals, your history, and whether the 6-week fits.",
+        "Leave your details and we'll send you a link to book a no-pressure consultation about your goals, your history, and whether the 6-week fits.",
     },
   },
 
@@ -591,7 +591,7 @@ export const PERSONAS: Persona[] = [
       },
       {
         q: "Is this safe for long COVID or post-viral fatigue?",
-        a: "Yes, with the right approach. We use adaptive pacing: load and volume flex on the day, based on how you are. We do not push through a fatigue crash, and we plan around the post-exertional malaise window of 24 to 72 hours that often follows a hard session. Our approach is informed by the AHA's 2024 scientific statement on exercise intolerance in PASC and current best-practice guidance for long COVID. Tell us about your history on the consultation call so we can plan well. If we are not the right fit, we will say so honestly.",
+        a: "Yes, with the right approach. We use adaptive pacing: load and volume flex on the day, based on how you are. We do not push through a fatigue crash, and we plan around the post-exertional malaise window of 24 to 72 hours that often follows a hard session. Our approach is informed by the AHA's 2024 scientific statement on exercise intolerance in PASC and current best-practice guidance for long COVID. Tell us about your history in your consultation so we can plan well. If we are not the right fit, we will say so honestly.",
       },
       {
         q: "What if I have a bad week and miss two sessions?",
@@ -615,13 +615,13 @@ export const PERSONAS: Persona[] = [
       eyebrow: "Step 01 · Tell us your story",
       title: "No pressure, no judgement.",
       body:
-        "Leave your details, and a few words on what you have been through if you would like. We will call you to talk it through. We will be honest about whether the 6-week fits.",
+        "Leave your details, and a few words on what you have been through if you would like. We'll send you a link to book a time to talk it through. We will be honest about whether the 6-week fits.",
       submitLabel: "Get started",
     },
     finalCta: {
       title: "Ready to rebuild?",
       body:
-        "Leave your details. We will call you for a no-pressure chat about how you are, where you are starting from, and whether the 6-week fits.",
+        "Leave your details and we'll send you a link to book a no-pressure consultation about how you are, where you are starting from, and whether the 6-week fits.",
     },
   },
 ];

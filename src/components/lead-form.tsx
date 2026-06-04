@@ -96,9 +96,9 @@ export function LeadForm({
           <div>
             <h2 className="display-tight text-2xl text-paper">Thanks, we&rsquo;ve got it.</h2>
             <p className="mt-2 text-paper/70 leading-relaxed text-base">
-              We&rsquo;ll be in touch soon to arrange a short phone call.
-              If it sounds like a good fit, we&rsquo;ll invite you in to see
-              the studio and meet your coach.
+              Check your inbox: we&rsquo;ve emailed you a link to book your
+              consultation, by phone or in person. Prefer a callback? Hallum
+              will ring you within two working days.
             </p>
           </div>
         </div>
@@ -114,14 +114,14 @@ export function LeadForm({
     >
       <div>
         <p className="text-[0.68rem] font-bold uppercase tracking-[0.28em] text-flame">
-          {eyebrow ?? "Step 01 · Arrange a call"}
+          {eyebrow ?? "Step 01 · Book your consultation"}
         </p>
         <h2 className="display-tight mt-3 text-[1.7rem] md:text-[1.95rem] leading-[1.05] text-paper">
-          {title ?? "Start with a free call."}
+          {title ?? "Start with a free consultation."}
         </h2>
         <p className="mt-3 text-base text-paper/65 leading-relaxed">
           {body ??
-            "Leave your details and we'll call to learn about your goals. No pressure, and if we're a fit, we'll invite you in for an in-person consultation."}
+            "Leave your details and we'll email you a link to book your free consultation, by phone or in person. No more than 30 minutes, no pressure."}
         </p>
       </div>
 

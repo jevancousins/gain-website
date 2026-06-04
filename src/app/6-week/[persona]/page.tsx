@@ -42,7 +42,7 @@ const HOW_STEPS = [
   {
     n: "01",
     icon: <PhoneCall size={16} />,
-    t: "Free 30-minute consultation call",
+    t: "Free 30-minute consultation",
     d: "We learn your goals, any injury or medical history, and what you have tried before. We explain how the 6-week works and answer your questions. If we are not the right fit, we will say so honestly.",
   },
   {
@@ -387,7 +387,7 @@ export default async function PersonaLandingPage({
 
             <ul className="mt-8 space-y-3 text-[1.0625rem] text-paper/75">
               {[
-                "Free 30-minute consultation call",
+                "Free 30-minute consultation",
                 "20 to 30 minute one-to-one induction",
                 "Weekly small-group sessions, max six",
                 "Weekly Sunday WhatsApp from your coach",
@@ -436,8 +436,8 @@ export default async function PersonaLandingPage({
                 Pricing
               </p>
               <p className="text-paper/80 text-[1.0625rem] leading-relaxed">
-                We talk through pricing, frequency, and payment options on the
-                consultation call. No hidden fees, no pressure.
+                We talk through pricing, frequency, and payment options in your
+                consultation. No hidden fees, no pressure.
               </p>
               <div className="mt-5">
                 <CTAButton href="#enquire" variant="primary">
@@ -620,8 +620,8 @@ export default async function PersonaLandingPage({
           <p className="md:col-span-9 text-paper/80 text-[1.02rem] leading-[1.72] max-w-3xl">
             No contracts. No auto-renewal. No tie-in beyond the programme you
             signed up for. After the 6-week, monthly rolling membership only
-            if it is working for you. If it is not, we will tell you on the
-            consultation call before you book.
+            if it is working for you. If it is not, we will tell you in your
+            consultation before you book.
           </p>
         </div>
       </Section>
@@ -633,7 +633,7 @@ export default async function PersonaLandingPage({
             <Folio number={folio(9)} label="Frequently asked" />
             <H2 className="mt-6">Questions <span className="display-italic font-medium text-flame">we get most.</span></H2>
             <p className="mt-6 text-paper/65 max-w-sm text-[1.0625rem] leading-relaxed">
-              Something else on your mind? Ask on the consultation call. That
+              Something else on your mind? Ask in your consultation. That
               is what it is for.
             </p>
           </div>
