@@ -47,7 +47,7 @@ export type Persona = {
     eyebrow: string;
     title: string;
     body: string;
-    // Lead-form submit button label. Defaults to "Get started".
+    // Lead-form submit button label. Defaults to "Request your free consultation".
     submitLabel?: string;
   };
   finalCta: {
@@ -227,9 +227,9 @@ export const PERSONAS: Persona[] = [
         a: COMMON_FAQS.after,
       },
     ],
-    ctaPrimary: "Get started",
+    ctaPrimary: "Request your free consultation",
     formIntro: {
-      eyebrow: "Step 01 · Book your consultation",
+      eyebrow: "Step 01 · Free consultation",
       title: "Start with a free consultation.",
       body:
         "Leave your details and we'll email you a link to book a consultation about what you want from the next 6 weeks. No pressure. If we are not the right fit, we will say so honestly.",
@@ -353,13 +353,13 @@ export const PERSONAS: Persona[] = [
         a: COMMON_FAQS.after,
       },
     ],
-    ctaPrimary: "Get started",
+    ctaPrimary: "Request your free consultation",
     formIntro: {
-      eyebrow: "Step 01 · Arrange a call",
+      eyebrow: "Step 01 · Free consultation",
       title: "Tell us your history.",
       body:
         "Leave your details and we'll email you a link to book a consultation. We will ask about your injury, the physio you have been through, and what you want next. No pressure, no sales script.",
-      submitLabel: "Get started",
+      submitLabel: "Request your free consultation",
     },
     finalCta: {
       title: "Ready for the next step after physio?",
@@ -480,9 +480,9 @@ export const PERSONAS: Persona[] = [
         a: COMMON_FAQS.after,
       },
     ],
-    ctaPrimary: "Get started",
+    ctaPrimary: "Request your free consultation",
     formIntro: {
-      eyebrow: "Step 01 · Arrange a call",
+      eyebrow: "Step 01 · Free consultation",
       title: "Ask us anything.",
       body:
         "Leave your details and we'll email you a link to book a 30 minute consultation, by phone or in person. Bring your questions on bone health, programming, or your medical history. No pressure.",
@@ -610,13 +610,13 @@ export const PERSONAS: Persona[] = [
         a: COMMON_FAQS.after,
       },
     ],
-    ctaPrimary: "Get started",
+    ctaPrimary: "Request your free consultation",
     formIntro: {
       eyebrow: "Step 01 · Tell us your story",
       title: "No pressure, no judgement.",
       body:
         "Leave your details, and a few words on what you have been through if you would like. We'll send you a link to book a time to talk it through. We will be honest about whether the 6-week fits.",
-      submitLabel: "Get started",
+      submitLabel: "Request your free consultation",
     },
     finalCta: {
       title: "Ready to rebuild?",
