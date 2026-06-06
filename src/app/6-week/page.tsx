@@ -199,6 +199,15 @@ export default async function GeneralLandingPage() {
                 {" "}were not built for.
               </span>
             </H2>
+            <div className="mt-8">
+              <Photo
+                src={IMAGES.gymStretching}
+                alt="A coach guiding an older member through a warm-up stretch"
+                aspect="aspect-[4/3]"
+                tone="warm"
+                sizes="(min-width: 1024px) 38vw, 100vw"
+              />
+            </div>
           </div>
           <div className="lg:col-span-7">
             <Rule tone="paper" className="mb-8" />
@@ -256,31 +265,71 @@ export default async function GeneralLandingPage() {
         <Rule tone="paper" />
       </Section>
 
-      {/* ——— Why six weeks ——— */}
+      {/* ——— Visual break: inside Gain ——— */}
+      <Section tone="flame" containerClass="!py-14 md:!py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+          <Photo src={IMAGES.gymInteriorWide} alt="The Gain gym floor with members training" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
+          <Photo src={IMAGES.gymMemberDumbbellLunge} alt="An older member performing a dumbbell lunge with good form" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
+          <Photo src={IMAGES.gainSignGroup} alt="Hallum and members together at the GAIN sign" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
+        </div>
+      </Section>
+
+      {/* ——— The programme ——— */}
       <Section tone="ink-soft">
-        <div className="grid lg:grid-cols-12 gap-10 items-start">
-          <div className="lg:col-span-4">
-            <Folio number="04" label="Why six weeks" />
+        <div className="grid lg:grid-cols-12 gap-10 items-start mb-12 lg:mb-16">
+          <div className="lg:col-span-5">
+            <Folio number="04" label="The programme" />
             <H2 className="mt-6">
-              Long enough to change.
+              Six weeks, built in
               <span className="display-italic font-medium text-flame">
-                {" "}Short enough to commit.
+                {" "}two clear phases.
               </span>
             </H2>
           </div>
-          <div className="lg:col-span-8 space-y-5">
-            <Rule tone="paper" />
+          <div className="lg:col-span-7">
+            <Rule tone="paper" className="mb-8" />
             <p className="text-[1.05rem] text-paper/80 leading-[1.72] max-w-2xl">
-              Six weeks to learn the lifts, build a training habit, and see
-              measurable strength gains. We track a key lift from day one and
-              re-test at week six, so you can see the numbers change.
-            </p>
-            <p className="text-[1.05rem] text-paper/80 leading-[1.72] max-w-2xl">
-              No contract afterwards. If you want to keep training, monthly
-              membership is available on a rolling basis. If not, you stop.
+              Small-group strength training, never more than six per session,
+              with your programme built around your body, your history, and your
+              goals. Here is how the six weeks unfold, from your first
+              consultation through to your final re-test.
             </p>
           </div>
         </div>
+
+        {/* Timeline */}
+        <ol className="relative grid gap-10 md:grid-cols-4 md:gap-6">
+          {/* Connector line linking the stages (desktop) */}
+          <span
+            aria-hidden
+            className="hidden md:block absolute left-[12.5%] right-[12.5%] top-7 h-0.5 bg-flame/30"
+          />
+          {[
+            { tag: "Before you start", t: "Free consultation", d: "A 30-minute call or visit. We learn your goals, any injury or medical history, and what you want from the six weeks." },
+            { tag: "Week 1", t: "Induction & baseline", d: "A 20 to 30 minute one-to-one: movement assessment, set your baseline lift, plus your nutrition-basics and at-home mobility guides." },
+            { tag: "Weeks 1–3", t: "Foundation", d: "Learn the core lifts and groove the movement patterns. Loads stay steady while you build technique and the habit." },
+            { tag: "Weeks 4–6", t: "Progressive strength", d: "Load climbs week on week, technique sharpens under weight, and we re-test your tracked lift to show the change." },
+          ].map((s, i) => (
+            <li key={s.t} className="relative flex items-start gap-5 md:block md:text-center">
+              <span className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-flame bg-ink-soft md:mx-auto">
+                <span className="display-tight text-lg text-flame tabular-nums">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </span>
+              <div className="md:mt-6">
+                <span className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-flame">{s.tag}</span>
+                <h3 className="display-tight text-xl text-paper mt-1.5">{s.t}</h3>
+                <p className="mt-2 text-paper/65 text-base leading-relaxed md:mx-auto md:max-w-[15rem]">{s.d}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-12 max-w-2xl border-l-2 border-flame/60 pl-4 text-[1.0625rem] text-paper/70 leading-relaxed">
+          No contract afterwards. If you want to keep training, ongoing
+          membership is available on a rolling monthly basis. If not, you
+          simply stop.
+        </p>
       </Section>
 
       {/* ——— Testimonials ——— */}
@@ -380,15 +429,6 @@ export default async function GeneralLandingPage() {
               No more than 30 minutes, by phone or in person. No pressure. If
               we are not the right fit, we will tell you and point you
               somewhere better.
-            </p>
-            <p className="mt-8 text-sm text-ink/75 leading-relaxed max-w-md">
-              Prefer to talk now? Call{" "}
-              <a
-                href={`tel:${SITE.phoneHref}`}
-                className="font-semibold underline underline-offset-4 hover:text-paper"
-              >
-                {SITE.phone}
-              </a>
             </p>
           </div>
           <div className="lg:col-span-6">
