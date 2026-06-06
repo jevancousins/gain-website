@@ -56,13 +56,20 @@ export function SiteFooter() {
 
         <div className="md:col-span-3">
           <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Visit</h3>
-          <address className="not-italic mt-5 text-paper/80 leading-relaxed flex gap-3">
+          <address className="not-italic mt-5 leading-relaxed flex gap-3">
             <MapPin size={14} className="mt-1 shrink-0 text-flame" />
-            <span>
+            <a
+              href={`https://maps.google.com/?q=${encodeURIComponent(
+                `${SITE.name}, ${SITE.address.line1}, ${SITE.address.city} ${SITE.address.postcode}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-paper hover:text-flame transition-colors"
+            >
               {SITE.address.line1}<br />
               {SITE.address.city}<br />
               {SITE.address.postcode}
-            </span>
+            </a>
           </address>
           <div className="mt-5 space-y-2 text-base text-paper/70">
             <a href={`tel:${SITE.phoneHref}`} className="flex items-center gap-2 hover:text-flame">
