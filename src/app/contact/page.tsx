@@ -35,7 +35,7 @@ export default function ContactPage() {
               Fill in the form and we&rsquo;ll email you a link to book your
               free consultation, by phone, or in person if you&rsquo;d like to
               see the gym first. It takes no more than 30 minutes. Prefer a
-              callback? Hallum will ring you within two working days.
+              callback? We will ring you within two working days.
             </Lede>
           </div>
 
@@ -50,14 +50,22 @@ export default function ContactPage() {
       <Section tone="ink-soft">
         <div className="grid md:grid-cols-3 gap-6">
           <div className="border border-ink-line bg-ink p-7">
-            <Kicker>Visit us</Kicker>
-            <address className="not-italic mt-5 text-paper text-base leading-relaxed flex gap-3">
-              <MapPin size={16} className="text-flame mt-1 shrink-0" />
-              <span>
+            <Kicker>
+              <MapPin size={11} className="inline mr-1 align-middle" /> Visit us
+            </Kicker>
+            <address className="not-italic mt-5 text-base leading-relaxed">
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(
+                  `${SITE.name}, ${SITE.address.line1}, ${SITE.address.city} ${SITE.address.postcode}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-paper hover:text-flame transition-colors"
+              >
                 Gain Strength Therapy<br />
                 {SITE.address.line1}<br />
                 {SITE.address.city}, {SITE.address.postcode}
-              </span>
+              </a>
             </address>
             <p className="mt-4 text-base text-paper/60 leading-relaxed">
               Near Eastbourne town centre: about a 15-minute walk from the
@@ -65,7 +73,7 @@ export default function ContactPage() {
             </p>
             <a
               href={`https://maps.google.com/?q=${encodeURIComponent(
-                `${SITE.address.line1}, ${SITE.address.city} ${SITE.address.postcode}`
+                `${SITE.name}, ${SITE.address.line1}, ${SITE.address.city} ${SITE.address.postcode}`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -76,16 +84,17 @@ export default function ContactPage() {
           </div>
 
           <div className="border border-ink-line bg-ink p-7">
-            <Kicker>Call us</Kicker>
+            <Kicker>
+              <Phone size={11} className="inline mr-1 align-middle" /> Call us
+            </Kicker>
             <a
               href={`tel:${SITE.phoneHref}`}
               className="mt-4 block display text-3xl md:text-4xl text-paper hover:text-flame transition-colors tabular-nums"
             >
               {SITE.phone}
             </a>
-            <p className="mt-3 text-base text-paper/65 leading-relaxed flex gap-2 items-start">
-              <Phone size={14} className="text-flame mt-0.5 shrink-0" />
-              <span>If we&rsquo;re coaching, leave a message or fill in the form and Hallum will get back to you within two working days.</span>
+            <p className="mt-3 text-base text-paper/65 leading-relaxed">
+              If we&rsquo;re coaching, leave a message or fill in the form and we will get back to you within two working days.
             </p>
           </div>
 
