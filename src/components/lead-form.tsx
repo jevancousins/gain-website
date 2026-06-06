@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, SITE } from "@/lib/utils";
 import { track } from "@/lib/analytics";
 
 type FieldKey = "firstName" | "email" | "phone";
@@ -100,10 +100,19 @@ export function LeadForm({
           <div>
             <h2 className="display-tight text-2xl text-paper">Thanks, we&rsquo;ve got it.</h2>
             <p className="mt-2 text-paper/70 leading-relaxed text-base">
-              Check your inbox: we&rsquo;ve emailed you a link to book your
-              consultation, by phone or in person. Prefer a callback? We will
-              ring you within two working days.
+              We&rsquo;ve emailed you a link to book your free consultation, by
+              phone or in person. Want to book now instead? Otherwise
+              we&rsquo;ll ring you within two working days.
             </p>
+            <a
+              href={SITE.bookingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track("booking_clicked")}
+              className="mt-5 inline-flex items-center gap-2 rounded-sm bg-flame text-ink px-5 py-3 text-[0.78rem] font-bold uppercase tracking-[0.2em] hover:bg-flame-deep transition-colors"
+            >
+              Book a time now <ArrowRight size={15} strokeWidth={2.4} />
+            </a>
           </div>
         </div>
       </div>
@@ -118,7 +127,7 @@ export function LeadForm({
     >
       <div>
         <p className="text-[0.68rem] font-bold uppercase tracking-[0.28em] text-flame">
-          {eyebrow ?? "Step 01 · Book your consultation"}
+          {eyebrow ?? "Step 01 · Free consultation"}
         </p>
         <h2 className="display-tight mt-3 text-[1.7rem] md:text-[1.95rem] leading-[1.05] text-paper">
           {title ?? "Start with a free consultation."}
@@ -213,7 +222,7 @@ export function LeadForm({
           </>
         ) : (
           <>
-            {submitLabel ?? "Get started"} <ArrowRight size={15} strokeWidth={2.4} />
+            {submitLabel ?? "Request your free consultation"} <ArrowRight size={15} strokeWidth={2.4} />
           </>
         )}
       </button>

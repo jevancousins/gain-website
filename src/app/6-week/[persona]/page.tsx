@@ -126,9 +126,9 @@ export default async function PersonaLandingPage({
 
   return (
     <>
-      {/* ——— Slim header (logo only, no nav) ——— */}
-      <header className="bg-ink border-b border-ink-line">
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 h-16 md:h-[72px] flex items-center justify-between gap-6">
+      {/* ——— Slim header (logo left, CTA right) ——— */}
+      <header className="sticky top-0 z-40 bg-ink/95 backdrop-blur-sm border-b border-ink-line">
+        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 h-16 md:h-[72px] flex items-center justify-between gap-4">
           <span className="flex items-center shrink-0" aria-label="Gain Strength Therapy">
             <span className="relative h-9 w-[5.6rem] md:h-10 md:w-[6.25rem]">
               <Image
@@ -141,12 +141,20 @@ export default async function PersonaLandingPage({
               />
             </span>
           </span>
-          <a
-            href={`tel:${SITE.phoneHref}`}
-            className="hidden sm:inline-flex items-center gap-2 text-[0.78rem] font-bold uppercase tracking-[0.22em] text-paper/80 hover:text-flame transition-colors"
-          >
-            <PhoneCall size={14} /> {SITE.phone}
-          </a>
+          <div className="flex items-center gap-4 md:gap-6">
+            <a
+              href={`tel:${SITE.phoneHref}`}
+              className="hidden sm:inline-flex items-center gap-2 text-[0.78rem] font-bold uppercase tracking-[0.22em] text-paper/80 hover:text-flame transition-colors"
+            >
+              <PhoneCall size={14} /> {SITE.phone}
+            </a>
+            <a
+              href="#enquire"
+              className="inline-flex items-center rounded-sm bg-flame text-ink px-4 sm:px-5 py-2.5 text-[0.72rem] sm:text-[0.78rem] font-bold uppercase tracking-[0.18em] hover:bg-flame-deep transition-colors"
+            >
+              Get Started
+            </a>
+          </div>
         </div>
       </header>
 
@@ -198,7 +206,7 @@ export default async function PersonaLandingPage({
           </div>
 
           <aside className="lg:col-span-5" id="enquire">
-            <div className="lg:sticky lg:top-10">
+            <div className="lg:sticky lg:top-24">
               <LeadForm
                 source={persona.source}
                 eyebrow={persona.formIntro.eyebrow}
@@ -441,7 +449,7 @@ export default async function PersonaLandingPage({
               </p>
               <div className="mt-5">
                 <CTAButton href="#enquire" variant="primary">
-                  Get started
+                  Request your free consultation
                 </CTAButton>
               </div>
             </div>
@@ -499,7 +507,7 @@ export default async function PersonaLandingPage({
               variant="solid-black"
               className="hover:!bg-ink hover:!text-flame"
             >
-              Get started
+              Request your free consultation
             </CTAButton>
             <CTAButton
               href="#enquire"
@@ -521,7 +529,7 @@ export default async function PersonaLandingPage({
             <H2 className="mt-6">From enquiry to <span className="display-italic font-medium text-flame">first session.</span></H2>
             <div className="mt-8 flex flex-wrap gap-3">
               <CTAButton href="#book" variant="primary">
-                Get started
+                Request your free consultation
               </CTAButton>
               <CTAButton href="#enquire" variant="ghost">
                 {persona.ctaPrimary}

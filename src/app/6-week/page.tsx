@@ -16,7 +16,7 @@ import { getGoogleRating } from "@/lib/google-rating";
 export const metadata: Metadata = {
   title: "6-Week Strength Programme | Gain Strength Therapy, Eastbourne",
   description:
-    "Small-group strength training for adults in Eastbourne. Post-rehab, beginners, over-40s. Max six per session, MSc-qualified coaching. Book a free consultation.",
+    "Small-group strength training for adults in Eastbourne. Post-rehab, beginners, over-40s. Max six per session, MSc-qualified coaching. Request your free consultation.",
   robots: { index: false, follow: false },
 };
 
@@ -97,9 +97,9 @@ export default async function GeneralLandingPage() {
 
   return (
     <>
-      {/* ——— Slim header (logo + phone, no nav) ——— */}
-      <header className="bg-ink border-b border-ink-line">
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 h-16 md:h-[72px] flex items-center justify-between gap-6">
+      {/* ——— Slim header (logo left, CTA right) ——— */}
+      <header className="sticky top-0 z-40 bg-ink/95 backdrop-blur-sm border-b border-ink-line">
+        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 h-16 md:h-[72px] flex items-center justify-between gap-4">
           <span className="flex items-center shrink-0" aria-label="Gain Strength Therapy">
             <span className="relative h-9 w-[5.6rem] md:h-10 md:w-[6.25rem]">
               <Image
@@ -112,12 +112,20 @@ export default async function GeneralLandingPage() {
               />
             </span>
           </span>
-          <a
-            href={`tel:${SITE.phoneHref}`}
-            className="hidden sm:inline-flex items-center gap-2 text-[0.78rem] font-bold uppercase tracking-[0.22em] text-paper/80 hover:text-flame transition-colors"
-          >
-            <PhoneCall size={14} /> {SITE.phone}
-          </a>
+          <div className="flex items-center gap-4 md:gap-6">
+            <a
+              href={`tel:${SITE.phoneHref}`}
+              className="hidden sm:inline-flex items-center gap-2 text-[0.78rem] font-bold uppercase tracking-[0.22em] text-paper/80 hover:text-flame transition-colors"
+            >
+              <PhoneCall size={14} /> {SITE.phone}
+            </a>
+            <a
+              href="#enquire"
+              className="inline-flex items-center rounded-sm bg-flame text-ink px-4 sm:px-5 py-2.5 text-[0.72rem] sm:text-[0.78rem] font-bold uppercase tracking-[0.18em] hover:bg-flame-deep transition-colors"
+            >
+              Get Started
+            </a>
+          </div>
         </div>
       </header>
 
@@ -150,7 +158,7 @@ export default async function GeneralLandingPage() {
 
             <div className="mt-10">
               <CTAButton href="#enquire" variant="primary">
-                Start with a free consultation
+                Request your free consultation
               </CTAButton>
             </div>
 
@@ -167,13 +175,13 @@ export default async function GeneralLandingPage() {
           </div>
 
           <aside className="lg:col-span-5" id="enquire">
-            <div className="lg:sticky lg:top-10">
+            <div className="lg:sticky lg:top-24">
               <LeadForm
                 source="6-week-general"
                 eyebrow="Step 01 &middot; No commitment"
-                title="Book a free consultation."
+                title="Request your free consultation."
                 body="Leave your details and we'll email you a link to book your consultation, by phone or in person. No more than 30 minutes, no pressure. Prefer a callback? We'll ring you within two working days."
-                submitLabel="Book a free consultation"
+                submitLabel="Request your free consultation"
               />
             </div>
           </aside>
@@ -320,7 +328,7 @@ export default async function GeneralLandingPage() {
 
         <div className="mt-10">
           <CTAButton href="#enquire" variant="primary">
-            Book a free consultation
+            Request your free consultation
           </CTAButton>
         </div>
       </Section>
@@ -354,7 +362,7 @@ export default async function GeneralLandingPage() {
             <Rule tone="paper" />
             <div className="mt-8">
               <CTAButton href="#enquire" variant="primary">
-                Book a free consultation
+                Request your free consultation
               </CTAButton>
             </div>
           </div>
@@ -387,9 +395,9 @@ export default async function GeneralLandingPage() {
             <LeadForm
               source="6-week-general"
               eyebrow="Step 01 &middot; No commitment"
-              title="Book a free consultation."
+              title="Request your free consultation."
               body="Leave your details and we'll email you a link to book your consultation, by phone or in person. No more than 30 minutes, no pressure. Prefer a callback? We'll ring you within two working days."
-              submitLabel="Book a free consultation"
+              submitLabel="Request your free consultation"
             />
           </div>
         </div>
@@ -426,15 +434,6 @@ export default async function GeneralLandingPage() {
         </div>
       </footer>
 
-      {/* ——— Sticky mobile CTA ——— */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-ink/95 border-t border-ink-line backdrop-blur-sm p-3 lg:hidden">
-        <a
-          href="#enquire"
-          className="block w-full text-center rounded-sm bg-flame text-ink px-5 py-3.5 text-[0.82rem] font-bold uppercase tracking-[0.22em]"
-        >
-          Book a free consultation
-        </a>
-      </div>
     </>
   );
 }
