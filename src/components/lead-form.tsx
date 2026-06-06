@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/analytics";
 
 type FieldKey = "firstName" | "email" | "phone";
 type FieldErrors = Partial<Record<FieldKey, string>>;
@@ -62,6 +63,9 @@ export function LeadForm({
       }
 
       setState("success");
+      // Primary conversion. Fired on success (not the click) so it reflects
+      // a real enquiry; PostHog already auto-captures the UTM/referrer.
+      track("lead_submitted", { source });
       form.reset();
     } catch {
       setFormError("Network issue. Please try again, or call us on 01323 370022.");
