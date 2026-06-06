@@ -77,10 +77,10 @@ export function SiteFooter() {
         <div className="md:col-span-2">
           <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Explore</h3>
           <ul className="mt-5 space-y-2.5 text-paper/75 text-base">
+            <li><Link href="/" className="link-quiet hover:text-paper">Home</Link></li>
             <li><Link href="/about" className="link-quiet hover:text-paper">About</Link></li>
-            <li><Link href="/contact" className="link-quiet hover:text-paper">Enquire</Link></li>
             <li><Link href="/contact" className="link-quiet hover:text-paper">Contact</Link></li>
-            <li><Link href="/contact" className="link-quiet hover:text-paper">Book</Link></li>
+            <li><Link href="/faqs" className="link-quiet hover:text-paper">FAQs</Link></li>
           </ul>
         </div>
 

@@ -35,23 +35,26 @@ export default function AboutPage() {
               <span className="display-italic font-medium text-flame">traditional gyms leave behind.</span>
             </h1>
             <Lede className="mt-10 max-w-none">
-              Gain exists for the people traditional gyms leave behind:
-              complete beginners, anyone recovering from injury, and people
-              managing a health condition. It is a calm, judgement-free space
-              where you can start from zero and build strength at your own pace.
+              From our 40s onwards we steadily lose muscle and bone, and the
+              research is clear that resistance training is the most effective
+              way to slow and reverse it: rebuilding strength, protecting your
+              bones, and keeping you independent for longer. Gain makes that
+              accessible to complete beginners, anyone recovering from injury,
+              and people managing a health condition, in a calm, judgement-free
+              space where you start from zero at your own pace.
             </Lede>
           </div>
         </div>
       </section>
 
       {/* ——— Image mosaic ——— */}
-      <section className="bg-ink">
+      <section className="bg-ink pb-16 md:pb-24">
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16">
-          <div className="grid grid-cols-12 gap-4 md:gap-6">
+          <div className="grid grid-cols-12 gap-4 md:gap-6 items-start">
             <div className="col-span-12 md:col-span-6">
-              <Photo src={IMAGES.gymStretching} alt="Hallum coaching a member through a warm-up stretch" aspect="aspect-[4/5]" tone="warm" />
+              <Photo src={IMAGES.gymStretching} alt="Hallum coaching a member through a warm-up stretch" aspect="aspect-[4/5] md:aspect-square" tone="warm" />
             </div>
-            <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4 md:gap-6 md:pt-16">
+            <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4 md:gap-6">
               <Photo src={IMAGES.gymLunges} alt="Members doing lunges in the gym" aspect="aspect-square" />
               <Photo src={IMAGES.gymMemberDumbbellLunge} alt="Senior female member performing a dumbbell lunge" aspect="aspect-square" />
               <Photo src={IMAGES.gymBoxCoaching} alt="Box step-up coaching" aspect="aspect-square" tone="warm" />
@@ -138,45 +141,45 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <Rule tone="paper" className="my-10" />
+          </div>
+        </div>
 
-            <div className="grid sm:grid-cols-2 gap-5">
-              <div className="border border-ink-line bg-ink-soft p-5">
-                <div className="flex items-center gap-3 text-flame mb-3">
-                  <GraduationCap size={18} />
-                  <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Education</span>
-                </div>
-                <p className="text-paper text-[1.0625rem] leading-relaxed">
-                  <strong className="font-semibold">MSc Sport Physiology</strong>,
-                  University of Brighton
-                </p>
-                <p className="mt-1 text-paper/65 text-base leading-relaxed">
-                  BSc Sports Science, University of Bath
-                </p>
-              </div>
-
-              <div className="border border-ink-line bg-ink-soft p-5">
-                <div className="flex items-center gap-3 text-flame mb-3">
-                  <Trophy size={18} />
-                  <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Experience</span>
-                </div>
-                <p className="text-paper text-[1.0625rem] leading-relaxed">
-                  <strong className="font-semibold">5 years of coaching experience</strong>
-                </p>
-              </div>
-
-              <div className="border border-ink-line bg-ink-soft p-5 sm:col-span-2">
-                <div className="flex items-center gap-3 text-flame mb-3">
-                  <Stethoscope size={18} />
-                  <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Coaching</span>
-                </div>
-                <p className="text-paper text-[1.0625rem] leading-relaxed">
-                  Qualified personal trainer. Specialist focus on
-                  post-rehabilitation progression, chronic conditions, and
-                  strength for life after 40.
-                </p>
-              </div>
+        {/* Credentials — full width across the section */}
+        <div className="mt-12 md:mt-16 grid sm:grid-cols-3 gap-5">
+          <div className="border border-ink-line bg-ink-soft p-5">
+            <div className="flex items-center gap-3 text-flame mb-3">
+              <GraduationCap size={18} />
+              <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Education</span>
             </div>
+            <p className="text-paper text-[1.0625rem] leading-relaxed">
+              <strong className="font-semibold">MSc Sport Physiology</strong>,
+              University of Brighton
+            </p>
+            <p className="mt-1 text-paper/65 text-base leading-relaxed">
+              BSc Sports Science, University of Bath
+            </p>
+          </div>
+
+          <div className="border border-ink-line bg-ink-soft p-5">
+            <div className="flex items-center gap-3 text-flame mb-3">
+              <Trophy size={18} />
+              <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Experience</span>
+            </div>
+            <p className="text-paper text-[1.0625rem] leading-relaxed">
+              <strong className="font-semibold">5 years of coaching experience</strong>
+            </p>
+          </div>
+
+          <div className="border border-ink-line bg-ink-soft p-5">
+            <div className="flex items-center gap-3 text-flame mb-3">
+              <Stethoscope size={18} />
+              <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">Coaching</span>
+            </div>
+            <p className="text-paper text-[1.0625rem] leading-relaxed">
+              Qualified personal trainer. Specialist focus on
+              post-rehabilitation progression, chronic conditions, and
+              strength for life after 40.
+            </p>
           </div>
         </div>
       </Section>
@@ -205,7 +208,7 @@ export default function AboutPage() {
           </div>
           <div className="lg:col-span-8 grid sm:grid-cols-2 gap-6">
             <div>
-              <Photo src={IMAGES.gymInteriorWide} alt="The Gain gym floor with members training" aspect="aspect-[4/5]" sizes="(min-width: 1024px) 30vw, 100vw" />
+              <Photo src={IMAGES.gymWide} alt="The Gain gym floor and equipment" aspect="aspect-[4/5]" sizes="(min-width: 1024px) 30vw, 100vw" />
               <h3 className="display-tight text-xl text-paper mt-4">The gym</h3>
               <p className="mt-2 text-paper/65 text-base leading-relaxed">
                 Small-group personal training, never more than six per session.
@@ -242,7 +245,7 @@ export default function AboutPage() {
           </div>
           <div className="lg:col-span-8">
             <div className="grid sm:grid-cols-2 gap-5">
-              <div className="border border-ink-line bg-ink-soft p-7">
+              <div className="border border-ink-line bg-ink-soft p-7 transition-all duration-300 hover:border-flame/50 hover:bg-ink-mid">
                 <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame">Start here</span>
                 <h3 className="display-tight text-2xl text-paper mt-3">6-week start</h3>
                 <p className="mt-3 text-paper/70 text-base leading-relaxed">
@@ -250,7 +253,7 @@ export default function AboutPage() {
                   real strength gains. The easiest way to test how we work.
                 </p>
               </div>
-              <div className="border border-ink-line bg-ink-soft p-7">
+              <div className="border border-ink-line bg-ink-soft p-7 transition-all duration-300 hover:border-flame/50 hover:bg-ink-mid">
                 <span className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame">Full transformation</span>
                 <h3 className="display-tight text-2xl text-paper mt-3">12-week transformation</h3>
                 <p className="mt-3 text-paper/70 text-base leading-relaxed">

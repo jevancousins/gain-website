@@ -48,7 +48,7 @@ const PILLARS = [
   {
     number: "02",
     title: "MSc-qualified coaching",
-    body: "Led by Hallum Cousins, MSc Sport Physiology. Specialist focus on post-rehab and life after 40.",
+    body: "Led by a coach with an MSc in Sport Physiology. Specialist focus on post-rehab and life after 40.",
   },
   {
     number: "03",

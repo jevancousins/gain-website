@@ -97,8 +97,8 @@ export function LeadForm({
             <h2 className="display-tight text-2xl text-paper">Thanks, we&rsquo;ve got it.</h2>
             <p className="mt-2 text-paper/70 leading-relaxed text-base">
               Check your inbox: we&rsquo;ve emailed you a link to book your
-              consultation, by phone or in person. Prefer a callback? Hallum
-              will ring you within two working days.
+              consultation, by phone or in person. Prefer a callback? We will
+              ring you within two working days.
             </p>
           </div>
         </div>

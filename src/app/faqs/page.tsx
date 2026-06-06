@@ -5,7 +5,7 @@ import { Folio, Kicker, Rule } from "@/components/editorial";
 export const metadata: Metadata = { title: "FAQs" };
 
 const FAQS = [
-  { q: "What happens after I fill in the form?", a: "We'll email you a link to book your free consultation, by phone or in person if you'd like to see the gym first. Prefer not to book? Hallum will call you within two working days. It lasts no more than 30 minutes." },
+  { q: "What happens after I fill in the form?", a: "We'll email you a link to book your free consultation, by phone or in person if you'd like to see the gym first. Prefer not to book? We will call you within two working days. It lasts no more than 30 minutes." },
   { q: "Which programme should I start with?", a: "Most people start with the 6-Week Transformation. It is the easiest way to see how we work and to feel real progress before committing to a longer block. If you already know you want a full transformation, the 12-Week is better value per session and goes deeper. We talk it through on the call." },
   { q: "I haven't trained in years. Will I cope?", a: "Yes. Most people walk in feeling exactly the same. We start where you are, not where we wish you were." },
   { q: "How many people are in a session?", a: "Up to six. Enough for atmosphere, few enough that your coach sees every rep." },
