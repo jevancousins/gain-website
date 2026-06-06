@@ -53,19 +53,10 @@ export default function ContactPage() {
             <Kicker>
               <MapPin size={11} className="inline mr-1 align-middle" /> Visit us
             </Kicker>
-            <address className="not-italic mt-5 text-base leading-relaxed">
-              <a
-                href={`https://maps.google.com/?q=${encodeURIComponent(
-                  `${SITE.name}, ${SITE.address.line1}, ${SITE.address.city} ${SITE.address.postcode}`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-paper hover:text-flame transition-colors"
-              >
-                Gain Strength Therapy<br />
-                {SITE.address.line1}<br />
-                {SITE.address.city}, {SITE.address.postcode}
-              </a>
+            <address className="not-italic mt-5 text-paper text-base leading-relaxed">
+              Gain Strength Therapy<br />
+              {SITE.address.line1}<br />
+              {SITE.address.city}, {SITE.address.postcode}
             </address>
             <p className="mt-4 text-base text-paper/60 leading-relaxed">
               Near Eastbourne town centre: about a 15-minute walk from the
