@@ -31,7 +31,7 @@ export default function PrivacyPage() {
               <li><strong>Health and fitness data:</strong> information you share so we can train you safely.</li>
               <li><strong>Payment information</strong> where relevant.</li>
               <li><strong>Usage data</strong> from your interactions with our website.</li>
-              <li><strong>Cookies and tracking technologies</strong>.</li>
+              <li><strong>Cookieless analytics data</strong> about how you use the website.</li>
             </ul>
           </section>
 
@@ -76,9 +76,9 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="display-tight text-2xl text-paper mb-4">7. Cookies</h2>
+            <h2 className="display-tight text-2xl text-paper mb-4">7. Cookies and analytics</h2>
             <p>
-              Our website uses cookies and similar technologies. You can manage your preferences through your browser.
+              We use privacy-friendly, cookieless analytics (Vercel Web Analytics and PostHog) to understand how the website is used so we can improve it. These do not store cookies or other identifiers on your device, do not track you across other websites, and are not used for advertising. You can manage cookies through your browser.
             </p>
           </section>
 

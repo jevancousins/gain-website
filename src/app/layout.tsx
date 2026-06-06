@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { ChromeGate } from "@/components/chrome-gate";
 import { LocalBusinessSchema } from "@/components/structured-data";
+import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { SITE } from "@/lib/utils";
 
 const montserrat = Montserrat({
@@ -76,6 +77,7 @@ export default function RootLayout({
           <SiteFooter />
         </ChromeGate>
         <LocalBusinessSchema />
+        <AnalyticsProvider />
       </body>
     </html>
   );
