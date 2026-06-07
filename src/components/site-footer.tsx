@@ -63,7 +63,7 @@ export function SiteFooter() {
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex gap-3 text-paper hover:text-flame transition-colors"
+              className="flex gap-3 text-paper/70 hover:text-flame transition-colors"
             >
               <MapPin size={14} className="mt-1 shrink-0" />
               <span>
