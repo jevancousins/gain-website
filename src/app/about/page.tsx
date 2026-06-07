@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Section, H2, FinalCTA, Lede, CTAButton } from "@/components/ui";
 import { Photo } from "@/components/photo";
 import { Folio, Kicker, Rule, PullQuote } from "@/components/editorial";
+import { PersonSchema } from "@/components/structured-data";
 import { IMAGES, TEAM } from "@/lib/utils";
 
 const HALLUM = TEAM[0];
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
+      <PersonSchema />
       {/* ——— HERO ——— */}
       <section className="relative bg-ink">
         <div className="border-b border-paper/10">
