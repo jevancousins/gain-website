@@ -8,6 +8,7 @@ import { ChromeGate } from "@/components/chrome-gate";
 import { LocalBusinessSchema } from "@/components/structured-data";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { SITE } from "@/lib/utils";
+import { getGoogleRating } from "@/lib/google-rating";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -53,9 +54,10 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const rating = await getGoogleRating();
   return (
     <html
       lang="en-GB"
@@ -76,7 +78,7 @@ export default function RootLayout({
         <ChromeGate>
           <SiteFooter />
         </ChromeGate>
-        <LocalBusinessSchema />
+        <LocalBusinessSchema rating={rating} />
         <AnalyticsProvider />
       </body>
     </html>

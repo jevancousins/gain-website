@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import { Section, H2, Lede, FinalCTA } from "@/components/ui";
 import { Folio, Kicker, Rule } from "@/components/editorial";
+import { FaqSchema } from "@/components/structured-data";
 
-export const metadata: Metadata = { title: "FAQs" };
+export const metadata: Metadata = {
+  title: "FAQs",
+  description:
+    "Answers to common questions about Gain Strength Therapy in Eastbourne: which programme to start with, training with an injury or health condition, group size, results, pricing, and what to expect.",
+};
 
 const FAQS = [
   { q: "What happens after I fill in the form?", a: "We'll email you a link to book your free consultation, by phone or in person if you'd like to see the gym first. Prefer not to book? We will call you within two working days. It lasts no more than 30 minutes." },
@@ -21,6 +26,7 @@ const FAQS = [
 export default function FaqsPage() {
   return (
     <>
+      <FaqSchema faqs={FAQS} />
       <section className="relative bg-ink">
         <div className="border-b border-paper/10">
           <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">

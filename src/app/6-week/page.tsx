@@ -12,12 +12,13 @@ import { Photo } from "@/components/photo";
 import { LeadForm } from "@/components/lead-form";
 import { IMAGES, REVIEWS, SITE } from "@/lib/utils";
 import { getGoogleRating } from "@/lib/google-rating";
+import { ServiceSchema, FaqSchema } from "@/components/structured-data";
 
 export const metadata: Metadata = {
   title: "6-Week Strength Programme | Gain Strength Therapy, Eastbourne",
   description:
     "Small-group strength training for adults in Eastbourne. Post-rehab, beginners, over-40s. Max six per session, MSc-qualified coaching. Request your free consultation.",
-  robots: { index: false, follow: false },
+  alternates: { canonical: `${SITE.url}/6-week` },
 };
 
 const FEARS = [
@@ -97,6 +98,13 @@ export default async function GeneralLandingPage() {
 
   return (
     <>
+      <ServiceSchema
+        name="6-Week Strength Programme"
+        description="A six-week small-group strength training programme for adults in Eastbourne, including beginners, over-40s, and people progressing from physio. Maximum six per session, led by an MSc-qualified coach."
+        url={`${SITE.url}/6-week`}
+      />
+      <FaqSchema faqs={FAQS} />
+
       {/* ——— Slim header (logo left, CTA right) ——— */}
       <header className="sticky top-0 z-40 bg-ink/95 backdrop-blur-sm border-b border-ink-line">
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 h-16 md:h-[72px] flex items-center justify-between gap-4">
