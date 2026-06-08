@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
@@ -18,6 +17,7 @@ import { Section, H2, CTAButton, Pill, Lede, Testimonial } from "@/components/ui
 import { Folio, Kicker, Rule, Caption } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { LeadForm } from "@/components/lead-form";
+import { SiteFooter } from "@/components/site-footer";
 import { IMAGES, SITE } from "@/lib/utils";
 import { getGoogleRating } from "@/lib/google-rating";
 import { PERSONA_SLUGS, getPersona } from "../personas";
@@ -159,63 +159,80 @@ export default async function PersonaLandingPage({
       </header>
 
       {/* ——— HERO ——— */}
-      <section className="relative bg-ink">
-        <div className="border-b border-paper/10">
-          <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
-            <Folio number={folio(1)} label="6-Week Programme" />
-            <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
-              {persona.adKicker}
-            </span>
-          </div>
+      <section className="relative bg-ink overflow-hidden">
+        {/* Low-visibility backdrop, echoing the home page's media-led hero */}
+        <div className="absolute inset-0 z-0" aria-hidden="true">
+          <Image
+            src={IMAGES.gymInteriorWide}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover opacity-[0.12]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/85 to-ink" />
         </div>
 
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-14 md:pt-20 pb-16 md:pb-24 grid lg:grid-cols-12 gap-10 lg:gap-16">
-          <div className="lg:col-span-7 relative">
-            <Kicker>{persona.hero.eyebrow}</Kicker>
-            <h1 className="display mt-6 text-[clamp(2.5rem,7.5vw,6.25rem)] text-paper leading-[1.02]">
-              {persona.hero.headlineLead}
-              <br />
-              <span className="display-italic font-medium text-flame">
-                {persona.hero.headlineItalic}
+        <div className="relative z-10">
+          <div className="border-b border-paper/10">
+            <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
+              <Folio number={folio(1)} label="6-Week Programme" />
+              <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
+                {persona.adKicker}
               </span>
-            </h1>
-            <Lede className="mt-10">{persona.hero.lede}</Lede>
-
-            <div className="mt-10 flex flex-wrap gap-3">
-              <CTAButton href="#enquire" variant="primary">
-                {persona.ctaPrimary}
-              </CTAButton>
-              <CTAButton href="#how" variant="ghost">
-                How it works
-              </CTAButton>
-            </div>
-
-            <div className="mt-14">
-              <Photo
-                src={persona.hero.image}
-                alt={persona.hero.imageAlt}
-                aspect="aspect-[16/10]"
-                tone="warm"
-                sizes="(min-width: 1024px) 55vw, 100vw"
-                priority
-              />
-              <Caption>
-                Six-week programmes run in the gym at Dursley Road, Eastbourne.
-              </Caption>
             </div>
           </div>
 
-          <aside className="lg:col-span-5" id="enquire">
-            <div className="lg:sticky lg:top-24">
-              <LeadForm
-                source={persona.source}
-                eyebrow={persona.formIntro.eyebrow}
-                title={persona.formIntro.title}
-                body={persona.formIntro.body}
-                submitLabel={persona.formIntro.submitLabel}
-              />
+          <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-14 md:pt-20 pb-14 md:pb-20 grid lg:grid-cols-12 gap-10 lg:gap-16">
+            <div className="lg:col-span-7 relative">
+              <Kicker>{persona.hero.eyebrow}</Kicker>
+              <h1 className="display mt-6 text-[clamp(2.5rem,7.5vw,6.25rem)] text-paper leading-[1.02]">
+                {persona.hero.headlineLead}
+                <br />
+                <span className="display-italic font-medium text-flame">
+                  {persona.hero.headlineItalic}
+                </span>
+              </h1>
+              <Lede className="mt-8">{persona.hero.lede}</Lede>
+
+              <div className="mt-10 flex flex-wrap gap-3">
+                <CTAButton href="#enquire" variant="primary">
+                  {persona.ctaPrimary}
+                </CTAButton>
+                <CTAButton href="#how" variant="ghost">
+                  How it works
+                </CTAButton>
+              </div>
             </div>
-          </aside>
+
+            <aside className="lg:col-span-5" id="enquire">
+              <div className="lg:sticky lg:top-24">
+                <LeadForm
+                  source={persona.source}
+                  eyebrow={persona.formIntro.eyebrow}
+                  title={persona.formIntro.title}
+                  body={persona.formIntro.body}
+                  submitLabel={persona.formIntro.submitLabel}
+                />
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      {/* ——— Hero image band (sits just below the fold) ——— */}
+      <section className="bg-ink pb-16 md:pb-24">
+        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16">
+          <Photo
+            src={persona.hero.image}
+            alt={persona.hero.imageAlt}
+            aspect="aspect-[16/9] md:aspect-[21/9]"
+            tone="warm"
+            sizes="100vw"
+          />
+          <Caption>
+            Six-week programmes run in the gym at Dursley Road, Eastbourne.
+          </Caption>
         </div>
       </section>
 
@@ -705,29 +722,8 @@ export default async function PersonaLandingPage({
         </div>
       </section>
 
-      {/* ——— Slim footer (no exit links to other site pages) ——— */}
-      <footer className="bg-ink-soft border-t border-ink-line text-paper/65">
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-[0.7rem] uppercase tracking-[0.22em]">
-          <p>
-            © {new Date().getFullYear()} Gain Strength Therapy · Dursley Rd,
-            Eastbourne, BN22 8DJ
-          </p>
-          <div className="flex gap-6">
-            <a
-              href={`tel:${SITE.phoneHref}`}
-              className="hover:text-flame transition-colors"
-            >
-              {SITE.phone}
-            </a>
-            <Link href="/privacy" className="hover:text-paper transition-colors">
-              Privacy
-            </Link>
-            <Link href="/terms" className="hover:text-paper transition-colors">
-              Terms
-            </Link>
-          </div>
-        </div>
-      </footer>
+      {/* Footer mirrors the main site, minus links that navigate away */}
+      <SiteFooter landing />
     </>
   );
 }

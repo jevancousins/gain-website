@@ -88,7 +88,7 @@ export const PERSONAS: Persona[] = [
       headlineLead: "You do not need to be fit to start.",
       headlineItalic: "You start to get fit.",
       lede:
-        "A 6-week strength programme for adults who have never set foot in a gym, or have not in years. Small groups, expert coaching, no judgement, no jargon. We will meet you exactly where you are.",
+        "A 6-week strength programme for adults new to training, or returning after years away: small groups, expert coaching, no judgement.",
       image: IMAGES.gymBoxCoaching,
       imageAlt: "A coach guiding a member through a step-up, gym in the background",
     },
@@ -254,7 +254,7 @@ export const PERSONAS: Persona[] = [
       headlineLead: "Discharged, but not yet strong?",
       headlineItalic: "Bridge the gap.",
       lede:
-        "A 6-week strength programme for adults who are pain-free but know they have not rebuilt full capacity. Progressive loading, expert eyes, no guesswork. Built for the gap between physio and full fitness.",
+        "A 6-week strength programme for the gap between physio and full fitness: progressive loading, expert eyes, no guesswork.",
       image: IMAGES.gymStretching,
       imageAlt: "A coach and an older male member working through a controlled warm-up",
     },
@@ -381,7 +381,7 @@ export const PERSONAS: Persona[] = [
       headlineLead: "Light weights are not enough.",
       headlineItalic: "You need progressive load.",
       lede:
-        "A 6-week strength programme for adults over 60 who want to protect bone density, balance and independence. Evidence-based, properly loaded, never patronising.",
+        "A 6-week strength programme for adults over 60: protect bone density, balance and independence, properly loaded and never patronising.",
       image: IMAGES.gymGroupClass,
       imageAlt: "A small mixed-age group working through coached strength exercises",
     },
@@ -507,7 +507,7 @@ export const PERSONAS: Persona[] = [
       headlineLead: "Deconditioning is not failure.",
       headlineItalic: "It is something we rebuild.",
       lede:
-        "A 6-week strength programme for adults rebuilding after illness, long COVID, or a long stretch of inactivity. Adaptive pacing, expert eyes, judgement-free. Some days you will do less. That is part of the plan.",
+        "A 6-week strength programme for rebuilding after illness or a long stretch of inactivity: adaptive pacing, expert eyes, judgement-free.",
       image: IMAGES.gymWarmup,
       imageAlt: "A coach and a member working through a careful, low-load warm-up",
     },

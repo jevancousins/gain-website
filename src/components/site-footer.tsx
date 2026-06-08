@@ -20,7 +20,12 @@ function FacebookIcon({ size = 16 }: { size?: number }) {
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ landing = false }: { landing?: boolean } = {}) {
+  // On the 6-week landing pages we keep the footer identical to the main
+  // site, but strip every link that navigates to another page (Home, About,
+  // Contact, FAQs) so visitors stay focused on enquiring. The in-page enquiry
+  // form (#enquire) stands in for the "/contact" calls-to-action.
+  const enquireHref = landing ? "#enquire" : "/contact";
   return (
     <footer className="bg-ink-soft text-paper/85 mt-0 border-t border-ink-line">
       <div className="border-b border-ink-line">
@@ -54,7 +59,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="md:col-span-3">
+        <div className={landing ? "md:col-span-4" : "md:col-span-3"}>
           <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Visit</h3>
           <address className="not-italic mt-5 leading-relaxed">
             <a
@@ -77,30 +82,32 @@ export function SiteFooter() {
             <a href={`tel:${SITE.phoneHref}`} className="flex items-center gap-2 hover:text-flame">
               <Phone size={13} /> {SITE.phone}
             </a>
-            <Link href="/contact" className="flex items-center gap-2 hover:text-flame">
+            <Link href={enquireHref} className="flex items-center gap-2 hover:text-flame">
               <Mail size={13} /> Get in touch via the form →
             </Link>
           </div>
         </div>
 
-        <div className="md:col-span-2">
-          <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Explore</h3>
-          <ul className="mt-5 space-y-2.5 text-paper/75 text-base">
-            <li><Link href="/" className="link-quiet hover:text-paper">Home</Link></li>
-            <li><Link href="/about" className="link-quiet hover:text-paper">About</Link></li>
-            <li><Link href="/contact" className="link-quiet hover:text-paper">Contact</Link></li>
-            <li><Link href="/faqs" className="link-quiet hover:text-paper">FAQs</Link></li>
-          </ul>
-        </div>
+        {!landing && (
+          <div className="md:col-span-2">
+            <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Explore</h3>
+            <ul className="mt-5 space-y-2.5 text-paper/75 text-base">
+              <li><Link href="/" className="link-quiet hover:text-paper">Home</Link></li>
+              <li><Link href="/about" className="link-quiet hover:text-paper">About</Link></li>
+              <li><Link href="/contact" className="link-quiet hover:text-paper">Contact</Link></li>
+              <li><Link href="/faqs" className="link-quiet hover:text-paper">FAQs</Link></li>
+            </ul>
+          </div>
+        )}
 
-        <div className="md:col-span-2">
+        <div className={landing ? "md:col-span-3" : "md:col-span-2"}>
           <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Get in touch</h3>
           <p className="mt-5 text-paper/70 text-base leading-relaxed">
             Every new member starts with a free consultation, by phone or in
             person. Leave your details and we&rsquo;ll send you a link to book.
           </p>
           <Link
-            href="/contact"
+            href={enquireHref}
             className="mt-4 inline-flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.22em] text-flame hover:text-paper transition-colors"
           >
             Get started →
@@ -114,7 +121,7 @@ export function SiteFooter() {
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-paper">Privacy</Link>
             <Link href="/terms" className="hover:text-paper">Terms</Link>
-            <Link href="/faqs" className="hover:text-paper">FAQs</Link>
+            {!landing && <Link href="/faqs" className="hover:text-paper">FAQs</Link>}
           </div>
         </div>
       </div>

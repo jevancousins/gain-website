@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
 import {
   PhoneCall,
@@ -10,6 +9,7 @@ import { Section, H2, CTAButton, Lede, Testimonial } from "@/components/ui";
 import { Folio, Rule } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { LeadForm } from "@/components/lead-form";
+import { SiteFooter } from "@/components/site-footer";
 import { IMAGES, REVIEWS, SITE } from "@/lib/utils";
 import { getGoogleRating } from "@/lib/google-rating";
 import { ServiceSchema, FaqSchema } from "@/components/structured-data";
@@ -138,61 +138,76 @@ export default async function GeneralLandingPage() {
       </header>
 
       {/* ——— HERO ——— */}
-      <section className="relative bg-ink">
-        <div className="border-b border-paper/10">
-          <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
-            <Folio number="01" label="6-Week Programme" />
-            <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
-              Eastbourne &middot; Max 6 per session
-            </span>
-          </div>
+      <section className="relative bg-ink overflow-hidden">
+        {/* Low-visibility backdrop, echoing the home page's media-led hero */}
+        <div className="absolute inset-0 z-0" aria-hidden="true">
+          <Image
+            src={IMAGES.gymInteriorWide}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover opacity-[0.12]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/85 to-ink" />
         </div>
 
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-14 md:pt-20 pb-16 md:pb-24 grid lg:grid-cols-12 gap-10 lg:gap-16">
-          <div className="lg:col-span-7 relative">
-            <h1 className="display mt-6 text-[clamp(2.5rem,7.5vw,6.25rem)] text-paper leading-[1.02]">
-              Not sure where to start with
-              <span className="display-italic font-medium text-flame">
-                {" "}strength training?
+        <div className="relative z-10">
+          <div className="border-b border-paper/10">
+            <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
+              <Folio number="01" label="6-Week Programme" />
+              <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
+                Eastbourne &middot; Max 6 per session
               </span>
-            </h1>
-            <Lede className="mt-10">
-              You are not alone, and you do not need to figure it out by
-              yourself. Most people in their 40s, 50s, and 60s know they should
-              be doing something, but walk into a gym and feel completely lost.
-              At Gain, your coach builds your programme around your body, your
-              history, and your goals from day one.
-            </Lede>
-
-            <div className="mt-10">
-              <CTAButton href="#enquire" variant="primary">
-                Request your free consultation
-              </CTAButton>
-            </div>
-
-            <div className="mt-14">
-              <Photo
-                src={IMAGES.gymGroupSession}
-                alt="A small-group strength training session at Gain, Eastbourne"
-                aspect="aspect-[16/10]"
-                tone="warm"
-                sizes="(min-width: 1024px) 55vw, 100vw"
-                priority
-              />
             </div>
           </div>
 
-          <aside className="lg:col-span-5" id="enquire">
-            <div className="lg:sticky lg:top-24">
-              <LeadForm
-                source="6-week-general"
-                eyebrow="Step 01 &middot; No commitment"
-                title="Request your free consultation."
-                body="Leave your details and we'll email you a link to book your consultation, by phone or in person. No more than 30 minutes, no pressure. Prefer a callback? We'll ring you within two working days."
-                submitLabel="Request your free consultation"
-              />
+          <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-14 md:pt-20 pb-14 md:pb-20 grid lg:grid-cols-12 gap-10 lg:gap-16">
+            <div className="lg:col-span-7 relative">
+              <h1 className="display mt-6 text-[clamp(2.5rem,7.5vw,6.25rem)] text-paper leading-[1.02]">
+                Not sure where to start with
+                <span className="display-italic font-medium text-flame">
+                  {" "}strength training?
+                </span>
+              </h1>
+              <Lede className="mt-8">
+                Most people in their 40s, 50s and 60s know they should be
+                training but feel lost in a gym. At Gain, your coach builds the
+                programme around your body, your history and your goals.
+              </Lede>
+
+              <div className="mt-10">
+                <CTAButton href="#enquire" variant="primary">
+                  Request your free consultation
+                </CTAButton>
+              </div>
             </div>
-          </aside>
+
+            <aside className="lg:col-span-5" id="enquire">
+              <div className="lg:sticky lg:top-24">
+                <LeadForm
+                  source="6-week-general"
+                  eyebrow="Step 01 &middot; No commitment"
+                  title="Request your free consultation."
+                  body="Leave your details and we'll email you a link to book your consultation, by phone or in person. No more than 30 minutes, no pressure. Prefer a callback? We'll ring you within two working days."
+                  submitLabel="Request your free consultation"
+                />
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      {/* ——— Hero image band (sits just below the fold) ——— */}
+      <section className="bg-ink pb-16 md:pb-24">
+        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16">
+          <Photo
+            src={IMAGES.gymGroupSession}
+            alt="A small-group strength training session at Gain, Eastbourne"
+            aspect="aspect-[16/9] md:aspect-[21/9]"
+            tone="warm"
+            sizes="100vw"
+          />
         </div>
       </section>
 
@@ -451,37 +466,8 @@ export default async function GeneralLandingPage() {
         </div>
       </section>
 
-      {/* ——— Slim footer ——— */}
-      <footer className="bg-ink-soft border-t border-ink-line text-paper/65">
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-[0.7rem] uppercase tracking-[0.22em]">
-          <div>
-            <p>
-              &copy; {new Date().getFullYear()} Gain Strength Therapy &middot; Dursley Rd,
-              Eastbourne, BN22 8DJ
-            </p>
-            <p className="mt-2 normal-case tracking-normal text-[0.6rem] text-paper/40 leading-relaxed">
-              Strength training is not a substitute for medical advice. If you have an
-              existing condition, please consult your GP before starting a new exercise
-              programme.
-            </p>
-          </div>
-          <div className="flex gap-6">
-            <a
-              href={`tel:${SITE.phoneHref}`}
-              className="hover:text-flame transition-colors"
-            >
-              {SITE.phone}
-            </a>
-            <Link href="/privacy" className="hover:text-paper transition-colors">
-              Privacy
-            </Link>
-            <Link href="/terms" className="hover:text-paper transition-colors">
-              Terms
-            </Link>
-          </div>
-        </div>
-      </footer>
-
+      {/* Footer mirrors the main site, minus links that navigate away */}
+      <SiteFooter landing />
     </>
   );
 }
