@@ -164,7 +164,7 @@ export default async function HomePage() {
           </FeatureCard>
           <FeatureCard n="02" icon={<FlaskConical size={18} />} title="A science-backed approach">
             Your training is grounded in the latest strength and conditioning
-            research, led by Hallum &mdash; our head coach and founder, who holds
+            research, led by Hallum, our head coach and founder, who holds
             a master&rsquo;s degree in sport physiology. No fads, no guesswork,
             no one-size plans.
           </FeatureCard>
