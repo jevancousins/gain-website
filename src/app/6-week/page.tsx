@@ -139,31 +139,35 @@ export default async function GeneralLandingPage() {
 
       {/* ——— HERO ——— */}
       <section className="relative bg-ink overflow-hidden">
-        {/* Low-visibility backdrop, echoing the home page's media-led hero */}
-        <div className="absolute inset-0 z-0" aria-hidden="true">
-          <Image
-            src={IMAGES.gymInteriorWide}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover opacity-40"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/70 to-ink" />
+        <div className="border-b border-paper/10">
+          <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
+            <Folio number="01" label="6-Week Programme" />
+            <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
+              Eastbourne &middot; Max 6 per session
+            </span>
+          </div>
         </div>
 
-        <div className="relative z-10">
-          <div className="border-b border-paper/10">
-            <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
-              <Folio number="01" label="6-Week Programme" />
-              <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
-                Eastbourne &middot; Max 6 per session
-              </span>
+        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 grid gap-10 lg:grid-cols-12 lg:gap-16">
+          {/* Copy + CTA. The hero background image is confined to this block so
+              on mobile it sits only behind the text and CTA: the form drops
+              below it. On desktop the two sit side by side. */}
+          <div className="relative lg:col-span-7 pt-14 md:pt-20 pb-14 md:pb-20">
+            {/* Bleeds to the screen edges horizontally, but only as tall as the
+                copy. The section's overflow-hidden clips the bleed. */}
+            <div className="absolute inset-y-0 -inset-x-6 md:-inset-x-10 lg:inset-x-0 z-0" aria-hidden="true">
+              <Image
+                src={IMAGES.gymInteriorWide}
+                alt=""
+                fill
+                priority
+                sizes="(min-width: 1024px) 58vw, 100vw"
+                className="object-cover opacity-40"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/70 to-ink" />
             </div>
-          </div>
 
-          <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-14 md:pt-20 pb-14 md:pb-20 grid lg:grid-cols-12 gap-10 lg:gap-16">
-            <div className="lg:col-span-7 relative">
+            <div className="relative z-10">
               <h1 className="display mt-6 text-[clamp(2.5rem,7.5vw,6.25rem)] text-paper leading-[1.02]">
                 Not sure where to start with
                 <span className="display-italic font-medium text-flame">
@@ -172,30 +176,31 @@ export default async function GeneralLandingPage() {
               </h1>
               <Lede className="mt-8">
                 Most people in their 40s, 50s and 60s know they should be
-                training but feel lost in a gym. At Gain, your coach builds the
-                programme around your body, your history and your goals.
+                training but feel lost in a gym. Our 6-week programme gives you
+                a coach who builds each session around your body, your history
+                and your goals.
               </Lede>
 
               <div className="mt-10">
                 {/* Hero CTA scrolls to the adjacent hero form, not the final one */}
                 <CTAButton href="#enquire" variant="primary">
-                  Request your free consultation
+                  Get started
                 </CTAButton>
               </div>
             </div>
-
-            <aside className="lg:col-span-5" id="enquire">
-              <div className="lg:sticky lg:top-24">
-                <LeadForm
-                  source="6-week-general"
-                  eyebrow="Step 01 &middot; No commitment"
-                  title="Request your free consultation."
-                  body="Leave your details and we'll email you a link to book your consultation, by phone or in person. No more than 30 minutes, no pressure. Prefer a callback? We'll ring you within two working days."
-                  submitLabel="Request your free consultation"
-                />
-              </div>
-            </aside>
           </div>
+
+          <aside className="lg:col-span-5 pb-14 md:pb-20 lg:pt-20" id="enquire">
+            <div className="lg:sticky lg:top-24">
+              <LeadForm
+                source="6-week-general"
+                eyebrow="Step 01 &middot; No commitment"
+                title="Request your free consultation."
+                body="Leave your details and we'll email you a link to book your consultation, by phone or in person. No more than 30 minutes, no pressure. Prefer a callback? We'll ring you within two working days."
+                submitLabel="Request your free consultation"
+              />
+            </div>
+          </aside>
         </div>
       </section>
 
