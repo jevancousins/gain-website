@@ -32,7 +32,7 @@ const FEARS = [
   },
   {
     headline: "\"I don’t want a big gym.\"",
-    body: "Six people maximum per session. A private studio, not a gym floor. No mirrors, no music, no audience.",
+    body: "Six people maximum per session, in a calm private studio rather than a crowded gym floor. No queues for equipment, no rushing, and a coach with you every step.",
   },
   {
     headline: "\"I’ve been discharged from physio but I’m not strong yet.\"",
