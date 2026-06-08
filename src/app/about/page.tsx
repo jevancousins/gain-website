@@ -90,29 +90,24 @@ export default function AboutPage() {
                 In 2020, I ruptured my ACL and meniscus playing football. I got
                 surgery one month before the first lockdown, but with no gyms
                 open, I had to rehabilitate completely on my own. It was one of
-                the hardest times of my life, going from a sporty
-                20-year-old to not being able to walk, in loads of pain, on top
-                of the isolation we all went through during lockdown.
-              </p>
-              <p>
-                I had two choices: accept my fate and hope my leg strength
-                would return naturally, or take control of the rehab process
-                myself. I chose the latter.
+                the hardest times of my life, going from being very active to
+                not being able to walk, in loads of pain, on top of the
+                isolation we all went through during lockdown.
               </p>
               <p>
                 I was in the middle of my sport science degree, so I knew how
                 to research the best methods for recovery. With no equipment
                 available, I had to get creative to make sure I was progressing
-                each week. On average, it takes someone a year to get back to
-                where they were. Some people never return to playing sport. I
-                was back running within a year. Six years on, I&rsquo;m still
-                playing football with no knee issues.
+                each week. This year-long journey saw me regain my leg strength,
+                confidence and balance, and helped me appreciate the importance
+                of physical strength for our mental health. Strength training
+                every week means I can keep doing the things I love, and that is
+                now my motivator.
               </p>
               <p>
-                That experience taught me something crucial: most people
-                don&rsquo;t need fancy equipment or complicated programmes.
-                They need someone who understands their body, cares whether
-                they improve, and guides them through the process safely.
+                That experience taught me something crucial: getting stronger
+                isn&rsquo;t just about looking good in the mirror; it&rsquo;s
+                about being able to do what you love, for as long as you can.
               </p>
             </div>
 
@@ -120,21 +115,19 @@ export default function AboutPage() {
 
             <div className="space-y-6 text-[1.05rem] text-paper/80 leading-[1.72] prose-body">
               <p>
-                During my master&rsquo;s degree, I worked at a commercial gym
-                as a personal trainer. It became clear how many people were
-                struggling with injuries, pain, or health conditions they
-                didn&rsquo;t know how to manage during exercise. From my own
-                experience, my education, and analysing research, I was able to
-                help hundreds of people get out of pain, build strength, and
-                actually enjoy exercise again. The majority just needed to get
-                stronger, more mobile, and learn how to modify exercises in
-                ways that would help them.
+                During my master&rsquo;s degree, I worked as a personal trainer
+                in a commercial gym. I saw how many people were struggling with
+                injuries, pain, or health conditions, and how lost they felt
+                trying to manage them. Most just needed to get stronger, move
+                better, and learn to exercise in a way that worked for their
+                body. That became my focus.
               </p>
               <p>
                 When I got the opportunity to open a small gym studio, I
                 couldn&rsquo;t turn it down. I wanted to create a space for
-                people who found big gyms intimidating. Somewhere they could
-                improve their health in a safe, non-judgmental environment.
+                people who found big gyms intimidating. Somewhere I could use my
+                expertise to help improve their health in a safe,
+                non-judgmental environment.
               </p>
               <p>
                 That&rsquo;s what Gain is. A place where someone actually cares
@@ -190,7 +183,7 @@ export default function AboutPage() {
       <Section tone="flame" containerClass="!py-28 md:!py-36">
         <div className="max-w-4xl">
           <PullQuote
-            quote="Most people don't need fancy equipment or complicated programmes. They need someone who understands their body, cares whether they improve, and guides them through the process safely."
+            quote="Getting stronger isn't just about looking good in the mirror; it's about being able to do what you love, for as long as you can."
             attribution="Hallum Cousins, Founder"
             tone="ink"
           />

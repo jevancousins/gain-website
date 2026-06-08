@@ -163,10 +163,23 @@ export default function GeneralLandingPage() {
             </div>
           </div>
 
+          {/* Inline image — before the form on mobile (grid row 3); on desktop
+              it sits full-width below the copy/form row, taking the place of
+              the old separate image band. */}
+          <div className="row-start-3 col-span-full pb-12 lg:pb-24">
+            <Photo
+              src={IMAGES.gainSignGroup}
+              alt="Hallum and four members smiling in front of the GAIN sign"
+              aspect="aspect-[16/9] md:aspect-[21/9]"
+              tone="warm"
+              sizes="100vw"
+            />
+          </div>
+
           {/* Enquiry form — beside the copy on desktop (row 2), beneath the
-              hero on mobile (row 3, clear of the background image) */}
+              image on mobile (row 4, clear of the background image) */}
           <aside
-            className="relative z-10 col-span-full lg:col-span-5 lg:col-start-8 row-start-3 lg:row-start-2 pb-14 md:pb-20 lg:pt-20"
+            className="relative z-10 col-span-full lg:col-span-5 lg:col-start-8 row-start-4 lg:row-start-2 pb-14 md:pb-20 lg:pt-20"
             id="enquire"
           >
             <div className="lg:sticky lg:top-24">
@@ -179,19 +192,6 @@ export default function GeneralLandingPage() {
               />
             </div>
           </aside>
-        </div>
-      </section>
-
-      {/* ——— Hero image band (sits just below the fold) ——— */}
-      <section className="bg-ink pb-16 md:pb-24">
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16">
-          <Photo
-            src={IMAGES.gainSignGroup}
-            alt="Hallum and four members smiling in front of the GAIN sign"
-            aspect="aspect-[16/9] md:aspect-[21/9]"
-            tone="warm"
-            sizes="100vw"
-          />
         </div>
       </section>
 
