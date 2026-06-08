@@ -168,9 +168,9 @@ export default async function PersonaLandingPage({
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-[0.12]"
+            className="object-cover opacity-40"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/85 to-ink" />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/70 to-ink" />
         </div>
 
         <div className="relative z-10">
