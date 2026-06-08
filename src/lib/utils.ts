@@ -167,6 +167,9 @@ export const IMAGES = {
   // ——— HEADSHOTS ———
   hallum: "/media/hallum.jpg",
 
+  // ——— PERSONAL / STORY ———
+  hallumHospital: "/media/hallum-hospital.jpg",
+
   // ——— ARCHIVAL — the original Gain team, including people no longer
   //     at Gain (Aaron, Ash, the physio). Use only if historical context
   //     is explicit; never as "the team you'll train with today".
@@ -231,6 +234,15 @@ export const IMAGE_META: Record<string, ImageMeta> = {
     setting: "headshot",
     status: "current",
     tags: ["headshot", "portrait", "Hallum", "coach", "profile", "meet the coach"],
+  },
+
+  "/media/hallum-hospital.jpg": {
+    description:
+      "Hallum, aged 20, lying in an NHS hospital bed (East Sussex Healthcare) shortly after surgery to repair the ACL and meniscus he ruptured playing football in 2020 — the injury that started the Gain story. Personal, documentary photo. Use only with his founder story / 'Meet Hallum' narrative; not a coaching or marketing image.",
+    people: ["Hallum Cousins (founder, aged 20)"],
+    setting: "headshot",
+    status: "current",
+    tags: ["Hallum", "founder story", "ACL", "meniscus", "injury", "rehab", "hospital", "personal", "backstory", "2020", "meet the coach"],
   },
 
   // ——— GYM — Hallum coaching (real photos, May 2026) ———
