@@ -141,7 +141,7 @@ export const PERSONAS: Persona[] = [
           number: "02",
           title: "A small, friendly room",
           body:
-            "Maximum six members per session. No mirrors-and-music big-box gym. Just a calm room of adults who are also there to learn.",
+            "Maximum six members per session. Not a crowded big-box gym floor, just a calm room of adults who are also there to learn, with a coach who knows your name.",
         },
         {
           number: "03",
@@ -402,7 +402,7 @@ export const PERSONAS: Persona[] = [
             "You will not be. We respect your capability. Loads climb when your technique earns them. We are firm and specific, not patronising.",
         },
         {
-          headline: "I tried a gym before. Boring machines, mirrors, music.",
+          headline: "I tried a gym before. Rows of machines, no guidance, easy to feel lost.",
           body:
             "This is none of that. A small room, free weights, varied movements, coached end to end. People come for the strength and stay for the company.",
         },
@@ -530,7 +530,7 @@ export const PERSONAS: Persona[] = [
         {
           headline: "I do not want to be in a crowded gym right now.",
           body:
-            "Maximum six members per session, in a calm, quiet room. No queues, no mirrors, no music you cannot hear yourself over.",
+            "Maximum six members per session, in a calm, quiet room. No crowds, no queues for equipment, no rushing, just space to focus at your own pace.",
         },
         {
           headline: "I might miss sessions when energy is low.",
