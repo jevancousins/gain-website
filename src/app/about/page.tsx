@@ -68,31 +68,27 @@ export default function AboutPage() {
 
       {/* ——— Meet Hallum ——— */}
       <Section tone="ink-mid">
-        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          <div className="lg:col-span-5">
-            <Folio number="02" label="Meet Hallum" />
-            <H2 className="mt-6">The story <span className="display-italic font-medium text-flame">behind Gain.</span></H2>
-            <div className="mt-8">
-              <Photo
-                src={HALLUM.photo}
-                alt="Hallum Cousins, founder of Gain Strength Therapy"
-                aspect="aspect-[4/5]"
-                tone="warm"
-                sizes="(min-width: 1024px) 35vw, 100vw"
-              />
-            </div>
-            <div className="mt-4 md:mt-6">
-              <Photo
-                src={IMAGES.hallumHospital}
-                alt="Hallum in hospital in 2020, recovering from surgery on his ruptured ACL and meniscus"
-                aspect="aspect-[4/5]"
-                tone="cool"
-                caption="2020 — days after surgery on a ruptured ACL and meniscus, a month before lockdown closed every gym."
-                sizes="(min-width: 1024px) 35vw, 100vw"
-              />
-            </div>
-          </div>
+        <Folio number="02" label="Meet Hallum" />
+        <H2 className="mt-6">The story <span className="display-italic font-medium text-flame">behind Gain.</span></H2>
 
+        {/*
+          Two rows on desktop (image left / text right), each pairing a photo
+          with the part of the story it belongs to:
+            · Row 1 — the hospital photo beside the injury & recovery story.
+            · Row 2 — the headshot beside the coaching & opening-Gain story.
+          Source order (hospital → story 1 → headshot → story 2) also gives the
+          right mobile stack, with the headshot sitting between the two blocks.
+        */}
+        <div className="mt-10 lg:mt-14 grid lg:grid-cols-12 gap-x-12 lg:gap-x-16 gap-y-10 lg:gap-y-16 items-start">
+          <div className="lg:col-span-5">
+            <Photo
+              src={IMAGES.hallumHospital}
+              alt="Hallum in hospital in 2020, recovering from surgery on his ruptured ACL and meniscus"
+              aspect="aspect-[4/5]"
+              tone="cool"
+              sizes="(min-width: 1024px) 35vw, 100vw"
+            />
+          </div>
           <div className="lg:col-span-7">
             <Rule tone="paper" className="mb-10" />
             <div className="space-y-6 text-[1.05rem] text-paper/80 leading-[1.72] prose-body">
@@ -120,9 +116,19 @@ export default function AboutPage() {
                 about being able to do what you love, for as long as you can.
               </p>
             </div>
+          </div>
 
-            <Rule tone="paper" className="my-10" />
-
+          <div className="lg:col-span-5">
+            <Photo
+              src={HALLUM.photo}
+              alt="Hallum Cousins, founder of Gain Strength Therapy"
+              aspect="aspect-[4/5]"
+              tone="warm"
+              sizes="(min-width: 1024px) 35vw, 100vw"
+            />
+          </div>
+          <div className="lg:col-span-7">
+            <Rule tone="paper" className="mb-10" />
             <div className="space-y-6 text-[1.05rem] text-paper/80 leading-[1.72] prose-body">
               <p>
                 During my master&rsquo;s degree, I worked as a personal trainer
@@ -145,7 +151,6 @@ export default function AboutPage() {
                 personalised, and pressure-free.
               </p>
             </div>
-
           </div>
         </div>
 

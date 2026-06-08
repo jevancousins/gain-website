@@ -238,11 +238,11 @@ export const IMAGE_META: Record<string, ImageMeta> = {
 
   "/media/hallum-hospital.jpg": {
     description:
-      "Hallum, aged 20, lying in an NHS hospital bed (East Sussex Healthcare) shortly after surgery to repair the ACL and meniscus he ruptured playing football in 2020 — the injury that started the Gain story. Personal, documentary photo. Use only with his founder story / 'Meet Hallum' narrative; not a coaching or marketing image.",
+      "Hallum, aged 20, lying in an NHS hospital bed (East Sussex Healthcare) shortly after surgery to repair the ACL and meniscus he ruptured playing football in 2020 — the injury that started the Gain story. Personal, documentary photo: he is clearly a patient in a hospital gown and bed, not coaching. Use wherever that post-injury / recovery backstory is relevant, including social posts about his comeback.",
     people: ["Hallum Cousins (founder, aged 20)"],
     setting: "headshot",
     status: "current",
-    tags: ["Hallum", "founder story", "ACL", "meniscus", "injury", "rehab", "hospital", "personal", "backstory", "2020", "meet the coach"],
+    tags: ["Hallum", "founder story", "ACL", "meniscus", "injury", "post-injury", "surgery", "rehab", "recovery", "comeback", "hospital", "personal", "backstory", "2020", "social proof"],
   },
 
   // ——— GYM — Hallum coaching (real photos, May 2026) ———
