@@ -5,7 +5,7 @@ Keep in sync with `src/lib/utils.ts` → `IMAGES` and `IMAGE_META`.
 
 Whenever you add, remove, or re-identify a photo, update this file — then sync the matching `IMAGE_META` entry in `src/lib/utils.ts` so code and docs stay aligned.
 
-Last updated: 2026-05-12
+Last updated: 2026-06-08
 
 ---
 
@@ -32,6 +32,7 @@ Last updated: 2026-05-12
 | File | Key | People | Notes |
 |---|---|---|---|
 | `hallum.jpg` | `IMAGES.hallum` | Hallum Cousins | Clean headshot, plain background. Primary "Meet your coach" image. |
+| `hallum-hospital.jpg` | `IMAGES.hallumHospital` | Hallum Cousins (aged 20) | Hallum in an NHS hospital bed after his 2020 ACL/meniscus surgery — the injury that started Gain. Personal backstory image; use only with his founder story (e.g. About → Meet Hallum), never as coaching/marketing. |
 
 ---
 

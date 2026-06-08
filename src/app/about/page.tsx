@@ -81,6 +81,16 @@ export default function AboutPage() {
                 sizes="(min-width: 1024px) 35vw, 100vw"
               />
             </div>
+            <div className="mt-4 md:mt-6">
+              <Photo
+                src={IMAGES.hallumHospital}
+                alt="Hallum in hospital in 2020, recovering from surgery on his ruptured ACL and meniscus"
+                aspect="aspect-[4/5]"
+                tone="cool"
+                caption="2020 — days after surgery on a ruptured ACL and meniscus, a month before lockdown closed every gym."
+                sizes="(min-width: 1024px) 35vw, 100vw"
+              />
+            </div>
           </div>
 
           <div className="lg:col-span-7">
