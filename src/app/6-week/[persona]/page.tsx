@@ -196,7 +196,8 @@ export default async function PersonaLandingPage({
               <Lede className="mt-8">{persona.hero.lede}</Lede>
 
               <div className="mt-10 flex flex-wrap gap-3">
-                <CTAButton href="#book" variant="primary">
+                {/* Hero CTA scrolls to the adjacent hero form, not the final one */}
+                <CTAButton href="#enquire" variant="primary">
                   {persona.ctaPrimary}
                 </CTAButton>
                 <CTAButton href="#how" variant="ghost">
