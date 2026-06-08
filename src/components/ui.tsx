@@ -1,6 +1,9 @@
-import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+// CTAButton (and the bare ScrollLink) live in a client component because they
+// smooth-scroll in-page anchors; imported for local use (FinalCTA) and
+// re-exported so existing imports from "@/components/ui" keep working.
+import { CTAButton, ScrollLink } from "./cta-button";
+export { CTAButton, ScrollLink };
 
 /* ——— Section — dark-first tones ——— */
 
@@ -76,67 +79,6 @@ export function Lede({
     <p className={cn("lede text-xl md:text-[1.35rem] text-paper/75 max-w-2xl", className)}>
       {children}
     </p>
-  );
-}
-
-/* ——— Buttons ——— */
-
-type BtnProps = {
-  href: string;
-  children: React.ReactNode;
-  variant?: "primary" | "secondary" | "ghost" | "outline-cream" | "solid-black";
-  className?: string;
-  external?: boolean;
-  icon?: "arrow" | "up-right" | "none";
-};
-
-export function CTAButton({
-  href,
-  children,
-  variant = "primary",
-  className,
-  external,
-  icon = "arrow",
-}: BtnProps) {
-  const styles = {
-    primary: "bg-flame text-ink hover:bg-flame-deep",
-    secondary: "bg-paper text-ink hover:bg-flame hover:text-ink",
-    ghost: "bg-transparent text-paper border border-paper/40 hover:border-flame hover:text-flame",
-    "outline-cream": "bg-transparent text-paper border border-paper/40 hover:bg-paper/10",
-    "solid-black": "bg-ink text-paper hover:bg-flame hover:text-ink",
-  } as const;
-
-  const cls = cn(
-    "group inline-flex items-center gap-3 rounded-sm px-6 py-4 text-[0.8rem] font-bold uppercase tracking-[0.22em] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flame focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
-    styles[variant],
-    className
-  );
-
-  const IconEl =
-    icon === "up-right" ? (
-      <ArrowUpRight size={15} strokeWidth={2.4} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-    ) : icon === "arrow" ? (
-      <ArrowRight size={15} strokeWidth={2.4} className="transition-transform duration-300 group-hover:translate-x-1" />
-    ) : null;
-
-  const content = (
-    <>
-      <span>{children}</span>
-      {IconEl}
-    </>
-  );
-
-  if (external) {
-    return (
-      <a href={href} className={cls} target="_blank" rel="noopener noreferrer">
-        {content}
-      </a>
-    );
-  }
-  return (
-    <Link href={href} className={cls}>
-      {content}
-    </Link>
   );
 }
 

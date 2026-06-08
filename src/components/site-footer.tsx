@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { SITE, IMAGES } from "@/lib/utils";
+import { ScrollLink } from "./cta-button";
 
 function InstagramIcon({ size = 16 }: { size?: number }) {
   return (
@@ -23,9 +24,12 @@ function FacebookIcon({ size = 16 }: { size?: number }) {
 export function SiteFooter({ landing = false }: { landing?: boolean } = {}) {
   // On the 6-week landing pages we keep the footer identical to the main
   // site, but strip every link that navigates to another page (Home, About,
-  // Contact, FAQs) so visitors stay focused on enquiring. The in-page enquiry
-  // form (#enquire) stands in for the "/contact" calls-to-action.
-  const enquireHref = landing ? "#enquire" : "/contact";
+  // Contact, FAQs) so visitors stay focused on enquiring. The "/contact"
+  // calls-to-action instead smooth-scroll to the on-page enquiry form (#book)
+  // via ScrollLink, which leaves no hash in the URL so the page still opens
+  // at the top.
+  const enquireHref = landing ? "#book" : "/contact";
+  const EnquireLink = landing ? ScrollLink : Link;
   return (
     <footer className="bg-ink-soft text-paper/85 mt-0 border-t border-ink-line">
       <div className="border-b border-ink-line">
@@ -82,9 +86,9 @@ export function SiteFooter({ landing = false }: { landing?: boolean } = {}) {
             <a href={`tel:${SITE.phoneHref}`} className="flex items-center gap-2 hover:text-flame">
               <Phone size={13} /> {SITE.phone}
             </a>
-            <Link href={enquireHref} className="flex items-center gap-2 hover:text-flame">
+            <EnquireLink href={enquireHref} className="flex items-center gap-2 hover:text-flame">
               <Mail size={13} /> Get in touch via the form →
-            </Link>
+            </EnquireLink>
           </div>
         </div>
 
@@ -106,12 +110,12 @@ export function SiteFooter({ landing = false }: { landing?: boolean } = {}) {
             Every new member starts with a free consultation, by phone or in
             person. Leave your details and we&rsquo;ll send you a link to book.
           </p>
-          <Link
+          <EnquireLink
             href={enquireHref}
             className="mt-4 inline-flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.22em] text-flame hover:text-paper transition-colors"
           >
             Get started →
-          </Link>
+          </EnquireLink>
         </div>
       </div>
 
