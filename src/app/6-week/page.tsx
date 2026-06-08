@@ -177,7 +177,8 @@ export default async function GeneralLandingPage() {
               </Lede>
 
               <div className="mt-10">
-                <CTAButton href="#book" variant="primary">
+                {/* Hero CTA scrolls to the adjacent hero form, not the final one */}
+                <CTAButton href="#enquire" variant="primary">
                   Request your free consultation
                 </CTAButton>
               </div>
