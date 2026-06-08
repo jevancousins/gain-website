@@ -11,7 +11,7 @@ import { Photo } from "@/components/photo";
 import { HeroVideo } from "@/components/hero-video";
 import { IMAGES, REVIEWS } from "@/lib/utils";
 import { getGoogleRating } from "@/lib/google-rating";
-import { Users, HeartPulse, Dumbbell, ArrowDown, ExternalLink } from "lucide-react";
+import { Users, HeartPulse, FlaskConical, ArrowDown, ExternalLink } from "lucide-react";
 
 export default async function HomePage() {
   const GOOGLE_RATING = await getGoogleRating();
@@ -162,10 +162,11 @@ export default async function HomePage() {
             affordable than 1-to-1, personalised to your ability, and the
             camaraderie carries you through the hard days.
           </FeatureCard>
-          <FeatureCard n="02" icon={<Dumbbell size={18} />} title="Qualified coaches only">
-            Every session is led by a personal trainer with advanced
-            qualifications and a master&rsquo;s degree in sport physiology.
-            No wander-around inductions, no one-size plans.
+          <FeatureCard n="02" icon={<FlaskConical size={18} />} title="A science-backed approach">
+            Your training is grounded in the latest strength and conditioning
+            research, led by Hallum &mdash; our head coach and founder, who holds
+            a master&rsquo;s degree in sport physiology. No fads, no guesswork,
+            no one-size plans.
           </FeatureCard>
           <FeatureCard n="03" icon={<HeartPulse size={18} />} title="A private, welcoming space">
             Free from the crowds and distractions of a commercial gym.
