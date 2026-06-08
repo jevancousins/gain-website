@@ -5,7 +5,7 @@ import {
   Star,
   ExternalLink,
 } from "lucide-react";
-import { Section, H2, CTAButton, Lede, Testimonial } from "@/components/ui";
+import { Section, H2, CTAButton, ScrollLink, Lede, Testimonial } from "@/components/ui";
 import { Folio, Rule } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { LeadForm } from "@/components/lead-form";
@@ -127,12 +127,12 @@ export default async function GeneralLandingPage() {
             >
               <PhoneCall size={14} /> {SITE.phone}
             </a>
-            <a
-              href="#enquire"
+            <ScrollLink
+              href="#book"
               className="inline-flex items-center rounded-sm bg-flame text-ink px-4 sm:px-5 py-2.5 text-[0.72rem] sm:text-[0.78rem] font-bold uppercase tracking-[0.18em] hover:bg-flame-deep transition-colors"
             >
               Get Started
-            </a>
+            </ScrollLink>
           </div>
         </div>
       </header>
@@ -177,7 +177,7 @@ export default async function GeneralLandingPage() {
               </Lede>
 
               <div className="mt-10">
-                <CTAButton href="#enquire" variant="primary">
+                <CTAButton href="#book" variant="primary">
                   Request your free consultation
                 </CTAButton>
               </div>
@@ -248,7 +248,7 @@ export default async function GeneralLandingPage() {
               ))}
             </ul>
             <div className="mt-10">
-              <CTAButton href="#enquire" variant="primary">
+              <CTAButton href="#book" variant="primary">
                 Tell us about you
               </CTAButton>
             </div>
@@ -350,8 +350,7 @@ export default async function GeneralLandingPage() {
 
         <p className="mt-12 max-w-2xl border-l-2 border-flame/60 pl-4 text-[1.0625rem] text-paper/70 leading-relaxed">
           No contract afterwards. If you want to keep training, ongoing
-          membership is available on a rolling monthly basis. If not, you
-          simply stop.
+          membership is available on a rolling monthly basis.
         </p>
       </Section>
 
@@ -399,7 +398,7 @@ export default async function GeneralLandingPage() {
         </div>
 
         <div className="mt-10">
-          <CTAButton href="#enquire" variant="primary">
+          <CTAButton href="#book" variant="primary">
             Request your free consultation
           </CTAButton>
         </div>
@@ -433,7 +432,7 @@ export default async function GeneralLandingPage() {
             </div>
             <Rule tone="paper" />
             <div className="mt-8">
-              <CTAButton href="#enquire" variant="primary">
+              <CTAButton href="#book" variant="primary">
                 Request your free consultation
               </CTAButton>
             </div>

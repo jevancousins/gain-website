@@ -13,7 +13,7 @@ import {
   Star,
   ExternalLink,
 } from "lucide-react";
-import { Section, H2, CTAButton, Pill, Lede, Testimonial } from "@/components/ui";
+import { Section, H2, CTAButton, ScrollLink, Pill, Lede, Testimonial } from "@/components/ui";
 import { Folio, Kicker, Rule, Caption } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { LeadForm } from "@/components/lead-form";
@@ -148,12 +148,12 @@ export default async function PersonaLandingPage({
             >
               <PhoneCall size={14} /> {SITE.phone}
             </a>
-            <a
-              href="#enquire"
+            <ScrollLink
+              href="#book"
               className="inline-flex items-center rounded-sm bg-flame text-ink px-4 sm:px-5 py-2.5 text-[0.72rem] sm:text-[0.78rem] font-bold uppercase tracking-[0.18em] hover:bg-flame-deep transition-colors"
             >
               Get Started
-            </a>
+            </ScrollLink>
           </div>
         </div>
       </header>
@@ -196,7 +196,7 @@ export default async function PersonaLandingPage({
               <Lede className="mt-8">{persona.hero.lede}</Lede>
 
               <div className="mt-10 flex flex-wrap gap-3">
-                <CTAButton href="#enquire" variant="primary">
+                <CTAButton href="#book" variant="primary">
                   {persona.ctaPrimary}
                 </CTAButton>
                 <CTAButton href="#how" variant="ghost">
@@ -465,7 +465,7 @@ export default async function PersonaLandingPage({
                 consultation. No hidden fees, no pressure.
               </p>
               <div className="mt-5">
-                <CTAButton href="#enquire" variant="primary">
+                <CTAButton href="#book" variant="primary">
                   Request your free consultation
                 </CTAButton>
               </div>
@@ -527,7 +527,7 @@ export default async function PersonaLandingPage({
               Request your free consultation
             </CTAButton>
             <CTAButton
-              href="#enquire"
+              href="#book"
               variant="ghost"
               className="!text-ink !border-ink/80 hover:!bg-ink hover:!text-flame hover:!border-ink"
               icon="none"
@@ -548,7 +548,7 @@ export default async function PersonaLandingPage({
               <CTAButton href="#book" variant="primary">
                 Request your free consultation
               </CTAButton>
-              <CTAButton href="#enquire" variant="ghost">
+              <CTAButton href="#book" variant="ghost">
                 {persona.ctaPrimary}
               </CTAButton>
             </div>
@@ -687,7 +687,7 @@ export default async function PersonaLandingPage({
       </Section>
 
       {/* ——— Final CTA with form ——— */}
-      <section className="relative bg-flame text-ink">
+      <section className="relative bg-flame text-ink" id="book">
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-20 md:py-28 grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
           <div className="lg:col-span-6">
             <span className="inline-block text-[0.68rem] font-bold uppercase tracking-[0.28em] text-ink/75">
