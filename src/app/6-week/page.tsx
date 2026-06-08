@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import {
-  PhoneCall,
-  Star,
-  ExternalLink,
-} from "lucide-react";
+import { PhoneCall } from "lucide-react";
 import { Section, H2, CTAButton, ScrollLink, Lede, Testimonial } from "@/components/ui";
 import { Folio, Rule } from "@/components/editorial";
 import { Photo } from "@/components/photo";
 import { LeadForm } from "@/components/lead-form";
 import { SiteFooter } from "@/components/site-footer";
 import { IMAGES, REVIEWS, SITE } from "@/lib/utils";
-import { getGoogleRating } from "@/lib/google-rating";
 import { ServiceSchema, FaqSchema } from "@/components/structured-data";
 
 export const metadata: Metadata = {
@@ -37,29 +32,6 @@ const FEARS = [
   {
     headline: "\"I’ve been discharged from physio but I’m not strong yet.\"",
     body: "We pick up where your physio left off. Every programme starts with what they said you can and can’t do.",
-  },
-];
-
-const PILLARS = [
-  {
-    number: "01",
-    title: "Six people, one coach",
-    body: "Small enough to coach every rep individually. Same exercises, your weight, your pace.",
-  },
-  {
-    number: "02",
-    title: "MSc-qualified coaching",
-    body: "Led by a coach with an MSc in Sport Physiology. Specialist focus on post-rehab and life after 40.",
-  },
-  {
-    number: "03",
-    title: "Measurable progress",
-    body: "We track one key lift from day one and re-test at week six. You see the numbers change.",
-  },
-  {
-    number: "04",
-    title: "No contract afterwards",
-    body: "The 6-week is the 6-week. Monthly membership available after, but only if it is working for you.",
   },
 ];
 
@@ -93,9 +65,7 @@ const FAQS = [
   },
 ];
 
-export default async function GeneralLandingPage() {
-  const GOOGLE_RATING = await getGoogleRating();
-
+export default function GeneralLandingPage() {
   return (
     <>
       <ServiceSchema
@@ -216,8 +186,8 @@ export default async function GeneralLandingPage() {
       <section className="bg-ink pb-16 md:pb-24">
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16">
           <Photo
-            src={IMAGES.gymGroupSession}
-            alt="A small-group strength training session at Gain, Eastbourne"
+            src={IMAGES.gainSignGroup}
+            alt="Hallum and four members smiling in front of the GAIN sign"
             aspect="aspect-[16/9] md:aspect-[21/9]"
             tone="warm"
             sizes="100vw"
@@ -270,44 +240,38 @@ export default async function GeneralLandingPage() {
         </div>
       </Section>
 
-      {/* ——— Pillars ——— */}
+      {/* ——— Testimonials ——— */}
       <Section tone="ink">
-        <div className="grid md:grid-cols-12 gap-10 items-end mb-10">
+        <div className="grid md:grid-cols-12 gap-10 items-end mb-12">
           <div className="md:col-span-7">
-            <Folio number="03" label="How Gain works" />
+            <Folio number="03" label="What members say" />
             <H2 className="mt-6">
-              The opposite of a
+              Real members,
               <span className="display-italic font-medium text-flame">
-                {" "}big-box gym.
+                {" "}real Eastbourne reviews.
               </span>
             </H2>
           </div>
         </div>
-        <Rule tone="paper" />
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-ink-line">
-          {PILLARS.map((p) => (
-            <div key={p.number} className="py-10 px-2 md:px-8 md:first:pl-0 md:last:pr-0">
-              <span className="block text-[0.68rem] font-bold uppercase tracking-[0.22em] text-flame tabular-nums">
-                / {p.number}
-              </span>
-              <h3 className="mt-5 display-tight text-xl md:text-[1.4rem] text-paper leading-[1.15]">
-                {p.title}
-              </h3>
-              <p className="mt-3 text-paper/70 text-[0.98rem] leading-relaxed">
-                {p.body}
-              </p>
-            </div>
+
+        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
+          {TESTIMONIALS.map((r) => (
+            <Testimonial key={r.author} quote={r.text} name={r.author} />
           ))}
         </div>
-        <Rule tone="paper" />
+
+        <div className="mt-10">
+          <CTAButton href="#book" variant="primary">
+            Request your free consultation
+          </CTAButton>
+        </div>
       </Section>
 
       {/* ——— Visual break: inside Gain ——— */}
       <Section tone="flame" containerClass="!py-14 md:!py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-          <Photo src={IMAGES.gymInteriorWide} alt="The Gain gym floor with members training" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
-          <Photo src={IMAGES.gymMemberDumbbellLunge} alt="An older member performing a dumbbell lunge with good form" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
-          <Photo src={IMAGES.gainSignGroup} alt="Hallum and members together at the GAIN sign" aspect="aspect-[4/3]" sizes="(min-width: 640px) 30vw, 100vw" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+          <Photo src={IMAGES.gymInteriorWide} alt="The Gain gym floor with members training" aspect="aspect-[4/3]" sizes="(min-width: 640px) 45vw, 100vw" />
+          <Photo src={IMAGES.gainSignTwoFemaleMembers} alt="Two women smiling in front of the GAIN sign in the gym" aspect="aspect-[4/3]" sizes="(min-width: 640px) 45vw, 100vw" />
         </div>
       </Section>
 
@@ -368,61 +332,11 @@ export default async function GeneralLandingPage() {
         </p>
       </Section>
 
-      {/* ——— Testimonials ——— */}
-      <Section tone="ink">
-        <div className="grid md:grid-cols-12 gap-10 items-end mb-12">
-          <div className="md:col-span-7">
-            <Folio number="05" label="What members say" />
-            <H2 className="mt-6">
-              Real members,
-              <span className="display-italic font-medium text-flame">
-                {" "}real Eastbourne reviews.
-              </span>
-            </H2>
-          </div>
-        </div>
-
-        <a
-          href={GOOGLE_RATING.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group mb-8 flex flex-wrap items-center gap-4 border border-ink-line bg-ink-soft px-5 py-4 hover:border-flame transition-colors"
-        >
-          <span className="flex items-center gap-1 text-flame" aria-hidden>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
-            ))}
-          </span>
-          <span className="text-sm font-semibold text-paper tabular-nums">
-            {GOOGLE_RATING.stars.toFixed(1)} on Google
-          </span>
-          <span className="h-3 w-px bg-paper/20" aria-hidden />
-          <span className="text-sm text-paper/70 tabular-nums">
-            {GOOGLE_RATING.count} reviews
-          </span>
-          <span className="ml-auto inline-flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.22em] text-flame group-hover:text-paper transition-colors">
-            Read on Google <ExternalLink size={13} />
-          </span>
-        </a>
-
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-          {TESTIMONIALS.map((r) => (
-            <Testimonial key={r.author} quote={r.text} name={r.author} />
-          ))}
-        </div>
-
-        <div className="mt-10">
-          <CTAButton href="#book" variant="primary">
-            Request your free consultation
-          </CTAButton>
-        </div>
-      </Section>
-
       {/* ——— FAQs ——— */}
       <Section tone="ink-soft">
         <div className="grid md:grid-cols-12 gap-10">
           <div className="md:col-span-4">
-            <Folio number="06" label="Questions we hear" />
+            <Folio number="05" label="Questions we hear" />
             <H2 className="mt-6">Before you book.</H2>
           </div>
           <div className="md:col-span-8">
