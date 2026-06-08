@@ -139,58 +139,66 @@ export default async function GeneralLandingPage() {
 
       {/* ——— HERO ——— */}
       <section className="relative bg-ink overflow-hidden">
-        <div className="border-b border-paper/10">
-          <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
-            <Folio number="01" label="6-Week Programme" />
-            <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
-              Eastbourne &middot; Max 6 per session
-            </span>
+        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 grid grid-cols-1 lg:grid-cols-12 lg:gap-x-16">
+          {/* Background image — spans the folio strip and the copy (grid rows
+              1–2), so it sits behind the folio like the home page hero video.
+              On mobile the form is row 3, so the image stops above it; on
+              desktop the form's opaque card sits over it. Bleeds to the
+              container edges; the section's overflow-hidden clips it. */}
+          <div
+            className="relative z-0 row-start-1 row-end-3 col-span-full -mx-6 md:-mx-10 lg:-mx-16"
+            aria-hidden="true"
+          >
+            <Image
+              src={IMAGES.gymInteriorWide}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover opacity-40"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/70 to-ink" />
           </div>
-        </div>
 
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 grid gap-10 lg:grid-cols-12 lg:gap-16">
-          {/* Copy + CTA. The hero background image is confined to this block so
-              on mobile it sits only behind the text and CTA: the form drops
-              below it. On desktop the two sit side by side. */}
-          <div className="relative lg:col-span-7 pt-14 md:pt-20 pb-14 md:pb-20">
-            {/* Bleeds to the screen edges horizontally, but only as tall as the
-                copy. The section's overflow-hidden clips the bleed. */}
-            <div className="absolute inset-y-0 -inset-x-6 md:-inset-x-10 lg:inset-x-0 z-0" aria-hidden="true">
-              <Image
-                src={IMAGES.gymInteriorWide}
-                alt=""
-                fill
-                priority
-                sizes="(min-width: 1024px) 58vw, 100vw"
-                className="object-cover opacity-40"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/70 to-ink" />
-            </div>
-
-            <div className="relative z-10">
-              <h1 className="display mt-6 text-[clamp(2.5rem,7.5vw,6.25rem)] text-paper leading-[1.02]">
-                Not sure where to start with
-                <span className="display-italic font-medium text-flame">
-                  {" "}strength training?
-                </span>
-              </h1>
-              <Lede className="mt-8">
-                Most people in their 40s, 50s and 60s know they should be
-                training but feel lost in a gym. Our 6-week programme gives you
-                a coach who builds each session around your body, your history
-                and your goals.
-              </Lede>
-
-              <div className="mt-10">
-                {/* Hero CTA scrolls to the adjacent hero form, not the final one */}
-                <CTAButton href="#enquire" variant="primary">
-                  Get started
-                </CTAButton>
-              </div>
+          {/* Folio strip — grid row 1 */}
+          <div className="relative z-10 row-start-1 col-span-full -mx-6 md:-mx-10 lg:-mx-16 border-b border-paper/10">
+            <div className="px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
+              <Folio number="01" label="6-Week Programme" />
+              <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/55">
+                Eastbourne &middot; Max 6 per session
+              </span>
             </div>
           </div>
 
-          <aside className="lg:col-span-5 pb-14 md:pb-20 lg:pt-20" id="enquire">
+          {/* Copy + CTA — grid row 2, left columns */}
+          <div className="relative z-10 row-start-2 col-span-full lg:col-span-7 lg:col-start-1 pt-14 md:pt-20 pb-14 md:pb-20">
+            <h1 className="display mt-6 text-[clamp(2.5rem,7.5vw,6.25rem)] text-paper leading-[1.02]">
+              Not sure where to start with
+              <span className="display-italic font-medium text-flame">
+                {" "}strength training?
+              </span>
+            </h1>
+            <Lede className="mt-8">
+              Most people in their 40s, 50s and 60s know they should be
+              training but feel lost in a gym. Our 6-week programme gives you
+              a coach who builds each session around your body, your history
+              and your goals.
+            </Lede>
+
+            <div className="mt-10">
+              {/* Hero CTA scrolls to the adjacent hero form, not the final one */}
+              <CTAButton href="#enquire" variant="primary">
+                Get started
+              </CTAButton>
+            </div>
+          </div>
+
+          {/* Enquiry form — beside the copy on desktop (row 2), beneath the
+              hero on mobile (row 3, clear of the background image) */}
+          <aside
+            className="relative z-10 col-span-full lg:col-span-5 lg:col-start-8 row-start-3 lg:row-start-2 pb-14 md:pb-20 lg:pt-20"
+            id="enquire"
+          >
             <div className="lg:sticky lg:top-24">
               <LeadForm
                 source="6-week-general"
