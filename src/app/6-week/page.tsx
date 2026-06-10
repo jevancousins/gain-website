@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { PhoneCall } from "lucide-react";
 import { Section, H2, CTAButton, ScrollLink, Lede, Testimonial } from "@/components/ui";
 import { Folio, Rule } from "@/components/editorial";
 import { Photo } from "@/components/photo";
@@ -91,12 +90,6 @@ export default function GeneralLandingPage() {
             </span>
           </span>
           <div className="flex items-center gap-4 md:gap-6">
-            <a
-              href={`tel:${SITE.phoneHref}`}
-              className="hidden sm:inline-flex items-center gap-2 text-[0.78rem] font-bold uppercase tracking-[0.22em] text-paper/80 hover:text-flame transition-colors"
-            >
-              <PhoneCall size={14} /> {SITE.phone}
-            </a>
             <ScrollLink
               href="#book"
               className="inline-flex items-center rounded-sm bg-flame text-ink px-4 sm:px-5 py-2.5 text-[0.72rem] sm:text-[0.78rem] font-bold uppercase tracking-[0.18em] hover:bg-flame-deep transition-colors"
@@ -109,27 +102,20 @@ export default function GeneralLandingPage() {
 
       {/* ——— HERO ——— */}
       <section className="relative bg-ink overflow-hidden">
-        <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 grid grid-cols-1 lg:grid-cols-12 lg:gap-x-16">
-          {/* Background image — spans the folio strip and the copy (grid rows
-              1–2), so it sits behind the folio like the home page hero video.
-              On mobile the form is row 3, so the image stops above it; on
-              desktop the form's opaque card sits over it. Bleeds to the
-              container edges; the section's overflow-hidden clips it. */}
-          <div
-            className="relative z-0 row-start-1 row-end-3 col-span-full -mx-6 md:-mx-10 lg:-mx-16"
-            aria-hidden="true"
-          >
-            <Image
-              src={IMAGES.gymInteriorWide}
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover opacity-40"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/70 to-ink" />
-          </div>
+        {/* Background image — full-bleed horizontally, capped at viewport height vertically */}
+        <div className="absolute inset-x-0 top-0 h-screen z-0" aria-hidden="true">
+          <Image
+            src={IMAGES.gymInteriorWide}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover opacity-40"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/70 to-ink" />
+        </div>
 
+        <div className="relative z-10 mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 grid grid-cols-1 lg:grid-cols-12 lg:gap-x-16">
           {/* Folio strip — grid row 1 */}
           <div className="relative z-10 row-start-1 col-span-full -mx-6 md:-mx-10 lg:-mx-16 border-b border-paper/10">
             <div className="px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
@@ -170,7 +156,7 @@ export default function GeneralLandingPage() {
             <Photo
               src={IMAGES.gainSignGroup}
               alt="Hallum and four members smiling in front of the GAIN sign"
-              aspect="aspect-[16/9] md:aspect-[21/9]"
+              aspect="aspect-[4/3]"
               tone="warm"
               sizes="100vw"
             />
@@ -179,7 +165,7 @@ export default function GeneralLandingPage() {
           {/* Enquiry form — beside the copy on desktop (row 2), beneath the
               image on mobile (row 4, clear of the background image) */}
           <aside
-            className="relative z-10 col-span-full lg:col-span-5 lg:col-start-8 row-start-4 lg:row-start-2 pb-14 md:pb-20 lg:pt-20"
+            className="relative z-10 col-span-full lg:col-span-5 lg:col-start-8 row-start-4 lg:row-start-2 pb-14 md:pb-20 lg:pt-8"
             id="enquire"
           >
             <div className="lg:sticky lg:top-24">
