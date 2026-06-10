@@ -156,7 +156,7 @@ export default function GeneralLandingPage() {
             <Photo
               src={IMAGES.gainSignGroup}
               alt="Hallum and four members smiling in front of the GAIN sign"
-              aspect="aspect-[4/3]"
+              aspect="aspect-[4/3] lg:aspect-[16/9]"
               tone="warm"
               sizes="100vw"
             />
