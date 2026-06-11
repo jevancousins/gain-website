@@ -18,13 +18,13 @@ export default async function HomePage() {
   return (
     <>
       {/* ——— HERO: Full-bleed video ——— */}
-      <section className="relative overflow-hidden bg-ink text-paper min-h-[88vh] md:min-h-[86vh] flex flex-col">
+      <section className="relative overflow-hidden bg-ink text-paper min-h-[calc(100dvh-4rem)] md:min-h-[calc(100dvh-6.5rem)] flex flex-col">
         <HeroVideo />
 
         <div className="relative z-10 border-b border-paper/15">
           <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-5 flex items-center justify-between gap-6 flex-wrap">
             <Folio number="01" label="Eastbourne · BN22" />
-            <span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">
+            <span className="hidden md:inline-block text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">
               Private strength training
             </span>
           </div>
