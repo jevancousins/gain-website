@@ -34,7 +34,7 @@ export default async function HomePage() {
           <div className="w-full mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 pt-20 pb-14 md:pb-20">
             <div className="grid lg:grid-cols-12 gap-10 items-end">
               <div className="lg:col-span-9">
-                <span className="inline-block text-[0.68rem] font-bold uppercase tracking-[0.28em] text-flame anim-rise d-0">
+                <span className="inline-block text-[0.6rem] md:text-[0.68rem] font-bold uppercase tracking-[0.12em] md:tracking-[0.28em] text-flame anim-rise d-0">
                   Beginners · Post-rehab · Older adults
                 </span>
                 <h1 className="display mt-6 text-[clamp(2.75rem,9vw,8.5rem)] text-paper">
