@@ -210,18 +210,18 @@ export function FinalCTA({
         </div>
         <div className="md:col-span-5">
           <p className="lede text-lg md:text-xl text-ink/85 max-w-md">{body}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex gap-3">
             <CTAButton
               href="/contact"
               variant="solid-black"
-              className="hover:!bg-ink hover:!text-flame"
+              className="flex-1 justify-center hover:!bg-ink hover:!text-flame"
             >
               Get in touch
             </CTAButton>
             <CTAButton
               href="/about"
               variant="ghost"
-              className="!text-ink !border-ink/80 hover:!bg-ink hover:!text-flame hover:!border-ink"
+              className="flex-1 justify-center !text-ink !border-ink/80 hover:!bg-ink hover:!text-flame hover:!border-ink"
             >
               Learn more
             </CTAButton>
