@@ -238,7 +238,7 @@ export function LeadForm({
       )}
 
       <p className="text-sm italic text-paper/55">
-        Your call is free. No pressure, no obligation.
+        Your consultation is free. No pressure, no obligation.
       </p>
     </form>
   );
