@@ -90,13 +90,22 @@ export function ScrollLink({
   href,
   children,
   className,
+  onClick,
 }: {
   href: string;
   children: React.ReactNode;
   className?: string;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }) {
   return (
-    <a href={href} className={className} onClick={(e) => scrollToHash(e, href)}>
+    <a
+      href={href}
+      className={className}
+      onClick={(e) => {
+        onClick?.(e);
+        scrollToHash(e, href);
+      }}
+    >
       {children}
     </a>
   );
