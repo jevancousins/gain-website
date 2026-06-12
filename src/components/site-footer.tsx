@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Mail, Phone } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { SITE, IMAGES } from "@/lib/utils";
 import { ScrollLink } from "./cta-button";
 
@@ -28,6 +31,9 @@ export function SiteFooter({ landing = false }: { landing?: boolean } = {}) {
   // calls-to-action instead smooth-scroll to the on-page enquiry form (#book)
   // via ScrollLink, which leaves no hash in the URL so the page still opens
   // at the top.
+  const pathname = usePathname();
+  const scrollTop = (href: string) =>
+    pathname === href ? () => window.scrollTo({ top: 0, behavior: "smooth" }) : undefined;
   const enquireHref = landing ? "#book" : "/contact";
   const EnquireLink = landing ? ScrollLink : Link;
   return (
@@ -86,7 +92,7 @@ export function SiteFooter({ landing = false }: { landing?: boolean } = {}) {
             <a href={`tel:${SITE.phoneHref}`} className="flex items-center gap-2 hover:text-flame">
               <Phone size={13} /> {SITE.phone}
             </a>
-            <EnquireLink href={enquireHref} className="flex items-center gap-2 hover:text-flame">
+            <EnquireLink href={enquireHref} className="flex items-center gap-2 hover:text-flame" onClick={scrollTop(enquireHref)}>
               <Mail size={13} /> Get in touch via the form →
             </EnquireLink>
           </div>
@@ -96,10 +102,10 @@ export function SiteFooter({ landing = false }: { landing?: boolean } = {}) {
           <div className="md:col-span-2">
             <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-paper/60">Explore</h3>
             <ul className="mt-5 space-y-2.5 text-paper/75 text-base">
-              <li><Link href="/" className="link-quiet hover:text-paper">Home</Link></li>
-              <li><Link href="/about" className="link-quiet hover:text-paper">About</Link></li>
-              <li><Link href="/contact" className="link-quiet hover:text-paper">Contact</Link></li>
-              <li><Link href="/faqs" className="link-quiet hover:text-paper">FAQs</Link></li>
+              <li><Link href="/" className="link-quiet hover:text-paper" onClick={scrollTop("/")}>Home</Link></li>
+              <li><Link href="/about" className="link-quiet hover:text-paper" onClick={scrollTop("/about")}>About</Link></li>
+              <li><Link href="/contact" className="link-quiet hover:text-paper" onClick={scrollTop("/contact")}>Contact</Link></li>
+              <li><Link href="/faqs" className="link-quiet hover:text-paper" onClick={scrollTop("/faqs")}>FAQs</Link></li>
             </ul>
           </div>
         )}
@@ -113,6 +119,7 @@ export function SiteFooter({ landing = false }: { landing?: boolean } = {}) {
           <EnquireLink
             href={enquireHref}
             className="mt-4 inline-flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.22em] text-flame hover:text-paper transition-colors"
+            onClick={scrollTop(enquireHref)}
           >
             Get started →
           </EnquireLink>
@@ -123,9 +130,9 @@ export function SiteFooter({ landing = false }: { landing?: boolean } = {}) {
         <div className="mx-auto max-w-[86rem] px-6 md:px-10 lg:px-16 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-[0.7rem] uppercase tracking-[0.22em] text-paper/60">
           <p>© {new Date().getFullYear()} Gain Strength Therapy · All rights reserved</p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-paper">Privacy</Link>
-            <Link href="/terms" className="hover:text-paper">Terms</Link>
-            {!landing && <Link href="/faqs" className="hover:text-paper">FAQs</Link>}
+            <Link href="/privacy" className="hover:text-paper" onClick={scrollTop("/privacy")}>Privacy</Link>
+            <Link href="/terms" className="hover:text-paper" onClick={scrollTop("/terms")}>Terms</Link>
+            {!landing && <Link href="/faqs" className="hover:text-paper" onClick={scrollTop("/faqs")}>FAQs</Link>}
           </div>
         </div>
       </div>

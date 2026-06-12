@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { cn, IMAGES, SITE } from "@/lib/utils";
 
@@ -15,6 +16,9 @@ const NAV = [
 export function SiteNav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const scrollTop = (href: string) =>
+    pathname === href ? () => window.scrollTo({ top: 0, behavior: "smooth" }) : undefined;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -47,7 +51,7 @@ export function SiteNav() {
         <Link
           href="/"
           className="flex items-center shrink-0"
-          onClick={() => setOpen(false)}
+          onClick={() => { setOpen(false); scrollTop("/")?.(); }}
           aria-label="Gain Strength Therapy, home"
         >
           <span className="relative h-9 w-[5.6rem] md:h-10 md:w-[6.25rem]">
@@ -68,6 +72,7 @@ export function SiteNav() {
               key={item.href}
               href={item.href}
               className="text-paper/80 hover:text-paper link-quiet"
+              onClick={scrollTop(item.href)}
             >
               {item.label}
             </Link>
@@ -78,6 +83,7 @@ export function SiteNav() {
           <Link
             href="/contact"
             className="inline-flex items-center gap-2 rounded-sm bg-flame text-ink px-5 py-2.5 text-[0.78rem] font-bold uppercase tracking-[0.2em] hover:bg-flame-deep transition-colors"
+            onClick={scrollTop("/contact")}
           >
             Get started
           </Link>
@@ -108,7 +114,7 @@ export function SiteNav() {
               href={item.href}
               className="display-tight text-3xl text-paper anim-rise"
               style={{ animationDelay: `${i * 60}ms` }}
-              onClick={() => setOpen(false)}
+              onClick={() => { setOpen(false); scrollTop(item.href)?.(); }}
             >
               <span className="text-paper/55 text-xs mr-3 align-middle tabular-nums">
                 0{i + 1}
@@ -119,7 +125,7 @@ export function SiteNav() {
           <Link
             href="/contact"
             className="mt-4 inline-flex items-center justify-center rounded-sm bg-flame text-ink px-6 py-4 text-[0.82rem] font-bold uppercase tracking-[0.2em]"
-            onClick={() => setOpen(false)}
+            onClick={() => { setOpen(false); scrollTop("/contact")?.(); }}
           >
             Get started
           </Link>
