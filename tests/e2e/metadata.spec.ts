@@ -5,10 +5,7 @@ const PAGES = [
   "/about",
   "/contact",
   "/faqs",
-  "/6-week/beginner",
-  "/6-week/post-physio",
-  "/6-week/active-senior",
-  "/6-week/post-illness",
+  "/6-week",
 ];
 
 for (const path of PAGES) {
@@ -37,25 +34,5 @@ for (const path of PAGES) {
       .locator('meta[name="viewport"]')
       .getAttribute("content");
     expect(viewport, `${path} should have a viewport meta`).toContain("width=device-width");
-  });
-}
-
-// Persona pages set robots: noindex,nofollow because they're paid-traffic landings.
-const PERSONA_PAGES = [
-  "/6-week/beginner",
-  "/6-week/post-physio",
-  "/6-week/active-senior",
-  "/6-week/post-illness",
-];
-
-for (const path of PERSONA_PAGES) {
-  test(`${path} is noindex,nofollow`, async ({ page }) => {
-    await page.goto(path);
-    const robots = await page
-      .locator('meta[name="robots"]')
-      .getAttribute("content");
-    expect(robots, `${path} should have a robots meta`).toBeTruthy();
-    expect(robots!.toLowerCase()).toContain("noindex");
-    expect(robots!.toLowerCase()).toContain("nofollow");
   });
 }

@@ -9,7 +9,7 @@ import { IMAGES, REVIEWS, SITE } from "@/lib/utils";
 import { ServiceSchema, FaqSchema } from "@/components/structured-data";
 
 export const metadata: Metadata = {
-  title: "6-Week Strength Programme | Gain Strength Therapy, Eastbourne",
+  title: "6-Week Strength Programme | Eastbourne",
   description:
     "Small-group strength training for adults in Eastbourne. Post-rehab, beginners, over-40s. Max six per session, MSc-qualified coaching. Request your free consultation.",
   alternates: { canonical: `${SITE.url}/6-week` },
