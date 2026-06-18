@@ -14,7 +14,7 @@ for (const path of PAGES) {
 
     const title = await page.title();
     expect(title.length, `${path} title should be non-empty`).toBeGreaterThan(0);
-    expect(title.length, `${path} title should be under 100 chars`).toBeLessThan(100);
+    expect(title.length, `${path} title should be under 80 chars`).toBeLessThan(80);
 
     const description = await page
       .locator('meta[name="description"]')
