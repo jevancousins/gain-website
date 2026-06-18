@@ -1,14 +1,43 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "fs/promises";
+import path from "path";
 
 export const alt = "Gain Strength Therapy: strength training in Eastbourne";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/**
- * Dynamic Open Graph image. Shown in WhatsApp, iMessage, Facebook, LinkedIn
- * and Twitter link previews. Deliberately simple — typography + brand flame.
- */
+async function loadGoogleFont(
+  family: string,
+  weight: number,
+  italic = false
+): Promise<ArrayBuffer> {
+  const axis = `ital,wght@${italic ? 1 : 0},${weight}`;
+  const css = await (
+    await fetch(
+      `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:${axis}&display=swap`,
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+      }
+    )
+  ).text();
+  const fontUrl = css.match(/src: url\(([^)]+)\)/)?.[1];
+  if (!fontUrl) throw new Error(`No font URL found for ${family} ${weight}`);
+  return (await fetch(fontUrl)).arrayBuffer();
+}
+
 export default async function OgImage() {
+  const [logoBuffer, font900, font500italic, font700] = await Promise.all([
+    readFile(path.join(process.cwd(), "public/media/logo.png")),
+    loadGoogleFont("Montserrat", 900),
+    loadGoogleFont("Montserrat", 500, true),
+    loadGoogleFont("Montserrat", 700),
+  ]);
+
+  const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -21,32 +50,18 @@ export default async function OgImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px 80px",
-          fontFamily: "sans-serif",
+          fontFamily: "'Montserrat', sans-serif",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          <div
-            style={{
-              fontSize: 44,
-              fontWeight: 900,
-              letterSpacing: "-0.04em",
-            }}
-          >
-            GAIN
-          </div>
-          <div
-            style={{
-              fontSize: 13,
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              opacity: 0.6,
-              paddingLeft: 18,
-              borderLeft: "1px solid rgba(255,255,255,0.2)",
-            }}
-          >
-            Strength Therapy
-          </div>
-        </div>
+        {/* Real logo: white wordmark + runner icon, transparent background */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoSrc}
+          width={248}
+          height={80}
+          alt=""
+          style={{ objectFit: "contain", objectPosition: "left center" }}
+        />
 
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           <div
@@ -81,7 +96,7 @@ export default async function OgImage() {
               color: "#FC832C",
             }}
           >
-            who don&apos;t like gyms.
+            who don&#39;t like gyms.
           </div>
         </div>
 
@@ -93,7 +108,7 @@ export default async function OgImage() {
             opacity: 0.6,
             textTransform: "uppercase",
             letterSpacing: "0.22em",
-            fontWeight: 600,
+            fontWeight: 700,
           }}
         >
           <span>Eastbourne · BN22 8DJ</span>
@@ -101,6 +116,13 @@ export default async function OgImage() {
         </div>
       </div>
     ),
-    size
+    {
+      ...size,
+      fonts: [
+        { name: "Montserrat", data: font900, weight: 900, style: "normal" },
+        { name: "Montserrat", data: font500italic, weight: 500, style: "italic" },
+        { name: "Montserrat", data: font700, weight: 700, style: "normal" },
+      ],
+    }
   );
 }
