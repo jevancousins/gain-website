@@ -3,7 +3,7 @@ import { test, expect } from "./fixtures";
 const TEST_MARKER = "[QA-TEST]";
 
 // We test the form on /contact. The same LeadForm component is used on
-// the /6-week/* landings, so we only need to exercise it once.
+// the /6-week landing, so we only need to exercise it once.
 test("lead form on /contact submits successfully and shows the success state", async ({
   page,
 }) => {
