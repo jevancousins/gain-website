@@ -17,8 +17,8 @@ async function loadGoogleFont(
       `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:${axis}&display=swap`,
       {
         headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          // Old UA so Google Fonts returns TTF instead of WOFF2 — Satori only supports TTF/OTF
+          "User-Agent": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
         },
       }
     )
