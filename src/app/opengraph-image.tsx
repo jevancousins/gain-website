@@ -12,19 +12,18 @@ async function loadGoogleFont(
   italic = false
 ): Promise<ArrayBuffer> {
   const axis = `ital,wght@${italic ? 1 : 0},${weight}`;
+  // Send no User-Agent: Google then serves a plain TTF (format('truetype')),
+  // which is the only thing Satori/ImageResponse accepts. A modern browser UA
+  // yields WOFF2 and a legacy IE UA yields EOT — both rejected by Satori.
   const css = await (
     await fetch(
-      `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:${axis}&display=swap`,
-      {
-        headers: {
-          // Old UA so Google Fonts returns TTF instead of WOFF2 — Satori only supports TTF/OTF
-          "User-Agent": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
-        },
-      }
+      `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:${axis}&display=swap`
     )
   ).text();
-  const fontUrl = css.match(/src: url\(([^)]+)\)/)?.[1];
-  if (!fontUrl) throw new Error(`No font URL found for ${family} ${weight}`);
+  const fontUrl = css.match(
+    /src: url\(([^)]+)\) format\('(?:opentype|truetype)'\)/
+  )?.[1];
+  if (!fontUrl) throw new Error(`No TTF/OTF font URL found for ${family} ${weight}`);
   return (await fetch(fontUrl)).arrayBuffer();
 }
 
