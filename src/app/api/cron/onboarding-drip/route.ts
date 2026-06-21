@@ -31,6 +31,27 @@ const DRIP_SEQUENCE = [
   { emailIndex: 6, daysAfterJoined: 21 },
 ] as const;
 
+// Enrolment cutoff. Only members who joined on or after this date enter the
+// drip, so the first run never back-emails the whole existing membership: a
+// member who joined months ago has every sent-flag false, but is excluded here
+// rather than being blasted all six emails at once. Set to the go-live date;
+// override with ONBOARDING_DRIP_START_DATE (YYYY-MM-DD). String compare is
+// chronological for ISO dates.
+const DRIP_START_DATE = process.env.ONBOARDING_DRIP_START_DATE ?? "2026-06-21";
+
+// Email 5 links to the nutrition guide PDF, which is not yet hosted. Until it
+// ships at public/media/gain-nutrition-guide.pdf, skip step 5 so we never email
+// a link to a 404. The step stays unsent and is delivered (late, if need be)
+// once this is flipped on. Set ONBOARDING_NUTRITION_GUIDE_READY=true when live.
+const NUTRITION_GUIDE_READY = process.env.ONBOARDING_NUTRITION_GUIDE_READY === "true";
+const NUTRITION_EMAIL_INDEX = 5;
+
+/** Whether a drip step may be sent right now (gates the unpublished guide). */
+function stepEligible(emailIndex: number): boolean {
+  if (emailIndex === NUTRITION_EMAIL_INDEX && !NUTRITION_GUIDE_READY) return false;
+  return true;
+}
+
 function gate(request: Request): boolean {
   const expected = [process.env.CRON_SECRET, process.env.TEAMUP_DIAG_KEY].filter(
     (v): v is string => Boolean(v),
@@ -80,26 +101,36 @@ export async function GET(request: Request) {
     if (!dryRun) await ensureOnboardingProperties();
     const members = await loadOnboardingMembers();
 
-    // Build the list of due-but-unsent emails across all members.
+    // Pick at most ONE email per member per run: the earliest due-but-unsent
+    // eligible step. Capping to one is what makes a missed run (outage) safe —
+    // a member never receives several drip emails in a single run, they catch
+    // up one per day. DRIP_SEQUENCE is ordered by threshold, so the first match
+    // walking forward is the earliest due step.
     const plans: DripPlan[] = [];
     let noJoinDate = 0;
+    let preStart = 0;
     for (const m of members) {
       if (!m.joined) {
         noJoinDate += 1;
         continue;
       }
+      if (m.joined < DRIP_START_DATE) {
+        preStart += 1;
+        continue;
+      }
       const elapsed = daysSince(m.joined, todayYmd);
       if (Number.isNaN(elapsed)) continue;
       for (const step of DRIP_SEQUENCE) {
-        const alreadySent = m.sent[step.emailIndex - 1];
-        if (!alreadySent && elapsed >= step.daysAfterJoined) {
-          plans.push({
-            email: m.email,
-            firstName: m.firstName,
-            emailIndex: step.emailIndex,
-            pageId: m.pageId,
-          });
-        }
+        if (!stepEligible(step.emailIndex)) continue;
+        if (m.sent[step.emailIndex - 1]) continue;
+        if (elapsed < step.daysAfterJoined) break; // not due yet; nothing later is either
+        plans.push({
+          email: m.email,
+          firstName: m.firstName,
+          emailIndex: step.emailIndex,
+          pageId: m.pageId,
+        });
+        break; // one email per member per run
       }
     }
 
@@ -109,8 +140,11 @@ export async function GET(request: Request) {
         dryRun: true,
         durationMs: Date.now() - startedAt,
         todayYmd,
+        dripStartDate: DRIP_START_DATE,
+        nutritionGuideReady: NUTRITION_GUIDE_READY,
         totalMembers: members.length,
         noJoinDate,
+        preStart,
         dueCount: plans.length,
         due: plans.map((p) => ({ email: p.email, emailIndex: p.emailIndex })),
       });
@@ -144,8 +178,11 @@ export async function GET(request: Request) {
       ok: true,
       durationMs: Date.now() - startedAt,
       todayYmd,
+      dripStartDate: DRIP_START_DATE,
+      nutritionGuideReady: NUTRITION_GUIDE_READY,
       totalMembers: members.length,
       noJoinDate,
+      preStart,
       dueCount: plans.length,
       sentCount: sent.length,
       sent,
