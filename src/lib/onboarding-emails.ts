@@ -14,6 +14,15 @@ export const MOBILITY_GUIDE_URL =
 export const NUTRITION_GUIDE_URL =
   "https://www.gainstrengththerapy.com/media/gain-nutrition-guide.pdf";
 
+// Induction booking lives in TeamUp as the "Gain Programme Induction" appointment
+// type (members-only visibility, 45 min, Hallum, availability driven by his
+// Google Calendar 2-way sync). We link to the appointments list page rather than
+// the type's deep link: the deep link errors for visitors who are not yet logged
+// in, whereas the list page loads for everyone and surfaces the induction once
+// the member signs in. New members hold a membership, so they see and book it.
+export const INDUCTION_BOOKING_URL =
+  "https://goteamup.com/p/8554886-gain-strength-therapy/c/appointment_types";
+
 /** Lowest emailIndex (1) through highest (6); used to validate callers. */
 export const DRIP_EMAIL_COUNT = 6;
 
@@ -60,8 +69,8 @@ export function buildDripEmailContent(firstName: string, emailIndex: number): Dr
           `<p>Hi ${safeName},</p>
 <p>You are in. Welcome to Gain.</p>
 <p>Before your first session, we will do a short induction, just the two of us, to set up your programme properly. It takes 20 to 30 minutes and happens at the studio before you join your first group session. It is where we establish your starting point, pick your tracking exercise, and make sure I know everything I need to know about your body.</p>
-<p>To book your induction slot, head to your TeamUp account or just reply to this email and I will sort it.</p>
-${ctaButton("mailto:hallum@gainstrengththerapy.com?subject=Booking%20my%20induction", "Book your induction")}
+<p>To book your induction, use the button below to pick a slot in your TeamUp account. You may need to sign in first; your induction shows up under Appointments. If you would rather I sorted it, just reply to this email.</p>
+${ctaButton(INDUCTION_BOOKING_URL, "Book your induction")}
 <p style="font-weight: 700; font-size: 15px; margin-top: 28px;">A few things worth knowing as you get started</p>
 <p>The programme runs in groups of up to six. You will always have the same coach in the room, exercises adapted to you, and a measured result to aim for. Most people do two sessions a week, though one or three are also fine and we will agree what fits.</p>
 <p>There are no contracts. After your programme ends, members move to a monthly rolling membership if they want to continue, no automatic sign-up, no pressure.</p>
@@ -75,7 +84,8 @@ ${ctaButton("mailto:hallum@gainstrengththerapy.com?subject=Booking%20my%20induct
           "",
           "Before your first session, we will do a short induction, just the two of us, to set up your programme properly. It takes 20 to 30 minutes and happens at the studio before you join your first group session. It is where we establish your starting point, pick your tracking exercise, and make sure I know everything I need to know about your body.",
           "",
-          "To book your induction slot, head to your TeamUp account or just reply to this email and I will sort it.",
+          `To book your induction, pick a slot in your TeamUp account (sign in first; it shows up under Appointments): ${INDUCTION_BOOKING_URL}`,
+          "If you would rather I sorted it, just reply to this email.",
           "",
           "A few things worth knowing as you get started:",
           "",
