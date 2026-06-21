@@ -1,5 +1,5 @@
 import { fetchUpcomingBookings, type CalAttendee, type CalBooking } from "@/lib/calcom";
-import { SITE } from "@/lib/utils";
+import { escapeHtml, GAIN_SIGNATURE_HTML, GAIN_SIGNATURE_TEXT } from "@/lib/email-shared";
 
 /**
  * Sends a "your consultation is tomorrow" reminder for Cal.com bookings, gated
@@ -120,15 +120,6 @@ export async function GET(request: Request) {
   }
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 async function sendReminderEmail(
   booking: CalBooking,
   attendee: CalAttendee,
@@ -160,9 +151,7 @@ async function sendReminderEmail(
     "Speak soon,",
     "Hallum",
     "",
-    "Gain Strength Therapy",
-    `${SITE.address.line1}, ${SITE.address.city}, ${SITE.address.postcode}`,
-    SITE.phone,
+    GAIN_SIGNATURE_TEXT,
   ].join("\n");
 
   const safeName = escapeHtml(firstName);
@@ -177,7 +166,7 @@ async function sendReminderEmail(
 <p>It takes no more than 30 minutes, by phone or in person at the gym, as you booked.</p>
 <p style="margin: 20px 0;"><a href="${manageUrl}" style="display: inline-block; background: #FC832C; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px;">Reschedule or cancel</a></p>
 <p>Speak soon,<br>Hallum</p>
-<p style="font-size: 12px; color: #666; margin-top: 32px; border-top: 1px solid #eee; padding-top: 16px;">Gain Strength Therapy<br>${SITE.address.line1}, ${SITE.address.city}, ${SITE.address.postcode}<br><a href="tel:${SITE.phoneHref}" style="color: #666;">${SITE.phone}</a></p>
+${GAIN_SIGNATURE_HTML}
 </body>
 </html>`;
 

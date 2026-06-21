@@ -245,6 +245,122 @@ export type SyncResult = {
   errors: Array<{ id: number; reason: string }>;
 };
 
+// ——— Onboarding drip support ———————————————————————————————————————————————
+//
+// The onboarding-drip cron (src/app/api/cron/onboarding-drip/route.ts) reads
+// members and their per-email sent-flags from here. The flags are checkbox
+// properties on the Members DB and guarantee idempotency: a sent email is
+// never sent twice regardless of how often the cron runs.
+
+export const ONBOARDING_EMAIL_COUNT = 6;
+
+/** "Onboarding Email N Sent" for N in 1..6. */
+export function onboardingFlagName(emailIndex: number): string {
+  return `Onboarding Email ${emailIndex} Sent`;
+}
+
+export type OnboardingMember = {
+  pageId: string;
+  email: string;
+  firstName: string;
+  joined: string | null; // YYYY-MM-DD
+  /** sent[i] is true if "Onboarding Email (i+1) Sent" is ticked. Length 6. */
+  sent: boolean[];
+};
+
+type OnboardingMemberRow = {
+  id: string;
+  properties: Record<string, {
+    email?: string | null;
+    title?: Array<{ plain_text: string }>;
+    date?: { start: string } | null;
+    checkbox?: boolean;
+  }>;
+};
+
+/**
+ * Ensure the six "Onboarding Email N Sent" checkbox properties exist on the
+ * Members DB. Idempotent — Notion treats re-adding an existing property of the
+ * same type as a no-op. Mirrors `ensureProgrammeProperty`.
+ */
+export async function ensureOnboardingProperties(): Promise<void> {
+  const { token, dbId } = notionConfig();
+  const properties: Record<string, unknown> = {};
+  for (let i = 1; i <= ONBOARDING_EMAIL_COUNT; i++) {
+    properties[onboardingFlagName(i)] = { checkbox: {} };
+  }
+  const res = await fetch(`${NOTION_API}/databases/${dbId}`, {
+    method: "PATCH",
+    headers: notionHeaders(token),
+    body: JSON.stringify({ properties }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    console.error(
+      `[onboarding drip] could not ensure sent-flag properties: ${res.status} ${body.slice(0, 200)}`,
+    );
+  }
+}
+
+/** Load every member with an email, plus their Joined date and sent-flags. */
+export async function loadOnboardingMembers(): Promise<OnboardingMember[]> {
+  const { token, dbId } = notionConfig();
+  const members: OnboardingMember[] = [];
+  let cursor: string | undefined = undefined;
+
+  while (true) {
+    const body: Record<string, unknown> = { page_size: 100 };
+    if (cursor) body.start_cursor = cursor;
+    const res = await fetch(`${NOTION_API}/databases/${dbId}/query`, {
+      method: "POST",
+      headers: notionHeaders(token),
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(`Notion query failed: ${res.status} ${await res.text()}`);
+    const data = (await res.json()) as {
+      results: OnboardingMemberRow[];
+      next_cursor: string | null;
+      has_more: boolean;
+    };
+    for (const row of data.results) {
+      const email = row.properties.Email?.email;
+      if (!email) continue;
+      const name = row.properties.Name?.title?.map((t) => t.plain_text).join("") ?? "";
+      const sent = Array.from({ length: ONBOARDING_EMAIL_COUNT }, (_, i) =>
+        Boolean(row.properties[onboardingFlagName(i + 1)]?.checkbox),
+      );
+      members.push({
+        pageId: row.id,
+        email,
+        firstName: name.trim().split(/\s+/)[0] || "",
+        joined: row.properties.Joined?.date?.start ?? null,
+        sent,
+      });
+    }
+    if (!data.has_more || !data.next_cursor) break;
+    cursor = data.next_cursor;
+  }
+
+  return members;
+}
+
+/** Mark "Onboarding Email N Sent" = true on a member page after a successful send. */
+export async function setOnboardingFlag(pageId: string, emailIndex: number): Promise<void> {
+  const { token } = notionConfig();
+  const res = await fetch(`${NOTION_API}/pages/${pageId}`, {
+    method: "PATCH",
+    headers: notionHeaders(token),
+    body: JSON.stringify({
+      properties: { [onboardingFlagName(emailIndex)]: { checkbox: true } },
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`set ${onboardingFlagName(emailIndex)} ${res.status}: ${body.slice(0, 200)}`);
+  }
+}
+
 export async function upsertCustomers(customers: TeamupCustomer[]): Promise<SyncResult> {
   const { token, dbId } = notionConfig();
   const result: SyncResult = {

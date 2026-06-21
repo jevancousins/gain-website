@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { SITE, NEWSLETTER_CONSENT_TEXT_V1 } from "@/lib/utils";
+import { escapeHtml } from "@/lib/email-shared";
 
 type LeadPayload = {
   firstName?: string;
@@ -10,6 +11,8 @@ type LeadPayload = {
   newsletter?: string | boolean;
   source?: string;
   message?: string;
+  // Per-ad attribution, captured from the landing-page URL (?ad=<id>).
+  ad?: string;
 };
 
 type FieldKey = "firstName" | "email" | "phone";
@@ -41,6 +44,10 @@ export async function POST(request: Request) {
   const source = (body.source ?? "unknown").toString().trim();
   const message = (body.message ?? "").toString().trim();
   const newsletter = body.newsletter === true || body.newsletter === "on";
+  // Attribution slug from the ad URL. Bounded and trimmed defensively; it comes
+  // straight from the query string so we never trust its length. Persona is
+  // resolved later by joining this slug to the Ads DB, not stored on the lead.
+  const ad = (body.ad ?? "").toString().trim().slice(0, 100);
 
   if (!firstName) {
     return fieldError("firstName", "Please enter your first name.");
@@ -66,6 +73,7 @@ export async function POST(request: Request) {
     message,
     source,
     newsletter,
+    ad,
     userAgent: request.headers.get("user-agent") ?? "",
     referer: request.headers.get("referer") ?? "",
   };
@@ -146,6 +154,7 @@ type Lead = {
   message: string;
   source: string;
   newsletter: boolean;
+  ad: string; // ad slug from ?ad=, empty when the visit wasn't from a tracked ad
   createdAt: string;
 };
 
@@ -170,6 +179,13 @@ async function writeLeadToNotion(lead: Lead, token: string, databaseId: string) 
   if (lead.message) {
     properties.Notes = { rich_text: [{ text: { content: lead.message } }] };
   }
+  // Per-ad attribution: tag the lead with the ad slug from the landing-page URL
+  // so the Ads DB can compute enquiry rate per ad (and per persona, via the
+  // ad's persona mapping in the Ads DB). Only set when present, to keep organic
+  // / untracked leads clean.
+  if (lead.ad) {
+    properties.Ad = { rich_text: [{ text: { content: lead.ad } }] };
+  }
 
   const res = await fetch("https://api.notion.com/v1/pages", {
     method: "POST",
@@ -188,15 +204,6 @@ async function writeLeadToNotion(lead: Lead, token: string, databaseId: string) 
     const body = await res.text().catch(() => "");
     throw new Error(`Notion API ${res.status}: ${body}`);
   }
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }
 
 const PROGRAMME_ITEMS = [
