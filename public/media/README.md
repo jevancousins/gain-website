@@ -24,6 +24,18 @@ Last updated: 2026-06-08
 | File | Key | Notes |
 |---|---|---|
 | `logo.png` | `IMAGES.logo` | Circular wordmark. |
+| `logo-light.png` | — | Light wordmark on transparent; used in the email signature. |
+
+---
+
+## Resources (PDFs)
+
+Member-facing guides linked (not attached) from the onboarding drip emails.
+
+| File | Live URL | Notes |
+|---|---|---|
+| `at-home-mobility-guide.pdf` | `gainstrengththerapy.com/media/at-home-mobility-guide.pdf` | At-Home Mobility Guide. Linked from onboarding email 3 (T0 + 5 days). |
+| `gain-nutrition-guide.pdf` | `gainstrengththerapy.com/media/gain-nutrition-guide.pdf` | Gain Nutrition Guide. Linked from onboarding email 5 (T0 + 14 days). **Not yet added** — held pending final food photos and Jevan review. |
 
 ---
 

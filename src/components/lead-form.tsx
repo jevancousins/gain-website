@@ -38,11 +38,19 @@ export function LeadForm({
     const form = e.currentTarget;
     const data = Object.fromEntries(new FormData(form).entries());
 
+    // Per-ad attribution: read the ad slug from the landing-page URL (?ad=<id>)
+    // at submit time so each enquiry is tagged to the exact ad version that
+    // drove it. Persona is deliberately not in the URL: it is a property of the
+    // ad in the Ads DB, resolved by joining on the ad slug at analysis time.
+    // Read here (not via useSearchParams) to avoid a Suspense boundary on these
+    // statically-rendered pages.
+    const ad = new URLSearchParams(window.location.search).get("ad") ?? undefined;
+
     try {
       const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...data, source }),
+        body: JSON.stringify({ ...data, source, ad }),
       });
 
       if (!res.ok) {
