@@ -34,6 +34,15 @@ function notionHeaders(token: string) {
   };
 }
 
+/**
+ * Display name for a TeamUp customer. Used both when writing the Notion Name
+ * and when disambiguating shared-email family accounts during the migration
+ * fallback (see findExisting).
+ */
+function customerName(c: TeamupCustomer): string {
+  return [c.first_name, c.last_name].filter(Boolean).join(" ").trim() || c.email || `TeamUp #${c.id}`;
+}
+
 function mapMembershipStatus(membership: MembershipSummary | undefined): NotionStatus | null {
   if (!membership || !membership.hasHistory) return null;
   if (membership.activeName) {
@@ -80,9 +89,11 @@ type EnrichmentInput = {
 
 function buildProperties(input: EnrichmentInput) {
   const { customer: c, lastSession, membership } = input;
-  const name = [c.first_name, c.last_name].filter(Boolean).join(" ").trim() || c.email || `TeamUp #${c.id}`;
   const properties: Record<string, unknown> = {
-    Name: { title: [{ text: { content: name } }] },
+    Name: { title: [{ text: { content: customerName(c) } }] },
+    // Stable unique key. Email is NOT unique — TeamUp family accounts share one
+    // email across several customers — so the sync dedupes on this instead.
+    "TeamUp ID": { number: c.id },
   };
   if (c.email) properties.Email = { email: c.email };
   if (c.created_at) properties.Joined = { date: { start: c.created_at.slice(0, 10) } };
@@ -110,6 +121,7 @@ type MemberRow = {
   id: string;
   properties: {
     Email?: { email: string | null };
+    "TeamUp ID"?: { number: number | null };
     Name?: { title?: Array<{ plain_text: string }> };
     Status?: { select?: { name: string } | null };
     Source?: { select?: { name: string } | null };
@@ -122,6 +134,8 @@ type MemberRow = {
 
 type ExistingMember = {
   pageId: string;
+  teamupId: number | null;
+  email: string | null;
   name: string;
   status: string | null;
   source: string | null;
@@ -131,34 +145,35 @@ type ExistingMember = {
   programme: string | null;
 };
 
+type MemberIndex = {
+  byTeamupId: Map<number, ExistingMember>;
+  byEmail: Map<string, ExistingMember[]>;
+};
+
 /**
- * Ensure the Members DB has a `Programme` rich_text property. Idempotent —
+ * Ensure a Members DB property exists with the requested type. Idempotent —
  * Notion accepts the same payload every run; if the property already exists
- * with the requested type the call is a no-op.
+ * with that type the call is a no-op.
  */
-async function ensureProgrammeProperty(): Promise<void> {
+async function ensureProperty(name: string, definition: Record<string, unknown>): Promise<void> {
   const { token, dbId } = notionConfig();
   const res = await fetch(`${NOTION_API}/databases/${dbId}`, {
     method: "PATCH",
     headers: notionHeaders(token),
-    body: JSON.stringify({
-      properties: {
-        Programme: { rich_text: {} },
-      },
-    }),
+    body: JSON.stringify({ properties: { [name]: definition } }),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     // Don't fail the whole sync just because we couldn't add a property; log
-    // and continue, the writes that try to set Programme will surface a row
-    // error if the property still doesn't exist.
-    console.error(`[teamup sync] could not ensure Programme property: ${res.status} ${body.slice(0, 200)}`);
+    // and continue. Writes that depend on it will surface a per-row error.
+    console.error(`[teamup sync] could not ensure ${name} property: ${res.status} ${body.slice(0, 200)}`);
   }
 }
 
-async function loadEmailIndex(): Promise<Map<string, ExistingMember>> {
+async function loadMemberIndex(): Promise<MemberIndex> {
   const { token, dbId } = notionConfig();
-  const index = new Map<string, ExistingMember>();
+  const byTeamupId = new Map<number, ExistingMember>();
+  const byEmail = new Map<string, ExistingMember[]>();
   let cursor: string | undefined = undefined;
 
   while (true) {
@@ -177,10 +192,11 @@ async function loadEmailIndex(): Promise<Map<string, ExistingMember>> {
       has_more: boolean;
     };
     for (const row of data.results) {
-      const email = row.properties.Email?.email;
-      if (!email) continue;
-      index.set(email.toLowerCase(), {
+      const email = row.properties.Email?.email ?? null;
+      const member: ExistingMember = {
         pageId: row.id,
+        teamupId: row.properties["TeamUp ID"]?.number ?? null,
+        email,
         name: row.properties.Name?.title?.map((t) => t.plain_text).join("") ?? "",
         status: row.properties.Status?.select?.name ?? null,
         source: row.properties.Source?.select?.name ?? null,
@@ -188,19 +204,58 @@ async function loadEmailIndex(): Promise<Map<string, ExistingMember>> {
         lastSession: row.properties["Last Session"]?.date?.start ?? null,
         membershipType: row.properties["Membership Type"]?.select?.name ?? null,
         programme: row.properties.Programme?.rich_text?.map((t) => t.plain_text).join("") || null,
-      });
+      };
+      if (member.teamupId != null) byTeamupId.set(member.teamupId, member);
+      if (email) {
+        const key = email.toLowerCase();
+        const list = byEmail.get(key);
+        if (list) list.push(member);
+        else byEmail.set(key, [member]);
+      }
     }
     if (!data.has_more || !data.next_cursor) break;
     cursor = data.next_cursor;
   }
 
-  return index;
+  return { byTeamupId, byEmail };
+}
+
+/**
+ * Resolve the existing Notion row for a customer.
+ *
+ * Primary key is the TeamUp customer id (stable and unique). For rows created
+ * before the id column existed, fall back to email — but carefully, because
+ * family accounts share one email across multiple customers:
+ *  - email unique to a single customer  -> match the one unclaimed row even if
+ *    the stored name differs in formatting (e.g. "Lisa FISHER" vs "Lisa Fisher").
+ *  - email shared by several customers   -> require an exact name match so we
+ *    don't hijack a sibling's row; an unmatched sibling falls through to create.
+ * Only rows without a TeamUp id yet are eligible for the email fallback, so a
+ * row already claimed by another customer is never stolen.
+ */
+function findExisting(
+  c: TeamupCustomer,
+  index: MemberIndex,
+  emailShareCount: number,
+): ExistingMember | undefined {
+  const byId = index.byTeamupId.get(c.id);
+  if (byId) return byId;
+
+  const email = c.email ? c.email.toLowerCase() : null;
+  if (!email) return undefined;
+
+  const candidates = (index.byEmail.get(email) ?? []).filter((m) => m.teamupId == null);
+  if (candidates.length === 0) return undefined;
+
+  if (emailShareCount <= 1 && candidates.length === 1) return candidates[0];
+
+  const desired = customerName(c).trim().toLowerCase();
+  const named = candidates.filter((m) => m.name.trim().toLowerCase() === desired);
+  return named.length === 1 ? named[0] : undefined;
 }
 
 function isUnchanged(input: EnrichmentInput, existing: ExistingMember): boolean {
   const c = input.customer;
-  const desiredName =
-    [c.first_name, c.last_name].filter(Boolean).join(" ").trim() || c.email || `TeamUp #${c.id}`;
   const desiredStatus = mapMembershipStatus(input.membership);
   const desiredSource = mapSource(c.lead_source);
   const desiredJoined = c.created_at ? c.created_at.slice(0, 10) : null;
@@ -208,7 +263,8 @@ function isUnchanged(input: EnrichmentInput, existing: ExistingMember): boolean 
   const desiredProgramme = input.membership?.activeName ?? null;
 
   return (
-    existing.name === desiredName &&
+    existing.teamupId === c.id &&
+    existing.name === customerName(c) &&
     existing.status === desiredStatus &&
     existing.source === desiredSource &&
     existing.joined === desiredJoined &&
@@ -243,6 +299,11 @@ export type SyncResult = {
   unchanged: number;
   skipped: number;
   errors: Array<{ id: number; reason: string }>;
+  dryRun?: boolean;
+  /** Names that would be created (dry run only). */
+  plannedCreates?: string[];
+  /** Rows that would get a TeamUp id written for the first time (dry run only). */
+  plannedBackfills?: string[];
 };
 
 // ——— Onboarding drip support ———————————————————————————————————————————————
@@ -281,7 +342,7 @@ type OnboardingMemberRow = {
 /**
  * Ensure the six "Onboarding Email N Sent" checkbox properties exist on the
  * Members DB. Idempotent — Notion treats re-adding an existing property of the
- * same type as a no-op. Mirrors `ensureProgrammeProperty`.
+ * same type as a no-op. Mirrors `ensureProperty`.
  */
 export async function ensureOnboardingProperties(): Promise<void> {
   const { token, dbId } = notionConfig();
@@ -361,8 +422,12 @@ export async function setOnboardingFlag(pageId: string, emailIndex: number): Pro
   }
 }
 
-export async function upsertCustomers(customers: TeamupCustomer[]): Promise<SyncResult> {
+export async function upsertCustomers(
+  customers: TeamupCustomer[],
+  options: { dryRun?: boolean } = {},
+): Promise<SyncResult> {
   const { token, dbId } = notionConfig();
+  const dryRun = options.dryRun === true;
   const result: SyncResult = {
     total: customers.length,
     created: 0,
@@ -370,15 +435,28 @@ export async function upsertCustomers(customers: TeamupCustomer[]): Promise<Sync
     unchanged: 0,
     skipped: 0,
     errors: [],
+    ...(dryRun ? { dryRun: true, plannedCreates: [], plannedBackfills: [] } : {}),
   };
 
-  await ensureProgrammeProperty();
+  if (!dryRun) {
+    await ensureProperty("Programme", { rich_text: {} });
+    await ensureProperty("TeamUp ID", { number: {} });
+  }
 
-  const [emailIndex, attendanceByCustomer, membershipByCustomer] = await Promise.all([
-    loadEmailIndex(),
+  const [memberIndex, attendanceByCustomer, membershipByCustomer] = await Promise.all([
+    loadMemberIndex(),
     fetchAttendanceSummaryByCustomer(),
     fetchMembershipSummaryByCustomer(),
   ]);
+
+  // How many customers share each email — drives the family-account fallback.
+  const emailShareCount = new Map<string, number>();
+  for (const c of customers) {
+    if (!c.email) continue;
+    const key = c.email.toLowerCase();
+    emailShareCount.set(key, (emailShareCount.get(key) ?? 0) + 1);
+  }
+
   // Notion's published rate limit averages ~3 req/s. Three concurrent writers
   // matches that without bursting hard enough to draw 429s.
   const CONCURRENCY = 3;
@@ -389,7 +467,8 @@ export async function upsertCustomers(customers: TeamupCustomer[]): Promise<Sync
         result.skipped += 1;
         return;
       }
-      const existing = emailIndex.get(c.email.toLowerCase());
+      const shareCount = emailShareCount.get(c.email.toLowerCase()) ?? 1;
+      const existing = findExisting(c, memberIndex, shareCount);
       const attendance = attendanceByCustomer.get(c.id);
       const input: EnrichmentInput = {
         customer: c,
@@ -400,6 +479,17 @@ export async function upsertCustomers(customers: TeamupCustomer[]): Promise<Sync
 
       if (existing && isUnchanged(input, existing)) {
         result.unchanged += 1;
+        return;
+      }
+
+      if (dryRun) {
+        if (existing) {
+          result.updated += 1;
+          if (existing.teamupId == null) result.plannedBackfills?.push(customerName(c));
+        } else {
+          result.created += 1;
+          result.plannedCreates?.push(customerName(c));
+        }
         return;
       }
 

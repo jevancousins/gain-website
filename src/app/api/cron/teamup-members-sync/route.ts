@@ -19,10 +19,12 @@ export async function GET(request: Request) {
     return Response.json({ error: "not found" }, { status: 404 });
   }
 
+  const dryRun = ["1", "true"].includes(url.searchParams.get("dryRun") ?? "");
+
   const startedAt = Date.now();
   try {
     const customers = await listAllCustomers();
-    const result = await upsertCustomers(customers);
+    const result = await upsertCustomers(customers, { dryRun });
     return Response.json({ ok: true, durationMs: Date.now() - startedAt, ...result });
   } catch (err) {
     return Response.json(
