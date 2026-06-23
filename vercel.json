@@ -11,6 +11,10 @@
       "schedule": "0 6 * * *"
     },
     {
+      "path": "/api/cron/resend-contacts-sync",
+      "schedule": "30 6 * * *"
+    },
+    {
       "path": "/api/cron/onboarding-drip",
       "schedule": "0 7 * * *"
     },

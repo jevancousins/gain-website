@@ -3,6 +3,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { SITE, NEWSLETTER_CONSENT_TEXT_V1 } from "@/lib/utils";
 import { escapeHtml } from "@/lib/email-shared";
+import { upsertResendMarketingContact } from "@/lib/resend-contacts";
 
 type LeadPayload = {
   firstName?: string;
@@ -109,6 +110,15 @@ export async function POST(request: Request) {
     tasks.push({
       name: "email",
       promise: sendLeadConfirmationEmail(lead, resendKey, fromEmail),
+    });
+    tasks.push({
+      name: "resend-contact",
+      promise: upsertResendMarketingContact(resendKey, {
+        email: lead.email,
+        firstName: lead.firstName,
+        unsubscribed: !lead.newsletter,
+        segmentNames: ["Marketing - All", "Leads - Open"],
+      }).then(() => undefined),
     });
     // Notify Hallum the instant an enquiry lands so he can call back fast.
     // Reaches his inbox on laptop and phone; reply-to is set to the lead's
