@@ -34,7 +34,7 @@ Visit <http://localhost:3000>.
 | `CRON_SECRET` | server | Authenticates Vercel cron requests (`?key=` or Bearer). |
 | `ANTHROPIC_API_KEY` | server | Optional: personalised email opener when a lead leaves a message (Claude Haiku). |
 
-In development, when Notion is not configured, leads are appended to `.data/leads.jsonl` so you can inspect them locally. The Cal.com booking link is not an env var; it lives in `SITE.bookingUrl` (`src/lib/utils.ts`). The remaining vars in `.env.local.example` power the scheduled crons (TeamUp sync, finances, retention digest, Google reviews, Meta ad spend, PostHog).
+In development, when Notion is not configured, leads are appended to `.data/leads.jsonl` so you can inspect them locally. The Cal.com booking link is not an env var; it lives in `SITE.bookingUrl` (`src/lib/utils.ts`). The remaining vars in `.env.local.example` power the scheduled crons (TeamUp sync, finances, retention digest, Google reviews, Meta ad spend). Web analytics is Vercel Web Analytics + Speed Insights, enabled in the Vercel project with no env vars.
 
 ## Project layout
 

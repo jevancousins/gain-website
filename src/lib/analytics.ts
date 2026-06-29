@@ -1,19 +1,22 @@
-import posthog from "posthog-js";
+import { track as vercelTrack } from "@vercel/analytics";
 
 /**
- * Fire a product-analytics event (PostHog). Client-only and best-effort: it
- * no-ops when analytics is not configured and never throws, so a tracking
- * failure can never break the UI. Import only from client components.
+ * Fire a custom analytics event (Vercel Web Analytics). Client-only and
+ * best-effort: it no-ops when Web Analytics is not enabled on the project and
+ * never throws, so a tracking failure can never break the UI. Import only from
+ * client components.
  *
- * Most clicks are captured automatically (PostHog autocapture), so reserve
- * explicit events for things autocapture can't see, e.g. a *successful*
- * async form submission.
+ * Pageviews are captured automatically by <Analytics /> in the root layout, so
+ * reserve explicit events for things it can't see, e.g. a *successful* async
+ * form submission.
  */
-export function track(event: string, properties?: Record<string, unknown>) {
+export function track(
+  event: string,
+  properties?: Record<string, string | number | boolean | null>,
+) {
   if (typeof window === "undefined") return;
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return;
   try {
-    posthog.capture(event, properties);
+    vercelTrack(event, properties);
   } catch {
     // analytics is best-effort; swallow any error
   }
