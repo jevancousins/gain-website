@@ -3,7 +3,7 @@ import {
   loadOnboardingMembers,
   setOnboardingFlag,
 } from "@/lib/notion-members";
-import { buildDripEmailContent } from "@/lib/onboarding-emails";
+import { DRIP_TEMPLATE_ALIAS, INDUCTION_BOOKING_URL } from "@/lib/onboarding-emails";
 
 /**
  * Daily onboarding drip: sends new-member lifecycle emails as they fall due,
@@ -201,7 +201,16 @@ async function sendDripEmail(
   apiKey: string,
   from: string,
 ): Promise<void> {
-  const { subject, html, text } = buildDripEmailContent(plan.firstName, plan.emailIndex);
+  const name = (plan.firstName || "").trim() || "there";
+  const alias = DRIP_TEMPLATE_ALIAS[plan.emailIndex];
+  if (!alias) {
+    throw new Error(`No Resend template for drip email ${plan.emailIndex}`);
+  }
+  // Copy + layout live in the published Resend template; we pass only the runtime
+  // variables it references. Email 1 additionally needs the induction booking URL.
+  const variables: Record<string, string> = { MEMBER_FIRST_NAME: name };
+  if (plan.emailIndex === 1) variables.BOOK_INDUCTION_URL = INDUCTION_BOOKING_URL;
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -212,9 +221,7 @@ async function sendDripEmail(
       from,
       reply_to: "hallum@gainstrengththerapy.com",
       to: [plan.email],
-      subject,
-      html,
-      text,
+      template: { id: alias, variables },
     }),
   });
   if (!res.ok) {

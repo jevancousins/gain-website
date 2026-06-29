@@ -56,9 +56,8 @@ next-env.d.ts
 # raw unprocessed photo originals
 public/media/raw/
 
-# social: generated artifacts (HTML is source of truth, rendered via social/_lib/render.py)
-social/**/preview-*.png
-social/*.pdf
+# social: local working directory, kept out of the website repo
+/social/
 
 # internal planning docs (kept local / in Notion, not in the website repo)
 /docs/

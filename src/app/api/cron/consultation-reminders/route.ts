@@ -1,5 +1,4 @@
 import { fetchUpcomingBookings, type CalAttendee, type CalBooking } from "@/lib/calcom";
-import { escapeHtml, GAIN_SIGNATURE_HTML, GAIN_SIGNATURE_TEXT } from "@/lib/email-shared";
 
 /**
  * Sends a "your consultation is tomorrow" reminder for Cal.com bookings, gated
@@ -137,39 +136,9 @@ async function sendReminderEmail(
   }).format(new Date(booking.start));
   const manageUrl = `https://cal.com/booking/${booking.uid}`;
 
-  const text = [
-    `Hi ${firstName},`,
-    "",
-    "A quick reminder that your free consultation with Gain Strength Therapy is tomorrow:",
-    "",
-    `${when} (UK time)`,
-    "",
-    "It takes no more than 30 minutes, by phone or in person at the gym, as you booked.",
-    "",
-    `Need to change it? You can reschedule or cancel here: ${manageUrl}`,
-    "",
-    "Speak soon,",
-    "Hallum",
-    "",
-    GAIN_SIGNATURE_TEXT,
-  ].join("\n");
-
-  const safeName = escapeHtml(firstName);
-  const safeWhen = escapeHtml(when);
-  const html = `<!doctype html>
-<html>
-<head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; line-height: 1.7; max-width: 540px; margin: 0 auto; padding: 24px;">
-<p>Hi ${safeName},</p>
-<p>A quick reminder that your free consultation with Gain Strength Therapy is tomorrow:</p>
-<p style="font-weight: 700; font-size: 17px; margin: 20px 0;">${safeWhen} <span style="font-weight: 400; color: #666;">(UK time)</span></p>
-<p>It takes no more than 30 minutes, by phone or in person at the gym, as you booked.</p>
-<p style="margin: 20px 0;"><a href="${manageUrl}" style="display: inline-block; background: #FC832C; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px;">Reschedule or cancel</a></p>
-<p>Speak soon,<br>Hallum</p>
-${GAIN_SIGNATURE_HTML}
-</body>
-</html>`;
-
+  // Copy + layout live in the published Resend template "gain-consultation-reminder";
+  // we supply only the runtime variables it references. FIRST_NAME is a Resend
+  // built-in; WHEN and MANAGE_URL are declared on the template.
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -180,9 +149,10 @@ ${GAIN_SIGNATURE_HTML}
       from,
       reply_to: "hallum@gainstrengththerapy.com",
       to: [attendee.email],
-      subject: "Reminder: your Gain consultation is tomorrow",
-      html,
-      text,
+      template: {
+        id: "gain-consultation-reminder",
+        variables: { FIRST_NAME: firstName, WHEN: when, MANAGE_URL: manageUrl },
+      },
     }),
   });
 
