@@ -5,8 +5,8 @@ Marketing site for [Gain Strength Therapy](https://www.gainstrengththerapy.com),
 ## Stack
 
 - **Next.js 16** (App Router, TypeScript, Turbopack)
-- **Tailwind CSS v4** with a custom brand palette (bone / ink / rust / forest)
-- **Fraunces** (display serif) + **Inter** (body) via `next/font`
+- **Tailwind CSS v4** with a custom brand palette (flame orange, ink, paper, cream)
+- **Montserrat** (display + body) via `next/font`
 - **Cal.com** embed for live consultation booking
 - **Lucide** icons
 - **Resend** for transactional email (published templates), **Notion** as the leads/members store, and Vercel cron jobs for the onboarding drip, consultation reminders and back-office syncs
