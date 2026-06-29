@@ -9,7 +9,7 @@ Marketing site for [Gain Strength Therapy](https://www.gainstrengththerapy.com),
 - **Fraunces** (display serif) + **Inter** (body) via `next/font`
 - **Cal.com** embed for live consultation booking
 - **Lucide** icons
-- Route handler at `/api/lead` ready to forward to any webhook (n8n, Make, Zapier, HubSpot, Supabase, Resend, etc.)
+- **Resend** for transactional email (published templates), **Notion** as the leads/members store, and Vercel cron jobs for the onboarding drip, consultation reminders and back-office syncs
 
 ## Local development
 
@@ -23,12 +23,18 @@ Visit <http://localhost:3000>.
 
 ## Environment variables
 
-See `.env.local.example`. Only two are used today:
+`.env.local.example` is the source of truth and lists every variable. The site now runs a small ops backend, so there are more than the original two. The ones that matter for the public site and lead capture:
 
 | Var | Where | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_CALCOM_LINK` | client | Cal.com link for the inline booking embed (e.g. `gainstrengththerapy/free-consultation`). When empty, the `/book` page shows a graceful fallback. |
-| `LEAD_WEBHOOK_URL` | server | Where `POST /api/lead` forwards submissions. When empty in dev, leads are appended to `.data/leads.jsonl` so you can inspect them locally. |
+| `RESEND_API_KEY` | server | Sends the lead confirmation, onboarding and consultation-reminder emails via published Resend templates. |
+| `LEAD_FROM_EMAIL` | server | From address for those emails (a verified `gainstrengththerapy.com` sender). |
+| `LEAD_NOTIFY_EMAIL` | server | Recipient of the internal "new enquiry" alert. |
+| `NOTION_TOKEN` + `NOTION_LEADS_DB_ID` | server | Writes each lead into the Notion leads database. |
+| `CRON_SECRET` | server | Authenticates Vercel cron requests (`?key=` or Bearer). |
+| `ANTHROPIC_API_KEY` | server | Optional: personalised email opener when a lead leaves a message (Claude Haiku). |
+
+In development, when Notion is not configured, leads are appended to `.data/leads.jsonl` so you can inspect them locally. The Cal.com booking link is not an env var; it lives in `SITE.bookingUrl` (`src/lib/utils.ts`). The remaining vars in `.env.local.example` power the scheduled crons (TeamUp sync, finances, retention digest, Google reviews, Meta ad spend, PostHog).
 
 ## Project layout
 
@@ -62,9 +68,9 @@ Copy for the January programme page is taken from `GAIN Strength Therapy – HQ/
 
 Imagery is currently SVG placeholders in `components/placeholder-image.tsx`. Replace with real photography by dropping files into `public/` and swapping the `<PlaceholderImage />` components for `<Image />` from `next/image`.
 
-## Lead capture → automated workflows
+## Lead capture
 
-`POST /api/lead` validates a payload like:
+`POST /api/lead` validates a submission like:
 
 ```json
 {
@@ -76,20 +82,20 @@ Imagery is currently SVG placeholders in `components/placeholder-image.tsx`. Rep
 }
 ```
 
-When `LEAD_WEBHOOK_URL` is set, it forwards the enriched lead (with `id`, `createdAt`, `userAgent`, `referer`) to that URL. Typical destinations:
+On a valid submission it, in parallel:
 
-- **n8n / Make / Zapier** — route to CRM, email tool, WhatsApp, etc.
-- **Notion database** — via their REST API
-- **Resend / Postmark** — instant owner notification email
-- **Supabase / Postgres** — if you want to own the data end-to-end
+- **writes the lead to Notion** (`NOTION_LEADS_DB_ID`), with newsletter-consent metadata when opted in;
+- **sends the lead a confirmation email** via the published Resend template `gain-lead-confirmation-enquiry-form`;
+- **alerts Hallum** with an internal "new enquiry" notification (`LEAD_NOTIFY_EMAIL`), reply-to set to the lead so he can respond directly;
+- **upserts the lead as a Resend marketing contact** for the newsletter audience.
 
-In development, leads also append to `.data/leads.jsonl` for easy inspection.
+The request succeeds as long as at least one of these lands. In development, when Notion is not configured, leads are appended to `.data/leads.jsonl` for easy inspection.
 
 ## Deploy (Vercel)
 
 1. Push this repo to GitHub.
 2. Import to [Vercel](https://vercel.com/new) — framework is auto-detected.
-3. Set `NEXT_PUBLIC_CALCOM_LINK` and `LEAD_WEBHOOK_URL` in Project Settings → Environment Variables.
+3. Set the variables from `.env.local.example` in Project Settings → Environment Variables (at minimum the Resend, Notion and `CRON_SECRET` values).
 4. Point `www.gainstrengththerapy.com` at Vercel (follow the DNS instructions in the Domains tab).
 
 ## Before launch checklist
@@ -101,4 +107,4 @@ In development, leads also append to `.data/leads.jsonl` for easy inspection.
 - [x] Set up Cal.com account + consultation event type; paste the link into `NEXT_PUBLIC_CALCOM_LINK`
 - [x] Write proper `/privacy` and `/terms` content
 - [x] Wire lead capture to its destination — `POST /api/lead` writes to the Notion leads DB and sends the Resend confirmation + owner notification (the `LEAD_WEBHOOK_URL` forwarder is no longer used)
-- [ ] Run Lighthouse / a11y sweep in production mode
+- [x] Run Lighthouse / a11y sweep in production mode — 2026-06-29 (mobile, home): accessibility 100, best practices 100, SEO 92, performance 69. Remaining: descriptive link text on the "LEARN MORE" link, and homepage performance (5.3 MB hero video, ~80 KB unused JS)
