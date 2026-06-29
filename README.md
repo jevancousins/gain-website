@@ -99,6 +99,6 @@ In development, leads also append to `.data/leads.jsonl` for easy inspection.
 - [x] Replace SVG placeholders with real photography
 - [x] Add real favicon + OG image (`/public/og.jpg`)
 - [x] Set up Cal.com account + consultation event type; paste the link into `NEXT_PUBLIC_CALCOM_LINK`
-- [ ] Write proper `/privacy` and `/terms` content
-- [ ] Wire `LEAD_WEBHOOK_URL` to your workflow destination
+- [x] Write proper `/privacy` and `/terms` content
+- [x] Wire lead capture to its destination — `POST /api/lead` writes to the Notion leads DB and sends the Resend confirmation + owner notification (the `LEAD_WEBHOOK_URL` forwarder is no longer used)
 - [ ] Run Lighthouse / a11y sweep in production mode
