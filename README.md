@@ -41,32 +41,31 @@ In development, when Notion is not configured, leads are appended to `.data/lead
 ```
 src/
 ├── app/
-│   ├── layout.tsx          # root shell, fonts, nav, footer, JSON-LD
+│   ├── layout.tsx          # root shell: fonts, nav, footer, analytics, JSON-LD
 │   ├── page.tsx            # home
-│   ├── about/              # about page
-│   ├── facility/           # facility page
-│   ├── programme/          # January landing page (primary conversion target)
-│   ├── book/               # Cal.com embed + lead form fallback
-│   ├── contact/            # contact details + form
-│   ├── faqs/, privacy/, terms/
-│   ├── api/lead/route.ts   # lead capture + webhook forwarding
-│   ├── sitemap.ts, robots.ts
-│   └── globals.css         # brand tokens (Tailwind v4 @theme)
-├── components/
-│   ├── site-nav.tsx, site-footer.tsx
-│   ├── ui.tsx              # shared primitives (Section, H2, CTAButton, etc.)
-│   ├── lead-form.tsx       # reusable capture form
-│   ├── cal-embed.tsx       # Cal.com embed wrapper
-│   ├── placeholder-image.tsx # SVG placeholders (swap for real photos)
-│   └── structured-data.tsx # LocalBusiness JSON-LD
-└── lib/utils.ts            # cn() + SITE config (address, hours, links)
+│   ├── 6-week/             # 6-week programme landing page (primary conversion target)
+│   ├── about/  contact/  faqs/  privacy/  terms/
+│   ├── opengraph-image.tsx, sitemap.ts, robots.ts
+│   ├── globals.css         # brand tokens (Tailwind v4 @theme)
+│   └── api/
+│       ├── lead/           # lead capture -> Notion + Resend (see "Lead capture")
+│       ├── resend-webhook/ # Resend delivery/engagement webhook
+│       ├── teamup/         # TeamUp webhooks + diagnostics
+│       └── cron/           # scheduled jobs: onboarding drip, consultation
+│                           # reminders, TeamUp/finance/review syncs
+├── components/             # site-nav, site-footer, ui (shared primitives),
+│                           # hero-video, lead-form, cta-button, analytics/,
+│                           # structured-data (LocalBusiness JSON-LD), …
+└── lib/                    # utils (SITE config + cn), email-shared,
+                            # onboarding-emails, calcom, resend-contacts,
+                            # notion-* and teamup-* integrations
 ```
 
 ## Copy & content
 
-Copy for the January programme page is taken from `GAIN Strength Therapy – HQ/03 - Sales & Marketing/Landing Page Copy – January Foundations – GAIN.docx`. Team bios on `/about` and a handful of pricing/contact fields (phone number, email address) are **placeholders**. Search the codebase for `Placeholder` and for `01323 000 000` / `hello@gainstrengththerapy.com` to confirm before launch.
+The site is live with real copy, photography and contact details. Business details (address, phone, email, opening hours, social and booking links) live in the `SITE` config in `src/lib/utils.ts` — edit them there and every page plus the structured data update together.
 
-Imagery is currently SVG placeholders in `components/placeholder-image.tsx`. Replace with real photography by dropping files into `public/` and swapping the `<PlaceholderImage />` components for `<Image />` from `next/image`.
+Imagery is real photography under `public/media/`, rendered via `next/image` (the `<Photo />` wrapper in `components/photo.tsx`); the hero and facility background loops are in `public/media/videos/`.
 
 ## Lead capture
 
@@ -107,4 +106,4 @@ The request succeeds as long as at least one of these lands. In development, whe
 - [x] Set up Cal.com account + consultation event type; paste the link into `NEXT_PUBLIC_CALCOM_LINK`
 - [x] Write proper `/privacy` and `/terms` content
 - [x] Wire lead capture to its destination — `POST /api/lead` writes to the Notion leads DB and sends the Resend confirmation + owner notification (the `LEAD_WEBHOOK_URL` forwarder is no longer used)
-- [x] Run Lighthouse / a11y sweep in production mode — 2026-06-29 (mobile, home): accessibility 100, best practices 100, SEO 92, performance 69. Remaining: descriptive link text on the "LEARN MORE" link, and homepage performance (5.3 MB hero video, ~80 KB unused JS)
+- [x] Run Lighthouse / a11y sweep in production mode — 2026-06-29 (mobile, home): accessibility 100, best practices 100, SEO 100, performance ~90 (after optimising the hero video to VP9 WebM and taking render-blocking JS off the critical path)
