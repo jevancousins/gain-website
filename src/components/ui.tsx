@@ -193,9 +193,17 @@ export function Pill({
 export function FinalCTA({
   title = "Still thinking it over?",
   body = "That is completely fine. Get in touch and we will answer your questions honestly, with no pressure to sign up.",
+  // The secondary button defaults to the About page. Override it (or pass
+  // secondaryHref={null} to hide it) on pages where /about would be a self-link.
+  secondaryHref = "/about",
+  secondaryLabel = "About Gain",
+  secondaryAriaLabel = "About Gain Strength Therapy",
 }: {
   title?: string;
   body?: string;
+  secondaryHref?: string | null;
+  secondaryLabel?: string;
+  secondaryAriaLabel?: string;
 }) {
   return (
     <Section tone="flame" containerClass="!py-24 md:!py-32">
@@ -218,14 +226,16 @@ export function FinalCTA({
             >
               Get in touch
             </CTAButton>
-            <CTAButton
-              href="/about"
-              variant="ghost"
-              ariaLabel="About Gain Strength Therapy"
-              className="flex-1 justify-center !text-ink !border-ink/80 hover:!bg-ink hover:!text-flame hover:!border-ink"
-            >
-              About Gain
-            </CTAButton>
+            {secondaryHref && (
+              <CTAButton
+                href={secondaryHref}
+                variant="ghost"
+                ariaLabel={secondaryAriaLabel}
+                className="flex-1 justify-center !text-ink !border-ink/80 hover:!bg-ink hover:!text-flame hover:!border-ink"
+              >
+                {secondaryLabel}
+              </CTAButton>
+            )}
           </div>
         </div>
       </div>

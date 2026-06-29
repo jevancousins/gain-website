@@ -284,6 +284,9 @@ export default function AboutPage() {
 
       <FinalCTA
         body="If you haven't found a gym that you feel comfortable enough to keep going, book a consultation with us. We'll talk through your situation, show you the space and work out whether Gain is right for you."
+        secondaryHref="/6-week"
+        secondaryLabel="See the programme"
+        secondaryAriaLabel="See the programme at Gain"
       />
     </>
   );
