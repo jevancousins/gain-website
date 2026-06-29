@@ -11,6 +11,10 @@ type BtnProps = {
   className?: string;
   external?: boolean;
   icon?: "arrow" | "up-right" | "none";
+  // Overrides the accessible name. Use when the visible label (e.g. "Learn
+  // more") is not descriptive enough on its own; must still contain the visible
+  // text so it satisfies WCAG 2.5.3 (label in name).
+  ariaLabel?: string;
 };
 
 const styles = {
@@ -43,6 +47,7 @@ export function CTAButton({
   className,
   external,
   icon = "arrow",
+  ariaLabel,
 }: BtnProps) {
   const cls = cn(baseCls, styles[variant], className);
 
@@ -62,7 +67,7 @@ export function CTAButton({
 
   if (href.startsWith("#")) {
     return (
-      <a href={href} className={cls} onClick={(e) => scrollToHash(e, href)}>
+      <a href={href} className={cls} aria-label={ariaLabel} onClick={(e) => scrollToHash(e, href)}>
         {content}
       </a>
     );
@@ -70,14 +75,14 @@ export function CTAButton({
 
   if (external) {
     return (
-      <a href={href} className={cls} target="_blank" rel="noopener noreferrer">
+      <a href={href} className={cls} aria-label={ariaLabel} target="_blank" rel="noopener noreferrer">
         {content}
       </a>
     );
   }
 
   return (
-    <Link href={href} className={cls}>
+    <Link href={href} className={cls} aria-label={ariaLabel}>
       {content}
     </Link>
   );
