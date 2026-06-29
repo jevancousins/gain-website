@@ -221,10 +221,10 @@ export function FinalCTA({
             <CTAButton
               href="/about"
               variant="ghost"
-              ariaLabel="Learn more about Gain Strength Therapy"
+              ariaLabel="About Gain Strength Therapy"
               className="flex-1 justify-center !text-ink !border-ink/80 hover:!bg-ink hover:!text-flame hover:!border-ink"
             >
-              Learn more
+              About Gain
             </CTAButton>
           </div>
         </div>
