@@ -546,6 +546,9 @@ export const IMAGE_META: Record<string, ImageMeta> = {
 /** Hero + facility background videos — served from /public/media/videos */
 export const VIDEOS = {
   hero: {
+    // VP9/WebM is preferred (~60-70% smaller); MP4 is the Safari fallback.
+    webm720: "/media/videos/hero-720.webm",
+    webm1080: "/media/videos/hero-1080.webm",
     src720: "/media/videos/hero-720.mp4",
     src1080: "/media/videos/hero-1080.mp4",
     poster: IMAGES.gymStretching,

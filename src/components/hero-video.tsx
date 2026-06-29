@@ -54,7 +54,13 @@ export function HeroVideo({
         poster={reducedMotion ? IMAGES.gymStretching : undefined}
         aria-hidden
       >
+        {/* WebM first per tier (browser picks the first supported source whose
+            media matches); MP4 is the Safari/older fallback. */}
+        {"webm1080" in v && (
+          <source src={v.webm1080} type="video/webm" media="(min-width: 1024px)" />
+        )}
         <source src={v.src1080} type="video/mp4" media="(min-width: 1024px)" />
+        {"webm720" in v && <source src={v.webm720} type="video/webm" />}
         <source src={v.src720} type="video/mp4" />
       </video>
       {/* Dark wash — keeps white text legible on any frame */}
