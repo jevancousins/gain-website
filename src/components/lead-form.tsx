@@ -1,12 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Loader2, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn, SITE } from "@/lib/utils";
 import { track } from "@/lib/analytics";
 
 type FieldKey = "firstName" | "email" | "phone";
 type FieldErrors = Partial<Record<FieldKey, string>>;
+
+// One-tap fix for UNAMBIGUOUS address typos only: a misspelled provider name,
+// or the impossible ".con" TLD. We deliberately do NOT guess ambiguous
+// truncations like "hotmail.co" or "yahoo.co" — for UK users those are as
+// likely to mean ".co.uk" as ".com", and e.g. hotmail.co.uk is a completely
+// separate inbox from hotmail.com. Genuinely undeliverable domains are caught
+// server-side by the MX-record check in /api/lead, which flags them for Hallum
+// rather than silently guessing a (possibly wrong) correction.
+const EMAIL_DOMAIN_TYPOS: Record<string, string> = {
+  "gmial.com": "gmail.com",
+  "gmai.com": "gmail.com",
+  "gnail.com": "gmail.com",
+  "gmail.con": "gmail.com",
+  "hotmial.com": "hotmail.com",
+  "hotmai.com": "hotmail.com",
+  "hotmail.con": "hotmail.com",
+  "outlook.con": "outlook.com",
+  "yahoo.con": "yahoo.com",
+  "iclould.com": "icloud.com",
+};
+
+function suggestEmail(email: string): string | null {
+  const trimmed = email.trim().toLowerCase();
+  const at = trimmed.lastIndexOf("@");
+  if (at < 0) return null;
+  const fixed = EMAIL_DOMAIN_TYPOS[trimmed.slice(at + 1)];
+  return fixed ? trimmed.slice(0, at + 1) + fixed : null;
+}
 
 export function LeadForm({
   source = "landing",
@@ -28,6 +56,8 @@ export function LeadForm({
   );
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -75,6 +105,7 @@ export function LeadForm({
       // a real enquiry; PostHog already auto-captures the UTM/referrer.
       track("lead_submitted", { source });
       form.reset();
+      setEmailSuggestion(null);
     } catch {
       setFormError("Network issue. Please try again, or call us on 01323 370022.");
       setState("idle");
@@ -189,13 +220,34 @@ export function LeadForm({
           type="email"
           required
           autoComplete="email"
+          ref={emailRef}
           className={inputCls(fieldErrors.email)}
           placeholder="you@example.com"
           aria-invalid={Boolean(fieldErrors.email)}
           aria-describedby={fieldErrors.email ? "email-error" : undefined}
-          onChange={() => clearFieldError("email")}
+          onChange={() => {
+            clearFieldError("email");
+            setEmailSuggestion(null);
+          }}
+          onBlur={(e) => setEmailSuggestion(suggestEmail(e.target.value))}
         />
         <FieldMessage id="email-error" msg={fieldErrors.email} />
+        {emailSuggestion && (
+          <p className="mt-2 text-sm text-paper/70">
+            Did you mean{" "}
+            <button
+              type="button"
+              className="font-semibold text-flame underline underline-offset-2"
+              onClick={() => {
+                if (emailRef.current) emailRef.current.value = emailSuggestion;
+                setEmailSuggestion(null);
+              }}
+            >
+              {emailSuggestion}
+            </button>
+            ?
+          </p>
+        )}
       </div>
 
       <div>
