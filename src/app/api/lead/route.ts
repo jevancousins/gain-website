@@ -289,11 +289,12 @@ async function writeLeadToNotion(lead: Lead, token: string, databaseId: string) 
 // route.ts only supplies the recipient and the FIRST_NAME greeting variable.
 const CONFIRMATION_TEMPLATE_6WEEK = "gain-lead-confirmation-6-week";
 const CONFIRMATION_TEMPLATE_GENERAL = "gain-lead-confirmation-general";
-// The original combined template, kept published purely as a safety net: if a
-// source-specific template is ever unavailable, we fall back to it so the
-// enquirer still receives a confirmation rather than nothing.
+// Safety net: if a source-specific template is ever unavailable, fall back to
+// the general confirmation so the enquirer still receives an email rather than
+// nothing. (The original combined "enquiry-form" template was retired once both
+// source-specific templates went live.)
 const CONFIRMATION_TEMPLATE_FALLBACK: string =
-  "gain-lead-confirmation-enquiry-form";
+  "gain-lead-confirmation-general";
 
 function confirmationTemplateFor(source: string) {
   return isSixWeekSource(source)
