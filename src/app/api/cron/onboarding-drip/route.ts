@@ -3,54 +3,42 @@ import {
   loadOnboardingMembers,
   setOnboardingFlag,
 } from "@/lib/notion-members";
-import { DRIP_TEMPLATE_ALIAS, INDUCTION_BOOKING_URL } from "@/lib/onboarding-emails";
 
 /**
- * Daily onboarding drip: sends new-member lifecycle emails as they fall due,
- * keyed off each member's `Joined` date in the Notion Members DB.
+ * Daily member-onboarding ENROLMENT.
  *
- * Idempotent by design. Each email is tracked by an "Onboarding Email N Sent"
- * checkbox on the member's row; the cron only sends where the flag is false and
- * the elapsed days since joining have reached the threshold, then sets the flag
- * on success. Re-running the cron (or a retry) therefore never double-sends.
+ * The onboarding emails now live in the Resend Automation "Member onboarding
+ * drip" (built in Resend, so the whole sequence and each member's progress are
+ * visible in the Resend dashboard). This cron no longer sends the emails itself:
+ * it fires ONE `member.joined` event per new member, and Resend runs the timed
+ * sequence (welcome → induction prep → mobility → week-1 → mid-programme; the
+ * nutrition step is added back once the guide is hosted).
  *
- * Member data arrives via the teamup-members-sync cron (06:00 UTC); this runs
- * at 07:00 UTC so a member who joined yesterday is picked up the next morning.
+ * Idempotent: each member is enrolled at most once, marked by the existing
+ * "Onboarding Email 1 Sent" checkbox — email 1 is sent by the automation the
+ * instant the event fires, so that flag stays a faithful "has been onboarded"
+ * marker and a re-run never re-enrols. Members who joined before DRIP_START_DATE
+ * are excluded so the back-catalogue is never enrolled.
+ *
+ * Runs at 07:00 UTC, after teamup-members-sync (06:00) and resend-contacts-sync
+ * (06:30), so a new member exists in Notion and their Resend contact (whose
+ * first_name the automation reads as contact.first_name) is provisioned before
+ * we enrol them.
  *
  * Manual check: GET /api/cron/onboarding-drip?key=<CRON_SECRET>&dryRun=true
  */
 
 const TZ = "Europe/London";
 
-const DRIP_SEQUENCE = [
-  { emailIndex: 1, daysAfterJoined: 0 },
-  { emailIndex: 2, daysAfterJoined: 2 },
-  { emailIndex: 3, daysAfterJoined: 5 },
-  { emailIndex: 4, daysAfterJoined: 7 },
-  { emailIndex: 5, daysAfterJoined: 14 },
-  { emailIndex: 6, daysAfterJoined: 21 },
-] as const;
+// The trigger event of the Resend "Member onboarding drip" automation.
+const ENROLL_EVENT = "member.joined";
 
-// Enrolment cutoff. Only members who joined on or after this date enter the
-// drip, so the first run never back-emails the whole existing membership: a
-// member who joined months ago has every sent-flag false, but is excluded here
-// rather than being blasted all six emails at once. Set to the go-live date;
-// override with ONBOARDING_DRIP_START_DATE (YYYY-MM-DD). String compare is
-// chronological for ISO dates.
+// Enrolment cutoff. Only members who joined on or after this date are enrolled,
+// so the first run never enrols the whole existing membership. Override with
+// ONBOARDING_DRIP_START_DATE (YYYY-MM-DD). String compare is chronological for
+// ISO dates. Setting it far in the future (e.g. 2999-01-01) is the no-deploy
+// kill switch: the cron runs but enrols nobody.
 const DRIP_START_DATE = process.env.ONBOARDING_DRIP_START_DATE ?? "2026-06-21";
-
-// Email 5 links to the nutrition guide PDF, which is not yet hosted. Until it
-// ships at public/media/gain-nutrition-guide.pdf, skip step 5 so we never email
-// a link to a 404. The step stays unsent and is delivered (late, if need be)
-// once this is flipped on. Set ONBOARDING_NUTRITION_GUIDE_READY=true when live.
-const NUTRITION_GUIDE_READY = process.env.ONBOARDING_NUTRITION_GUIDE_READY === "true";
-const NUTRITION_EMAIL_INDEX = 5;
-
-/** Whether a drip step may be sent right now (gates the unpublished guide). */
-function stepEligible(emailIndex: number): boolean {
-  if (emailIndex === NUTRITION_EMAIL_INDEX && !NUTRITION_GUIDE_READY) return false;
-  return true;
-}
 
 function gate(request: Request): boolean {
   const expected = [process.env.CRON_SECRET, process.env.TEAMUP_DIAG_KEY].filter(
@@ -74,15 +62,7 @@ function ymdInTz(date: Date, timeZone: string): string {
   }).format(date);
 }
 
-/** Whole days from `joined` (YYYY-MM-DD) up to `todayYmd`. Negative if future. */
-function daysSince(joinedYmd: string, todayYmd: string): number {
-  const joined = Date.parse(`${joinedYmd}T00:00:00Z`);
-  const today = Date.parse(`${todayYmd}T00:00:00Z`);
-  if (Number.isNaN(joined) || Number.isNaN(today)) return NaN;
-  return Math.floor((today - joined) / 86_400_000);
-}
-
-type DripPlan = { email: string; firstName: string; emailIndex: number; pageId: string };
+type EnrolPlan = { email: string; firstName: string; pageId: string };
 
 export async function GET(request: Request) {
   if (!gate(request)) {
@@ -92,7 +72,6 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const dryRun = url.searchParams.get("dryRun") === "true";
   const resendKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.LEAD_FROM_EMAIL;
 
   const startedAt = Date.now();
   const todayYmd = ymdInTz(new Date(), TZ);
@@ -101,12 +80,9 @@ export async function GET(request: Request) {
     if (!dryRun) await ensureOnboardingProperties();
     const members = await loadOnboardingMembers();
 
-    // Pick at most ONE email per member per run: the earliest due-but-unsent
-    // eligible step. Capping to one is what makes a missed run (outage) safe —
-    // a member never receives several drip emails in a single run, they catch
-    // up one per day. DRIP_SEQUENCE is ordered by threshold, so the first match
-    // walking forward is the earliest due step.
-    const plans: DripPlan[] = [];
+    // Enrol each eligible member exactly once: joined on/after the cutoff and
+    // not yet marked (sent[0] = "Onboarding Email 1 Sent" = already enrolled).
+    const plans: EnrolPlan[] = [];
     let noJoinDate = 0;
     let preStart = 0;
     for (const m of members) {
@@ -118,20 +94,8 @@ export async function GET(request: Request) {
         preStart += 1;
         continue;
       }
-      const elapsed = daysSince(m.joined, todayYmd);
-      if (Number.isNaN(elapsed)) continue;
-      for (const step of DRIP_SEQUENCE) {
-        if (!stepEligible(step.emailIndex)) continue;
-        if (m.sent[step.emailIndex - 1]) continue;
-        if (elapsed < step.daysAfterJoined) break; // not due yet; nothing later is either
-        plans.push({
-          email: m.email,
-          firstName: m.firstName,
-          emailIndex: step.emailIndex,
-          pageId: m.pageId,
-        });
-        break; // one email per member per run
-      }
+      if (m.sent[0]) continue; // already enrolled
+      plans.push({ email: m.email, firstName: m.firstName, pageId: m.pageId });
     }
 
     if (dryRun) {
@@ -141,36 +105,35 @@ export async function GET(request: Request) {
         durationMs: Date.now() - startedAt,
         todayYmd,
         dripStartDate: DRIP_START_DATE,
-        nutritionGuideReady: NUTRITION_GUIDE_READY,
         totalMembers: members.length,
         noJoinDate,
         preStart,
-        dueCount: plans.length,
-        due: plans.map((p) => ({ email: p.email, emailIndex: p.emailIndex })),
+        toEnrol: plans.length,
+        enrol: plans.map((p) => p.email),
       });
     }
 
-    if (!resendKey || !fromEmail) {
+    if (!resendKey) {
       return Response.json(
-        { ok: false, error: "RESEND_API_KEY or LEAD_FROM_EMAIL not set", dueCount: plans.length },
+        { ok: false, error: "RESEND_API_KEY not set", toEnrol: plans.length },
         { status: 500 },
       );
     }
 
-    const sent: Array<{ email: string; emailIndex: number }> = [];
-    const errors: Array<{ email: string; emailIndex: number; reason: string }> = [];
+    const enrolled: string[] = [];
+    const errors: Array<{ email: string; reason: string }> = [];
 
-    // Sequential to stay well within Resend + Notion rate limits; drip volume is
-    // low (a handful of new members per day) so throughput is not a concern.
+    // Sequential to stay well within Resend + Notion rate limits; volume is a
+    // handful of new members per day at most.
     for (const p of plans) {
       try {
-        await sendDripEmail(p, resendKey, fromEmail);
-        // Only flag as sent once the email actually went out, so a send failure
-        // leaves the flag false and the email is retried on the next run.
-        await setOnboardingFlag(p.pageId, p.emailIndex);
-        sent.push({ email: p.email, emailIndex: p.emailIndex });
+        await enrolMember(p, resendKey);
+        // Only mark enrolled once the event was accepted, so a failure leaves
+        // the flag false and the member is retried on the next run.
+        await setOnboardingFlag(p.pageId, 1);
+        enrolled.push(p.email);
       } catch (err) {
-        errors.push({ email: p.email, emailIndex: p.emailIndex, reason: (err as Error).message });
+        errors.push({ email: p.email, reason: (err as Error).message });
       }
     }
 
@@ -179,13 +142,12 @@ export async function GET(request: Request) {
       durationMs: Date.now() - startedAt,
       todayYmd,
       dripStartDate: DRIP_START_DATE,
-      nutritionGuideReady: NUTRITION_GUIDE_READY,
       totalMembers: members.length,
       noJoinDate,
       preStart,
-      dueCount: plans.length,
-      sentCount: sent.length,
-      sent,
+      toEnrol: plans.length,
+      enrolledCount: enrolled.length,
+      enrolled,
       errors,
     });
   } catch (err) {
@@ -196,36 +158,30 @@ export async function GET(request: Request) {
   }
 }
 
-async function sendDripEmail(
-  plan: Pick<DripPlan, "email" | "firstName" | "emailIndex">,
+/**
+ * Enrol one member into the Resend "Member onboarding drip" automation by firing
+ * its trigger event. The automation reads the member's first name from their
+ * Resend contact (contact.first_name); the payload name is a redundant backup.
+ */
+async function enrolMember(
+  plan: Pick<EnrolPlan, "email" | "firstName">,
   apiKey: string,
-  from: string,
 ): Promise<void> {
   const name = (plan.firstName || "").trim() || "there";
-  const alias = DRIP_TEMPLATE_ALIAS[plan.emailIndex];
-  if (!alias) {
-    throw new Error(`No Resend template for drip email ${plan.emailIndex}`);
-  }
-  // Copy + layout live in the published Resend template; we pass only the runtime
-  // variables it references. Email 1 additionally needs the induction booking URL.
-  const variables: Record<string, string> = { MEMBER_FIRST_NAME: name };
-  if (plan.emailIndex === 1) variables.BOOK_INDUCTION_URL = INDUCTION_BOOKING_URL;
-
-  const res = await fetch("https://api.resend.com/emails", {
+  const res = await fetch("https://api.resend.com/events/send", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from,
-      reply_to: "hallum@gainstrengththerapy.com",
-      to: [plan.email],
-      template: { id: alias, variables },
+      event: ENROLL_EVENT,
+      email: plan.email,
+      payload: { MEMBER_FIRST_NAME: name },
     }),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`Resend drip email ${plan.emailIndex}: ${res.status} ${body.slice(0, 200)}`);
+    throw new Error(`Resend enrol ${res.status}: ${body.slice(0, 200)}`);
   }
 }
