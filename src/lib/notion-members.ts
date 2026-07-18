@@ -4,7 +4,7 @@ import {
   fetchMembershipSummaryByCustomer,
   type MembershipSummary,
 } from "@/lib/teamup-memberships";
-import { copyConsentFromLeadToMember } from "@/lib/notion-leads";
+import { copyConsentFromLeadToMember, markLeadConverted } from "@/lib/notion-leads";
 
 const NOTION_API = "https://api.notion.com/v1";
 const NOTION_VERSION = "2022-06-28";
@@ -298,6 +298,8 @@ export type SyncResult = {
   updated: number;
   unchanged: number;
   skipped: number;
+  /** Website leads auto-marked Converted + linked to their new member row. */
+  converted: number;
   errors: Array<{ id: number; reason: string }>;
   dryRun?: boolean;
   /** Names that would be created (dry run only). */
@@ -434,6 +436,7 @@ export async function upsertCustomers(
     updated: 0,
     unchanged: 0,
     skipped: 0,
+    converted: 0,
     errors: [],
     ...(dryRun ? { dryRun: true, plannedCreates: [], plannedBackfills: [] } : {}),
   };
@@ -495,6 +498,7 @@ export async function upsertCustomers(
 
       const properties = buildProperties(input);
 
+      let memberPageId: string;
       if (existing) {
         const res = await fetch(`${NOTION_API}/pages/${existing.pageId}`, {
           method: "PATCH",
@@ -502,6 +506,7 @@ export async function upsertCustomers(
           body: JSON.stringify({ properties }),
         });
         if (!res.ok) throw new Error(`update ${res.status}: ${(await res.text()).slice(0, 200)}`);
+        memberPageId = existing.pageId;
         result.updated += 1;
       } else {
         const res = await fetch(`${NOTION_API}/pages`, {
@@ -510,6 +515,7 @@ export async function upsertCustomers(
           body: JSON.stringify({ parent: { database_id: dbId }, properties }),
         });
         if (!res.ok) throw new Error(`create ${res.status}: ${(await res.text()).slice(0, 200)}`);
+        memberPageId = ((await res.json()) as { id: string }).id;
         result.created += 1;
       }
 
@@ -518,6 +524,15 @@ export async function upsertCustomers(
           await copyConsentFromLeadToMember(c.email);
         } catch (err) {
           console.error(`[teamup sync] consent copy failed for ${c.email}`, (err as Error).message);
+        }
+        // Reflect the conversion in the Leads DB automatically: flip the matching
+        // website lead to Converted and link it to this member, so the Leads
+        // pipeline stops drifting from reality (was manual-only). See
+        // markLeadConverted for the family-account guard.
+        try {
+          result.converted += await markLeadConverted(c.email, memberPageId, shareCount);
+        } catch (err) {
+          console.error(`[teamup sync] lead conversion failed for ${c.email}`, (err as Error).message);
         }
       }
     } catch (err) {

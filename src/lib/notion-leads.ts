@@ -24,6 +24,8 @@ export type LeadConsentFields = {
   consentAt: string | null;
   unsubscribedAt: string | null;
   unsubscribeReason: string | null;
+  status: string | null;
+  convertedMemberIds: string[];
 };
 
 type LeadRow = {
@@ -35,6 +37,8 @@ type LeadRow = {
     "Newsletter Consent At"?: { date?: { start: string } | null };
     "Newsletter Unsubscribed At"?: { date?: { start: string } | null };
     "Newsletter Unsubscribe Reason"?: { select?: { name: string } | null };
+    Status?: { select?: { name: string } | null };
+    "Converted Member"?: { relation?: Array<{ id: string }> };
   };
 };
 
@@ -69,6 +73,9 @@ export async function findLeadsByEmail(email: string): Promise<LeadConsentFields
       row.properties["Newsletter Unsubscribed At"]?.date?.start ?? null,
     unsubscribeReason:
       row.properties["Newsletter Unsubscribe Reason"]?.select?.name ?? null,
+    status: row.properties.Status?.select?.name ?? null,
+    convertedMemberIds:
+      row.properties["Converted Member"]?.relation?.map((r) => r.id) ?? [],
   }));
 }
 
@@ -184,4 +191,43 @@ export async function copyConsentFromLeadToMember(memberEmail: string): Promise<
   }
 
   return copied;
+}
+
+/**
+ * When a TeamUp member is synced, mark the matching website lead as Converted and
+ * link the two records, so the Leads DB reflects conversions automatically rather
+ * than relying on a manual update. Matches by email.
+ *
+ * Guardrails:
+ * - Shared / family TeamUp accounts put several customers on one email, so an
+ *   email match can't reliably identify the enquirer. `shareCount` is how many
+ *   TeamUp customers share this email; we only auto-convert when it is 1.
+ * - Idempotent: skips the write when the lead is already Converted and already
+ *   linked to this member, and preserves any existing Converted Member links.
+ *
+ * Returns the number of lead rows updated.
+ */
+export async function markLeadConverted(
+  memberEmail: string,
+  memberPageId: string,
+  shareCount: number,
+): Promise<number> {
+  if (shareCount > 1) return 0;
+  const leads = await findLeadsByEmail(memberEmail);
+  if (leads.length === 0) return 0;
+
+  let converted = 0;
+  for (const lead of leads) {
+    const alreadyLinked = lead.convertedMemberIds.includes(memberPageId);
+    if (lead.status === "Converted" && alreadyLinked) continue;
+    const relationIds = alreadyLinked
+      ? lead.convertedMemberIds
+      : [...lead.convertedMemberIds, memberPageId];
+    await patchNotionPage(lead.pageId, {
+      Status: { select: { name: "Converted" } },
+      "Converted Member": { relation: relationIds.map((id) => ({ id })) },
+    });
+    converted += 1;
+  }
+  return converted;
 }
