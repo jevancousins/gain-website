@@ -29,8 +29,8 @@ import { planEmail6, type Email6Plan } from "@/lib/mid-programme-checkin";
  *    days (21 for a 6-week programme, 42 for a 12-week), anchored to the TeamUp
  *    membership start, paused when the membership is on hold. Live membership facts
  *    come from TeamUp each run; the active-day counter and per-membership dedup are
- *    persisted in Notion. `planEmail6` holds the decision logic. Remove step 6 from
- *    the Resend Automation before go-live, or programme members get it twice.
+ *    persisted in Notion. `planEmail6` holds the decision logic. (The old day-21
+ *    mid-programme step has been removed from the Resend Automation, so no double-send.)
  *
  * Runs at 07:00 UTC, after teamup-members-sync (06:00) and resend-contacts-sync
  * (06:30). Timezone Europe/London; day math is YMD compares.
@@ -48,12 +48,10 @@ const ENROLL_EVENT = "member.joined";
 // ONBOARDING_DRIP_START_DATE (YYYY-MM-DD). Far-future value = no-enrol kill switch.
 const DRIP_START_DATE = process.env.ONBOARDING_DRIP_START_DATE ?? "2026-06-21";
 
-// Programme go-live cutoff for the mid-programme check-in. Only 6/12-week
-// programmes that STARTED on/after this date are eligible, so nobody is emailed
-// for a programme that began before tracking existed. Set to the programmes'
-// go-live date; override with ONBOARDING_PROGRAMME_START_DATE.
-const PROGRAMME_DRIP_START_DATE =
-  process.env.ONBOARDING_PROGRAMME_START_DATE ?? "2026-07-19";
+// The mid-programme check-in needs NO go-live date. It self-scopes: a programme is
+// tracked from the first run that sees it, and one already well underway on first
+// sight is skipped (see FIRST_TRACK_GRACE_DAYS). So the programmes can be sold the
+// moment this deploys, and every sale from then on is timed correctly.
 
 const MID_PROGRAMME_TEMPLATE = DRIP_TEMPLATE_ALIAS[MID_PROGRAMME_EMAIL_INDEX];
 
@@ -148,7 +146,7 @@ export async function GET(request: Request) {
       const plan =
         membershipMap == null && m.teamupId != null
           ? unresolvedPlan(m)
-          : planEmail6(m, programme, todayYmd, PROGRAMME_DRIP_START_DATE, DRIP_START_DATE);
+          : planEmail6(m, programme, todayYmd, DRIP_START_DATE);
       // Only members with something to report (a programme, or a diagnosable skip).
       if (
         plan.decision === "SKIP_NO_PROGRAMME" ||
@@ -171,7 +169,6 @@ export async function GET(request: Request) {
         durationMs: Date.now() - startedAt,
         todayYmd,
         dripStartDate: DRIP_START_DATE,
-        programmeDripStartDate: PROGRAMME_DRIP_START_DATE,
         totalMembers: members.length,
         liveMembershipRead: membershipMap != null,
         enrolment: { noJoinDate, preStart, toEnrol: plans.length, enrol: plans.map((p) => p.email) },
@@ -235,7 +232,12 @@ export async function GET(request: Request) {
         } catch (err) {
           errors6.push({ email: r.email, reason: (err as Error).message });
         }
-      } else if (plan.decision === "SKIP_PAST_CEILING" && plan.anchorMembershipId) {
+      } else if (
+        (plan.decision === "SKIP_PAST_CEILING" ||
+          plan.decision === "SKIP_PROGRAMME_PREDATES_TRACKING") &&
+        plan.anchorMembershipId
+      ) {
+        // Permanently record so a deliberately-skipped programme is never revisited.
         try {
           await recordEmail6Skipped(
             r.pageId,
@@ -254,7 +256,6 @@ export async function GET(request: Request) {
       durationMs: Date.now() - startedAt,
       todayYmd,
       dripStartDate: DRIP_START_DATE,
-      programmeDripStartDate: PROGRAMME_DRIP_START_DATE,
       totalMembers: members.length,
       liveMembershipRead: membershipMap != null,
       enrolment: {

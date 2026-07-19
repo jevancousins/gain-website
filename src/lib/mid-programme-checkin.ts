@@ -22,10 +22,22 @@ export type Email6Decision =
   | "SKIP_EARLY_DEPARTURE"
   | "SKIP_ALREADY_HANDLED"
   | "SKIP_ORDERING"
-  | "SKIP_BEFORE_PROGRAMME_CUTOFF"
+  | "SKIP_PROGRAMME_PREDATES_TRACKING"
   | "SKIP_NO_PROGRAMME"
   | "SKIP_NO_TEAMUP_ID"
   | "SKIP_UNRESOLVED_LIVE_READ";
+
+/**
+ * How many days a programme may already be old the first time the cron sees it
+ * and still be tracked. The active-day counter starts when the cron first
+ * observes a membership, so a programme that began well before that would be
+ * counted late and mistimed. Normal sync lag is about a day, so a programme
+ * more than this many days old on first sight is treated as pre-existing (it
+ * started before tracking) and skipped rather than emailed at the wrong time.
+ * This is why no go-live date needs setting: deploy whenever, sell whenever, and
+ * every programme sold from then on is caught within the lag and timed correctly.
+ */
+export const FIRST_TRACK_GRACE_DAYS = 7;
 
 export type Email6Plan = {
   decision: Email6Decision;
@@ -43,6 +55,13 @@ export type Email6Plan = {
 export function addDaysYmd(ymd: string, days: number): string {
   const ms = Date.parse(`${ymd}T00:00:00Z`);
   return new Date(ms + days * 86_400_000).toISOString().slice(0, 10);
+}
+
+/** Whole days from `fromYmd` to `toYmd` (negative if `toYmd` is earlier). */
+export function calendarDaysBetween(fromYmd: string, toYmd: string): number {
+  const from = Date.parse(`${fromYmd}T00:00:00Z`);
+  const to = Date.parse(`${toYmd}T00:00:00Z`);
+  return Math.round((to - from) / 86_400_000);
 }
 
 /**
@@ -73,7 +92,6 @@ export function planEmail6(
   member: OnboardingMember,
   programme: ProgrammeMembership | null,
   todayYmd: string,
-  programmeCutoff: string,
   dripStartDate: string,
 ): Email6Plan {
   const base: Omit<Email6Plan, "decision"> = {
@@ -115,8 +133,11 @@ export function planEmail6(
 
   // Phase C: ordered gates. First failing gate wins.
   let decision: Email6Decision;
-  if (programme.startDate < programmeCutoff) {
-    decision = "SKIP_BEFORE_PROGRAMME_CUTOFF";
+  if (anchorReset && calendarDaysBetween(programme.startDate, todayYmd) > FIRST_TRACK_GRACE_DAYS) {
+    // First time we have seen this programme, and it was already well underway,
+    // so the counter would start late. Skip rather than mistime. Recorded to the
+    // skipped set by the caller so it is never revisited.
+    decision = "SKIP_PROGRAMME_PREDATES_TRACKING";
   } else if (
     member.email6SentMembershipIds.includes(programme.membershipId) ||
     member.email6SkippedMembershipIds.includes(programme.membershipId)

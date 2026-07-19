@@ -32,7 +32,9 @@ them yet), so the counter starts from day 0 at go-live and is exact with no back
 
 ## The checks that keep a send valid (evaluated in order; first failure wins)
 
-1. `SKIP_BEFORE_PROGRAMME_CUTOFF`: programme started before the go-live cutoff.
+1. `SKIP_PROGRAMME_PREDATES_TRACKING`: the first run that sees this programme finds it
+   already more than a week old, so its active-day count would start late. Skipped and
+   recorded, never revisited. This is what lets the feature self-scope with no go-live date.
 2. `SKIP_ALREADY_HANDLED`: this membership id is already in the sent or skipped set.
 3. `SKIP_ORDERING`: a genuine new member has not had their welcome yet (upgraders, who
    never get emails 1 to 5, pass).
@@ -73,11 +75,17 @@ Otherwise: **SEND**. Then append the membership id to `Email 6 Sent Memberships`
 member, the resolved programme, the counter before/after, the computed midpoint/ceiling,
 and the decision. No writes, no sends.
 
-## Before go-live (manual)
+## Go-live
 
-1. Remove **step 6** from the Resend "Member onboarding drip" automation, or programme
-   members receive it twice (automation + cron).
-2. Set `ONBOARDING_PROGRAMME_START_DATE` to the real programmes' go-live date.
-3. Verify against a real 6/12-week membership that pause shows as status `hold` and note
-   whether `expiration_date` extends on hold (the dryRun surfaces this telemetry). If it
-   does, an expiry-based formula becomes an equivalent stateless option.
+No go-live date to set: the feature self-scopes (a programme already underway the first
+time the cron sees it is skipped via `SKIP_PROGRAMME_PREDATES_TRACKING`), so the
+programmes can be sold the moment this deploys and every sale from then on is timed
+correctly.
+
+Already done: the day-21 mid-programme step was removed from the Resend "Member onboarding
+drip" automation (it now ends at the week-1 email), so there is no double-send.
+
+Still worth doing once a real 6/12-week membership exists: confirm pause shows as status
+`hold`, and note from the dryRun telemetry whether `expiration_date` extends on hold. If
+it does, an expiry-based formula becomes an equivalent stateless option (not needed, just
+a possible future simplification).
