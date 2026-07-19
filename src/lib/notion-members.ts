@@ -5,6 +5,7 @@ import {
   type MembershipSummary,
 } from "@/lib/teamup-memberships";
 import { copyConsentFromLeadToMember, markLeadConverted } from "@/lib/notion-leads";
+import { MID_PROGRAMME_EMAIL_INDEX } from "@/lib/onboarding-emails";
 
 const NOTION_API = "https://api.notion.com/v1";
 const NOTION_VERSION = "2022-06-28";
@@ -322,13 +323,36 @@ export function onboardingFlagName(emailIndex: number): string {
   return `Onboarding Email ${emailIndex} Sent`;
 }
 
+// Persistent state for the programme-anchored mid-programme check-in (email 6).
+// The check-in fires at a member's true midpoint counted in ACTIVE days, so the
+// cron accumulates active days here (paused days do not advance it), keyed to the
+// current programme membership so a re-take/upgrade resets cleanly. Dedup is per
+// membership id, not per member, for the same reason.
+export const PROGRAMME_ACTIVE_DAYS = "Programme Active Days";
+export const PROGRAMME_ACTIVE_DAYS_COUNTED_ON = "Programme Active Days Counted On";
+export const PROGRAMME_ANCHOR_MEMBERSHIP_ID = "Programme Anchor Membership ID";
+export const EMAIL6_SENT_MEMBERSHIPS = "Email 6 Sent Memberships";
+export const EMAIL6_SKIPPED_MEMBERSHIPS = "Email 6 Skipped Memberships";
+
 export type OnboardingMember = {
   pageId: string;
   email: string;
   firstName: string;
   joined: string | null; // YYYY-MM-DD
+  /** TeamUp customer id; the join key to live membership data. Null if unset. */
+  teamupId: number | null;
   /** sent[i] is true if "Onboarding Email (i+1) Sent" is ticked. Length 6. */
   sent: boolean[];
+  /** Accumulated active-training days on the current programme (email 6 timer). */
+  programmeActiveDays: number;
+  /** London YMD the counter last incremented; guards one increment per day. */
+  activeDaysCountedOn: string | null;
+  /** Membership id the counter is anchored to; a change resets the counter. */
+  anchorMembershipId: string | null;
+  /** Membership ids the check-in has already been sent for. */
+  email6SentMembershipIds: string[];
+  /** Membership ids the check-in was deliberately skipped for (past ceiling). */
+  email6SkippedMembershipIds: string[];
 };
 
 type OnboardingMemberRow = {
@@ -338,8 +362,19 @@ type OnboardingMemberRow = {
     title?: Array<{ plain_text: string }>;
     date?: { start: string } | null;
     checkbox?: boolean;
+    number?: number | null;
+    rich_text?: Array<{ plain_text: string }>;
   }>;
 };
+
+/** Parse a comma-separated membership-id list stored in a rich_text property. */
+function parseIdList(row: OnboardingMemberRow, prop: string): string[] {
+  const raw = row.properties[prop]?.rich_text?.map((t) => t.plain_text).join("") ?? "";
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 /**
  * Ensure the six "Onboarding Email N Sent" checkbox properties exist on the
@@ -352,6 +387,12 @@ export async function ensureOnboardingProperties(): Promise<void> {
   for (let i = 1; i <= ONBOARDING_EMAIL_COUNT; i++) {
     properties[onboardingFlagName(i)] = { checkbox: {} };
   }
+  // Programme-anchored check-in state (see the constants above).
+  properties[PROGRAMME_ACTIVE_DAYS] = { number: {} };
+  properties[PROGRAMME_ACTIVE_DAYS_COUNTED_ON] = { date: {} };
+  properties[PROGRAMME_ANCHOR_MEMBERSHIP_ID] = { rich_text: {} };
+  properties[EMAIL6_SENT_MEMBERSHIPS] = { rich_text: {} };
+  properties[EMAIL6_SKIPPED_MEMBERSHIPS] = { rich_text: {} };
   const res = await fetch(`${NOTION_API}/databases/${dbId}`, {
     method: "PATCH",
     headers: notionHeaders(token),
@@ -398,7 +439,17 @@ export async function loadOnboardingMembers(): Promise<OnboardingMember[]> {
         email,
         firstName: name.trim().split(/\s+/)[0] || "",
         joined: row.properties.Joined?.date?.start ?? null,
+        teamupId: row.properties["TeamUp ID"]?.number ?? null,
         sent,
+        programmeActiveDays: row.properties[PROGRAMME_ACTIVE_DAYS]?.number ?? 0,
+        activeDaysCountedOn:
+          row.properties[PROGRAMME_ACTIVE_DAYS_COUNTED_ON]?.date?.start ?? null,
+        anchorMembershipId:
+          row.properties[PROGRAMME_ANCHOR_MEMBERSHIP_ID]?.rich_text
+            ?.map((t) => t.plain_text)
+            .join("") || null,
+        email6SentMembershipIds: parseIdList(row, EMAIL6_SENT_MEMBERSHIPS),
+        email6SkippedMembershipIds: parseIdList(row, EMAIL6_SKIPPED_MEMBERSHIPS),
       });
     }
     if (!data.has_more || !data.next_cursor) break;
@@ -422,6 +473,86 @@ export async function setOnboardingFlag(pageId: string, emailIndex: number): Pro
     const body = await res.text().catch(() => "");
     throw new Error(`set ${onboardingFlagName(emailIndex)} ${res.status}: ${body.slice(0, 200)}`);
   }
+}
+
+async function patchMemberProps(
+  pageId: string,
+  properties: Record<string, unknown>,
+  what: string,
+): Promise<void> {
+  const { token } = notionConfig();
+  const res = await fetch(`${NOTION_API}/pages/${pageId}`, {
+    method: "PATCH",
+    headers: notionHeaders(token),
+    body: JSON.stringify({ properties }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`${what} ${res.status}: ${body.slice(0, 200)}`);
+  }
+}
+
+/**
+ * Persist the programme active-day counter for a member: the running total, the
+ * London day it was last counted (so a re-run the same day does not double-count),
+ * and the membership id it is anchored to (a change resets the total to 0).
+ */
+export async function setProgrammeCounter(
+  pageId: string,
+  state: { activeDays: number; countedOn: string | null; anchorMembershipId: string },
+): Promise<void> {
+  await patchMemberProps(
+    pageId,
+    {
+      [PROGRAMME_ACTIVE_DAYS]: { number: state.activeDays },
+      [PROGRAMME_ACTIVE_DAYS_COUNTED_ON]: {
+        date: state.countedOn ? { start: state.countedOn } : null,
+      },
+      [PROGRAMME_ANCHOR_MEMBERSHIP_ID]: {
+        rich_text: [{ text: { content: state.anchorMembershipId } }],
+      },
+    },
+    "set programme counter",
+  );
+}
+
+/**
+ * Record that the mid-programme check-in was sent for a membership: append its id
+ * to the sent set (the authoritative dedup) and tick the Onboarding Email 6 Sent
+ * checkbox for reporting parity. Called only after the send succeeds.
+ */
+export async function recordEmail6Sent(
+  pageId: string,
+  currentSentIds: string[],
+  membershipId: string,
+): Promise<void> {
+  const next = Array.from(new Set([...currentSentIds, membershipId])).join(", ");
+  await patchMemberProps(
+    pageId,
+    {
+      [EMAIL6_SENT_MEMBERSHIPS]: { rich_text: [{ text: { content: next } }] },
+      [onboardingFlagName(MID_PROGRAMME_EMAIL_INDEX)]: { checkbox: true },
+    },
+    "record email6 sent",
+  );
+}
+
+/**
+ * Record that the mid-programme check-in was deliberately skipped for a membership
+ * (member is already past the grace ceiling), so it is never revisited or sent
+ * stale. Distinct from the sent set for reporting.
+ */
+export async function recordEmail6Skipped(
+  pageId: string,
+  currentSkippedIds: string[],
+  membershipId: string,
+): Promise<void> {
+  const next = Array.from(new Set([...currentSkippedIds, membershipId])).join(", ");
+  await patchMemberProps(
+    pageId,
+    { [EMAIL6_SKIPPED_MEMBERSHIPS]: { rich_text: [{ text: { content: next } }] } },
+    "record email6 skipped",
+  );
 }
 
 export async function upsertCustomers(
