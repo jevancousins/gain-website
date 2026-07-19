@@ -325,6 +325,8 @@ export type OnboardingMember = {
   email: string;
   firstName: string;
   joined: string | null; // YYYY-MM-DD
+  /** TeamUp membership name; used to time the mid-programme check-in. */
+  programme: string | null;
   /** sent[i] is true if "Onboarding Email (i+1) Sent" is ticked. Length 6. */
   sent: boolean[];
 };
@@ -336,6 +338,7 @@ type OnboardingMemberRow = {
     title?: Array<{ plain_text: string }>;
     date?: { start: string } | null;
     checkbox?: boolean;
+    rich_text?: Array<{ plain_text: string }>;
   }>;
 };
 
@@ -396,6 +399,8 @@ export async function loadOnboardingMembers(): Promise<OnboardingMember[]> {
         email,
         firstName: name.trim().split(/\s+/)[0] || "",
         joined: row.properties.Joined?.date?.start ?? null,
+        programme:
+          row.properties.Programme?.rich_text?.map((t) => t.plain_text).join("") || null,
         sent,
       });
     }

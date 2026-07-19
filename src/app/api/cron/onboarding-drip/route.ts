@@ -3,7 +3,12 @@ import {
   loadOnboardingMembers,
   setOnboardingFlag,
 } from "@/lib/notion-members";
-import { DRIP_TEMPLATE_ALIAS, INDUCTION_BOOKING_URL } from "@/lib/onboarding-emails";
+import {
+  DRIP_TEMPLATE_ALIAS,
+  INDUCTION_BOOKING_URL,
+  MID_PROGRAMME_EMAIL_INDEX,
+  midProgrammeCheckInDay,
+} from "@/lib/onboarding-emails";
 
 /**
  * Daily onboarding drip: sends new-member lifecycle emails as they fall due,
@@ -22,13 +27,16 @@ import { DRIP_TEMPLATE_ALIAS, INDUCTION_BOOKING_URL } from "@/lib/onboarding-ema
 
 const TZ = "Europe/London";
 
+// Emails 1-5 sit at fixed offsets from the join date. Email 6, the
+// mid-programme check-in, is NOT here: its offset depends on the member's
+// programme (6-week -> ~day 21, 12-week -> ~day 42) and is computed per member
+// via midProgrammeCheckInDay, then merged into each member's schedule below.
 const DRIP_SEQUENCE = [
   { emailIndex: 1, daysAfterJoined: 0 },
   { emailIndex: 2, daysAfterJoined: 2 },
   { emailIndex: 3, daysAfterJoined: 5 },
   { emailIndex: 4, daysAfterJoined: 7 },
   { emailIndex: 5, daysAfterJoined: 14 },
-  { emailIndex: 6, daysAfterJoined: 21 },
 ] as const;
 
 // Enrolment cutoff. Only members who joined on or after this date enter the
@@ -109,6 +117,15 @@ export async function GET(request: Request) {
     const plans: DripPlan[] = [];
     let noJoinDate = 0;
     let preStart = 0;
+    // Visibility for dryRun: every member on a finite programme (6/12-week), with
+    // the halfway day we computed and whether the check-in has already gone out.
+    const midProgramme: Array<{
+      email: string;
+      programme: string | null;
+      midDay: number;
+      elapsed: number;
+      alreadySent: boolean;
+    }> = [];
     for (const m of members) {
       if (!m.joined) {
         noJoinDate += 1;
@@ -120,7 +137,29 @@ export async function GET(request: Request) {
       }
       const elapsed = daysSince(m.joined, todayYmd);
       if (Number.isNaN(elapsed)) continue;
-      for (const step of DRIP_SEQUENCE) {
+
+      // This member's due schedule: the fixed emails 1-5, plus the mid-programme
+      // check-in (email 6) at their programme's halfway point. Members on an
+      // open-ended membership have no midpoint, so they never get email 6.
+      const schedule: Array<{ emailIndex: number; daysAfterJoined: number }> = [
+        ...DRIP_SEQUENCE,
+      ];
+      const midDay = midProgrammeCheckInDay(m.programme);
+      if (midDay !== null) {
+        schedule.push({ emailIndex: MID_PROGRAMME_EMAIL_INDEX, daysAfterJoined: midDay });
+        midProgramme.push({
+          email: m.email,
+          programme: m.programme,
+          midDay,
+          elapsed,
+          alreadySent: m.sent[MID_PROGRAMME_EMAIL_INDEX - 1],
+        });
+      }
+      // Ascending by threshold so walking forward, the first due-but-unsent step
+      // is the earliest one, which is what makes the `break` below sound.
+      schedule.sort((a, b) => a.daysAfterJoined - b.daysAfterJoined);
+
+      for (const step of schedule) {
         if (!stepEligible(step.emailIndex)) continue;
         if (m.sent[step.emailIndex - 1]) continue;
         if (elapsed < step.daysAfterJoined) break; // not due yet; nothing later is either
@@ -147,6 +186,9 @@ export async function GET(request: Request) {
         preStart,
         dueCount: plans.length,
         due: plans.map((p) => ({ email: p.email, emailIndex: p.emailIndex })),
+        // Members on a 6/12-week programme and the halfway day each is timed to.
+        midProgrammeCount: midProgramme.length,
+        midProgramme,
       });
     }
 
