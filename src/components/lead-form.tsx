@@ -271,6 +271,26 @@ export function LeadForm({
         </span>
       </label>
 
+      {/*
+        Honeypot: invisible to real people (off-screen, not announced to screen
+        readers, not reachable by keyboard) but present in the DOM, so naive form
+        bots fill it. A non-empty "website" value is dropped server-side in
+        /api/lead. Off-screen rather than display:none because some bots skip
+        display:none fields. Not a real field, so autoComplete is off to keep
+        password managers from filling it and dropping a genuine enquiry.
+      */}
+      <div aria-hidden="true" className="absolute left-[-9999px] top-0 h-0 w-0 overflow-hidden">
+        <label htmlFor="website">Leave this field blank</label>
+        <input
+          id="website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue=""
+        />
+      </div>
+
       <button
         type="submit"
         disabled={state === "loading"}
