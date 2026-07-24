@@ -15,6 +15,8 @@ type LeadPayload = {
   message?: string;
   // Per-ad attribution, captured from the landing-page URL (?ad=<id>).
   ad?: string;
+  // Honeypot: a hidden field real users never fill. Any value means a bot.
+  website?: string;
 };
 
 type FieldKey = "firstName" | "email" | "phone";
@@ -82,6 +84,19 @@ export async function POST(request: Request) {
   // straight from the query string so we never trust its length. Persona is
   // resolved later by joining this slug to the Ads DB, not stored on the lead.
   const ad = (body.ad ?? "").toString().trim().slice(0, 100);
+
+  // Honeypot: the form renders a hidden "website" field that is off-screen,
+  // aria-hidden and non-tabbable, so a real person never sees or fills it.
+  // Automated form spam fills every input it finds, so a non-empty value is a
+  // bot. Silently accept and drop: return the exact success shape a genuine
+  // submission gets (so the bot neither retries nor adapts), but skip the Notion
+  // write, the confirmation email and the owner notification entirely, so the
+  // spam never reaches Hallum's inbox or sends mail from our verified domain.
+  // Checked before validation so a filled honeypot always short-circuits, even
+  // when the other fields are junk.
+  if ((body.website ?? "").toString().trim()) {
+    return NextResponse.json({ ok: true, id: crypto.randomUUID() }, { status: 201 });
+  }
 
   if (!firstName) {
     return fieldError("firstName", "Please enter your first name.");
