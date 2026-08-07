@@ -9,6 +9,7 @@ import {
 } from "@/lib/notion-members";
 import {
   fetchMembershipSummaryByCustomer,
+  type MembershipSummary,
   type ProgrammeMembership,
 } from "@/lib/teamup-memberships";
 import {
@@ -118,27 +119,62 @@ type DripPlan = {
   pageId: string;
   emailIndex: number;
   dueDay: number;
-  daysSinceJoined: number;
+  /** What the schedule is measured from, and why. */
+  anchorDate: string;
+  anchorSource: "programme_start" | "upcoming_programme_start" | "joined";
+  daysSinceAnchor: number;
   action: "send" | "mark_stale";
 };
 
-function planDripEmail(m: OnboardingMember, todayYmd: string): DripPlan | null {
+/**
+ * The date the sequence is measured from: the member's programme start where they
+ * have one (including a programme that has not begun yet), otherwise the Notion
+ * Joined date.
+ *
+ * Joined records the day they BOUGHT, which is not the day they START. Karen
+ * Marshall bought on 26 Jul 2026 to start on 10 Aug; anchored to the purchase she
+ * would have been asked how her first week went a fortnight before her first
+ * session. Members on open-ended memberships have no programme and correctly fall
+ * back to Joined.
+ */
+function dripAnchor(
+  m: OnboardingMember,
+  summary: MembershipSummary | null,
+): { date: string; source: DripPlan["anchorSource"] } | null {
+  if (summary?.programme?.startDate) {
+    return { date: summary.programme.startDate, source: "programme_start" };
+  }
+  if (summary?.upcomingProgrammeStart) {
+    return { date: summary.upcomingProgrammeStart, source: "upcoming_programme_start" };
+  }
+  return m.joined ? { date: m.joined, source: "joined" } : null;
+}
+
+function planDripEmail(
+  m: OnboardingMember,
+  summary: MembershipSummary | null,
+  todayYmd: string,
+): DripPlan | null {
   if (!m.joined || m.joined < DRIP_START_DATE) return null;
-  const daysSinceJoined = daysBetweenYmd(m.joined, todayYmd);
-  if (daysSinceJoined < 0) return null; // join date in the future; nothing due
+  const anchor = dripAnchor(m, summary);
+  if (!anchor) return null;
+  const daysSinceAnchor = daysBetweenYmd(anchor.date, todayYmd);
+  if (daysSinceAnchor < 0) return null; // programme has not started; nothing due yet
 
   for (let i = 1; i <= DRIP_MAX_SENDABLE_INDEX; i += 1) {
     if (m.sent[i - 1]) continue;
     const dueDay = DRIP_SCHEDULE_DAYS[i];
-    if (dueDay == null || daysSinceJoined < dueDay) return null; // not due; later ones cannot be either
+    if (dueDay == null || daysSinceAnchor < dueDay) return null; // not due; later ones cannot be either
     return {
       email: m.email,
       firstName: m.firstName,
       pageId: m.pageId,
       emailIndex: i,
       dueDay,
-      daysSinceJoined,
-      action: daysSinceJoined - dueDay > DRIP_MAX_LATE_DAYS ? "mark_stale" : "send",
+      anchorDate: anchor.date,
+      anchorSource: anchor.source,
+      daysSinceAnchor,
+      action: daysSinceAnchor - dueDay > DRIP_MAX_LATE_DAYS ? "mark_stale" : "send",
     };
   }
   return null;
@@ -197,7 +233,8 @@ export async function GET(request: Request) {
         preStart += 1;
         continue;
       }
-      const plan = planDripEmail(m, todayYmd);
+      const summary = m.teamupId != null ? membershipMap?.get(m.teamupId) ?? null : null;
+      const plan = planDripEmail(m, summary, todayYmd);
       if (plan) plans.push(plan);
     }
 
@@ -274,7 +311,7 @@ export async function GET(request: Request) {
           staleSeq.push({
             email: p.email,
             emailIndex: p.emailIndex,
-            daysLate: p.daysSinceJoined - p.dueDay,
+            daysLate: p.daysSinceAnchor - p.dueDay,
           });
           continue;
         }
