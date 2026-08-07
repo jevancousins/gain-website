@@ -38,6 +38,50 @@ export const DRIP_TEMPLATE_ALIAS: Record<number, string> = {
 export const DRIP_EMAIL_COUNT = 6;
 
 /**
+ * Days after the join date at which each of emails 1-5 is due.
+ *
+ * These emails used to be carried by the Resend "Member onboarding drip"
+ * Automation on its own delays. That was wrong in two ways and cost a real
+ * member her whole onboarding: an Automation will not send to a contact marked
+ * `unsubscribed`, and the contact sync marks anyone who did not tick the
+ * newsletter box as unsubscribed (correctly, for MARKETING). Onboarding is
+ * transactional, not marketing, so it must not be gated on newsletter consent.
+ * On top of that, steps 1, 2 and 5 were removed from the Automation on 22 Jul
+ * 2026 and never re-wired, so only 3 and 4 were reachable at all.
+ *
+ * The cron now owns emails 1-5 and sends them directly, the way email 6 already
+ * worked. The Resend Automation must stay disabled or subscribed members get
+ * emails 3 and 4 twice.
+ *
+ * Offsets match the drafts in AI for SMBs/onboarding-flow/onboarding-emails.md.
+ */
+export const DRIP_SCHEDULE_DAYS: Record<number, number> = {
+  1: 0, // welcome (lands the morning after signup: cron runs daily at 07:00)
+  2: 2, // induction prep
+  3: 5, // at-home mobility guide
+  4: 7, // week 1 check-in
+  5: 14, // nutrition guide
+};
+
+/**
+ * Highest drip email the cron will send. Email 5 links to
+ * /media/gain-nutrition-guide.pdf, which does not exist yet (404 as of 7 Aug
+ * 2026) — the missing nutrition doc Hallum has flagged since 18 July. Sending it
+ * would email members a dead link, so 5 stays gated.
+ *
+ * RAISE THIS TO 5 once the nutrition guide is committed to public/media/ and
+ * serves 200. Nothing else needs to change.
+ */
+export const DRIP_MAX_SENDABLE_INDEX = 4;
+
+/**
+ * How many days past its due date an email may still be sent. Beyond this the
+ * cron marks it done without sending, so a member recovering from an outage
+ * never receives a stale "how was your first week?" weeks late.
+ */
+export const DRIP_MAX_LATE_DAYS = 14;
+
+/**
  * The mid-programme check-in is drip email 6. Unlike emails 1-5 (which the Resend
  * "Member onboarding drip" automation sends on fixed delays from the join event),
  * email 6 is sent by the daily cron at each member's TRUE programme midpoint, so
