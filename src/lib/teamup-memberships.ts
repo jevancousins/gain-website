@@ -55,6 +55,18 @@ export type MembershipSummary = {
   /** The member's current 6/12-week programme, or null. Additive; does not affect
    *  activeName/latestStatus/expiresAt, which the members sync still relies on. */
   programme: ProgrammeMembership | null;
+  /**
+   * Start date (YMD) of a 6/12-week programme the member holds that has NOT begun
+   * yet, or null. `programme` deliberately excludes future starts because the
+   * mid-programme check-in counts active training days and cannot start early.
+   * The onboarding drip needs the opposite: it anchors emails 1-5 to the day the
+   * member actually begins, so it must see the future start.
+   *
+   * Karen Marshall bought on 26 Jul 2026 with a start of 10 Aug. Anchored to the
+   * purchase date she would have received "how's your first week going?" two weeks
+   * before her first session.
+   */
+  upcomingProgrammeStart: string | null;
 };
 
 const ACTIVE_STATUSES = new Set(["active"]);
@@ -108,6 +120,27 @@ function selectProgramme(
     renewalDate: chosen.renewal_date ?? null,
     isSetForCancellation: Boolean(chosen.is_set_for_cancellation),
   };
+}
+
+/**
+ * Earliest start date of a 6/12-week programme the member holds that has not begun
+ * yet, or null. The mirror of `selectProgramme`'s `start_date > todayYmd` exclusion.
+ * Earliest rather than latest, so a member who has bought consecutive blocks anchors
+ * to the one they are about to start.
+ */
+function selectUpcomingProgrammeStart(
+  rows: CustomerMembership[],
+  todayYmd: string,
+): string | null {
+  const starts = rows
+    .filter((r) => {
+      if (programmeLengthDays(r.name) === null) return false;
+      if (!PROGRAMME_LIVE_STATUSES.has((r.status ?? "").toLowerCase())) return false;
+      return Boolean(r.start_date) && (r.start_date as string) > todayYmd;
+    })
+    .map((r) => r.start_date as string)
+    .sort();
+  return starts[0] ?? null;
 }
 
 /**
@@ -167,6 +200,7 @@ export async function fetchMembershipSummaryByCustomer(
       expiresAt: active?.expiration_date ?? null,
       hasHistory: rows.length > 0,
       programme: selectProgramme(rows, todayYmd),
+      upcomingProgrammeStart: selectUpcomingProgrammeStart(rows, todayYmd),
     });
   }
 
