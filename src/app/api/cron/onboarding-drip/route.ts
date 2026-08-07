@@ -11,16 +11,33 @@ import {
   fetchMembershipSummaryByCustomer,
   type ProgrammeMembership,
 } from "@/lib/teamup-memberships";
-import { DRIP_TEMPLATE_ALIAS, MID_PROGRAMME_EMAIL_INDEX } from "@/lib/onboarding-emails";
+import {
+  DRIP_MAX_LATE_DAYS,
+  DRIP_MAX_SENDABLE_INDEX,
+  DRIP_SCHEDULE_DAYS,
+  DRIP_TEMPLATE_ALIAS,
+  MID_PROGRAMME_EMAIL_INDEX,
+} from "@/lib/onboarding-emails";
 import { planEmail6, type Email6Plan } from "@/lib/mid-programme-checkin";
 
 /**
  * Daily member-onboarding: two passes.
  *
- * 1. ENROLMENT (emails 1-5). The welcome -> induction-prep -> mobility -> week-1 ->
- *    nutrition sequence lives in the Resend Automation "Member onboarding drip".
- *    This cron fires ONE `member.joined` event per new member and Resend runs the
- *    fixed-delay sequence. Marked once by "Onboarding Email 1 Sent".
+ * 1. SEQUENCE (emails 1-5). The welcome -> induction-prep -> mobility -> week-1 ->
+ *    nutrition sequence is sent BY THIS CRON, directly via the Resend send API,
+ *    each email on its own day offset from the member's join date
+ *    (DRIP_SCHEDULE_DAYS). Idempotency is the per-email "Onboarding Email N Sent"
+ *    checkbox in Notion, so an email is never sent twice however often we run.
+ *
+ *    It used to be carried by the Resend "Member onboarding drip" Automation,
+ *    triggered by one `member.joined` event. That silently dropped every member
+ *    who had not ticked the newsletter box, because an Automation will not send
+ *    to a contact flagged `unsubscribed` and the contact sync sets that flag
+ *    whenever newsletter consent is absent. Karen Marshall, the first 6-week
+ *    programme sale, got none of her onboarding for that reason while Notion
+ *    recorded her as enrolled. Onboarding is transactional and must not depend on
+ *    marketing consent. KEEP THAT AUTOMATION DISABLED: if it is re-enabled,
+ *    subscribed members receive emails 3 and 4 twice.
  *
  * 2. MID-PROGRAMME CHECK-IN (email 6). NOT a step in that automation: a fixed
  *    delay from enrolment cannot reflect the true midpoint, a pause, an early
@@ -40,12 +57,9 @@ import { planEmail6, type Email6Plan } from "@/lib/mid-programme-checkin";
 
 const TZ = "Europe/London";
 
-// The trigger event of the Resend "Member onboarding drip" automation.
-const ENROLL_EVENT = "member.joined";
-
-// Enrolment cutoff for emails 1-5. Only members who joined on/after this enter the
+// Entry cutoff for emails 1-5. Only members who joined on/after this enter the
 // drip, so the first run never enrols the back-catalogue. Override with
-// ONBOARDING_DRIP_START_DATE (YYYY-MM-DD). Far-future value = no-enrol kill switch.
+// ONBOARDING_DRIP_START_DATE (YYYY-MM-DD). Far-future value = no-send kill switch.
 const DRIP_START_DATE = process.env.ONBOARDING_DRIP_START_DATE ?? "2026-06-21";
 
 // Programme go-live cutoff for the mid-programme check-in. Only 6/12-week
@@ -79,7 +93,56 @@ function ymdInTz(date: Date, timeZone: string): string {
   }).format(date);
 }
 
-type EnrolPlan = { email: string; firstName: string; pageId: string };
+/** Whole days from a YYYY-MM-DD to another, both read as calendar dates (UTC noon). */
+function daysBetweenYmd(from: string, to: string): number {
+  const a = Date.parse(`${from}T12:00:00Z`);
+  const b = Date.parse(`${to}T12:00:00Z`);
+  if (Number.isNaN(a) || Number.isNaN(b)) return 0;
+  return Math.round((b - a) / 86_400_000);
+}
+
+/**
+ * The one drip email due for a member on this run, or null.
+ *
+ * At most ONE email per member per run, always the lowest unsent index that is
+ * due. A member recovering from a gap therefore catches up at one email a day
+ * rather than receiving the whole sequence in a single burst.
+ *
+ * `action` is "send" normally, or "mark_stale" when the email is more than
+ * DRIP_MAX_LATE_DAYS past due: the flag is ticked without sending, so the member
+ * moves on through the sequence instead of getting stale mail.
+ */
+type DripPlan = {
+  email: string;
+  firstName: string;
+  pageId: string;
+  emailIndex: number;
+  dueDay: number;
+  daysSinceJoined: number;
+  action: "send" | "mark_stale";
+};
+
+function planDripEmail(m: OnboardingMember, todayYmd: string): DripPlan | null {
+  if (!m.joined || m.joined < DRIP_START_DATE) return null;
+  const daysSinceJoined = daysBetweenYmd(m.joined, todayYmd);
+  if (daysSinceJoined < 0) return null; // join date in the future; nothing due
+
+  for (let i = 1; i <= DRIP_MAX_SENDABLE_INDEX; i += 1) {
+    if (m.sent[i - 1]) continue;
+    const dueDay = DRIP_SCHEDULE_DAYS[i];
+    if (dueDay == null || daysSinceJoined < dueDay) return null; // not due; later ones cannot be either
+    return {
+      email: m.email,
+      firstName: m.firstName,
+      pageId: m.pageId,
+      emailIndex: i,
+      dueDay,
+      daysSinceJoined,
+      action: daysSinceJoined - dueDay > DRIP_MAX_LATE_DAYS ? "mark_stale" : "send",
+    };
+  }
+  return null;
+}
 
 type Email6Record = {
   email: string;
@@ -121,8 +184,8 @@ export async function GET(request: Request) {
       membershipMap = null;
     }
 
-    // ---- Pass 1: enrolment (emails 1-5) ----
-    const plans: EnrolPlan[] = [];
+    // ---- Pass 1: sequence emails 1-5 ----
+    const plans: DripPlan[] = [];
     let noJoinDate = 0;
     let preStart = 0;
     for (const m of members) {
@@ -134,8 +197,8 @@ export async function GET(request: Request) {
         preStart += 1;
         continue;
       }
-      if (m.sent[0]) continue; // already enrolled
-      plans.push({ email: m.email, firstName: m.firstName, pageId: m.pageId });
+      const plan = planDripEmail(m, todayYmd);
+      if (plan) plans.push(plan);
     }
 
     // ---- Pass 2: mid-programme check-in (email 6) ----
@@ -174,7 +237,13 @@ export async function GET(request: Request) {
         programmeDripStartDate: PROGRAMME_DRIP_START_DATE,
         totalMembers: members.length,
         liveMembershipRead: membershipMap != null,
-        enrolment: { noJoinDate, preStart, toEnrol: plans.length, enrol: plans.map((p) => p.email) },
+        sequence: {
+          noJoinDate,
+          preStart,
+          maxSendableIndex: DRIP_MAX_SENDABLE_INDEX,
+          due: plans.length,
+          plans,
+        },
         midProgramme: {
           decisionCounts: countDecisions(midRecords),
           toSend: midRecords.filter((r) => r.plan.decision === "SEND").map((r) => r.email),
@@ -185,21 +254,40 @@ export async function GET(request: Request) {
 
     if (!resendKey) {
       return Response.json(
-        { ok: false, error: "RESEND_API_KEY not set", toEnrol: plans.length },
+        { ok: false, error: "RESEND_API_KEY not set", due: plans.length },
         { status: 500 },
       );
     }
 
-    // ---- Execute pass 1: enrol ----
-    const enrolled: string[] = [];
-    const enrolErrors: Array<{ email: string; reason: string }> = [];
+    // ---- Execute pass 1: send the due sequence email ----
+    // The flag is ticked only AFTER Resend accepts the send, so a failure is
+    // retried on the next run rather than silently swallowed. That ordering is
+    // the whole point: the old code ticked "enrolled" regardless of whether any
+    // email ever went out, which is why the failure stayed invisible for days.
+    const sentSeq: Array<{ email: string; emailIndex: number }> = [];
+    const staleSeq: Array<{ email: string; emailIndex: number; daysLate: number }> = [];
+    const seqErrors: Array<{ email: string; emailIndex: number; reason: string }> = [];
     for (const p of plans) {
       try {
-        await enrolMember(p, resendKey);
-        await setOnboardingFlag(p.pageId, 1);
-        enrolled.push(p.email);
+        if (p.action === "mark_stale") {
+          await setOnboardingFlag(p.pageId, p.emailIndex);
+          staleSeq.push({
+            email: p.email,
+            emailIndex: p.emailIndex,
+            daysLate: p.daysSinceJoined - p.dueDay,
+          });
+          continue;
+        }
+        if (!fromEmail) throw new Error("LEAD_FROM_EMAIL not set");
+        await sendDripEmail(p, resendKey, fromEmail);
+        await setOnboardingFlag(p.pageId, p.emailIndex);
+        sentSeq.push({ email: p.email, emailIndex: p.emailIndex });
       } catch (err) {
-        enrolErrors.push({ email: p.email, reason: (err as Error).message });
+        seqErrors.push({
+          email: p.email,
+          emailIndex: p.emailIndex,
+          reason: (err as Error).message,
+        });
       }
     }
 
@@ -257,13 +345,15 @@ export async function GET(request: Request) {
       programmeDripStartDate: PROGRAMME_DRIP_START_DATE,
       totalMembers: members.length,
       liveMembershipRead: membershipMap != null,
-      enrolment: {
+      sequence: {
         noJoinDate,
         preStart,
-        toEnrol: plans.length,
-        enrolledCount: enrolled.length,
-        enrolled,
-        errors: enrolErrors,
+        maxSendableIndex: DRIP_MAX_SENDABLE_INDEX,
+        due: plans.length,
+        sentCount: sentSeq.length,
+        sent: sentSeq,
+        markedStale: staleSeq,
+        errors: seqErrors,
       },
       midProgramme: {
         decisionCounts: countDecisions(midRecords),
@@ -324,20 +414,33 @@ function countDecisions(records: Email6Record[]): Record<string, number> {
   return out;
 }
 
-/** Enrol one member into the Resend "Member onboarding drip" (emails 1-5). */
-async function enrolMember(
-  plan: Pick<EnrolPlan, "email" | "firstName">,
-  apiKey: string,
-): Promise<void> {
+/**
+ * Send one drip email (1-5) directly, bypassing the Automation and therefore any
+ * newsletter-consent state on the contact. Onboarding is transactional.
+ */
+async function sendDripEmail(plan: DripPlan, apiKey: string, from: string): Promise<void> {
+  const template = DRIP_TEMPLATE_ALIAS[plan.emailIndex];
+  if (!template) throw new Error(`no template alias for email ${plan.emailIndex}`);
   const name = (plan.firstName || "").trim() || "there";
-  const res = await fetch("https://api.resend.com/events/send", {
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ event: ENROLL_EVENT, email: plan.email, payload: { MEMBER_FIRST_NAME: name } }),
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      // Belt and braces alongside the Notion flag: guards a same-run retry and
+      // any re-attempt inside Resend's idempotency window.
+      "Idempotency-Key": `drip-${plan.emailIndex}-${plan.pageId}`,
+    },
+    body: JSON.stringify({
+      from,
+      reply_to: "hallum@gainstrengththerapy.com",
+      to: [plan.email],
+      template: { id: template, variables: { MEMBER_FIRST_NAME: name } },
+    }),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`Resend enrol ${res.status}: ${body.slice(0, 200)}`);
+    throw new Error(`Resend drip ${plan.emailIndex} ${res.status}: ${body.slice(0, 200)}`);
   }
 }
 
