@@ -334,6 +334,14 @@ export const PROGRAMME_ANCHOR_MEMBERSHIP_ID = "Programme Anchor Membership ID";
 export const EMAIL6_SENT_MEMBERSHIPS = "Email 6 Sent Memberships";
 export const EMAIL6_SKIPPED_MEMBERSHIPS = "Email 6 Skipped Memberships";
 
+// Sequence emails 1-5 that were ticked WITHOUT being sent, because they were more
+// than DRIP_MAX_LATE_DAYS past due. The "Onboarding Email N Sent" checkbox alone
+// cannot express this: the stale path ticks the very same box a real send does, so
+// a member who received nothing is indistinguishable from one who received
+// everything. That ambiguity is exactly what hid Lisa Gillette's missed onboarding
+// (joined 19 Jul 2026, email 1 ticked, zero sends in Resend) for three weeks.
+export const ONBOARDING_SKIPPED_EMAILS = "Onboarding Emails Skipped (not sent)";
+
 export type OnboardingMember = {
   pageId: string;
   email: string;
@@ -353,6 +361,8 @@ export type OnboardingMember = {
   email6SentMembershipIds: string[];
   /** Membership ids the check-in was deliberately skipped for (past ceiling). */
   email6SkippedMembershipIds: string[];
+  /** Sequence indexes (1-5) ticked without sending because they were too late. */
+  onboardingSkippedIndexes: number[];
 };
 
 type OnboardingMemberRow = {
@@ -393,6 +403,7 @@ export async function ensureOnboardingProperties(): Promise<void> {
   properties[PROGRAMME_ANCHOR_MEMBERSHIP_ID] = { rich_text: {} };
   properties[EMAIL6_SENT_MEMBERSHIPS] = { rich_text: {} };
   properties[EMAIL6_SKIPPED_MEMBERSHIPS] = { rich_text: {} };
+  properties[ONBOARDING_SKIPPED_EMAILS] = { rich_text: {} };
   const res = await fetch(`${NOTION_API}/databases/${dbId}`, {
     method: "PATCH",
     headers: notionHeaders(token),
@@ -450,6 +461,9 @@ export async function loadOnboardingMembers(): Promise<OnboardingMember[]> {
             .join("") || null,
         email6SentMembershipIds: parseIdList(row, EMAIL6_SENT_MEMBERSHIPS),
         email6SkippedMembershipIds: parseIdList(row, EMAIL6_SKIPPED_MEMBERSHIPS),
+        onboardingSkippedIndexes: parseIdList(row, ONBOARDING_SKIPPED_EMAILS)
+          .map((s) => Number(s))
+          .filter((n) => Number.isInteger(n) && n >= 1 && n <= ONBOARDING_EMAIL_COUNT),
       });
     }
     if (!data.has_more || !data.next_cursor) break;
@@ -552,6 +566,34 @@ export async function recordEmail6Skipped(
     pageId,
     { [EMAIL6_SKIPPED_MEMBERSHIPS]: { rich_text: [{ text: { content: next } }] } },
     "record email6 skipped",
+  );
+}
+
+/**
+ * Record that a sequence email (1-5) was ticked WITHOUT being sent because it was
+ * too far past due. Ticks the flag so the member advances through the sequence,
+ * exactly as before, but also appends the index to the skipped set so the two
+ * outcomes stay tellable apart afterwards.
+ *
+ * Both writes go in one PATCH deliberately: ticking the flag without recording the
+ * skip is the very failure this exists to prevent, so they must not be able to
+ * half-succeed.
+ */
+export async function recordOnboardingSkipped(
+  pageId: string,
+  currentSkippedIndexes: number[],
+  emailIndex: number,
+): Promise<void> {
+  const next = Array.from(new Set([...currentSkippedIndexes, emailIndex]))
+    .sort((a, b) => a - b)
+    .join(", ");
+  await patchMemberProps(
+    pageId,
+    {
+      [onboardingFlagName(emailIndex)]: { checkbox: true },
+      [ONBOARDING_SKIPPED_EMAILS]: { rich_text: [{ text: { content: next } }] },
+    },
+    "record onboarding skipped",
   );
 }
 

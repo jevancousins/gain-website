@@ -27,10 +27,6 @@
       "schedule": "0 8 * * 1"
     },
     {
-      "path": "/api/cron/birthday-digest",
-      "schedule": "0 8 * * *"
-    },
-    {
       "path": "/api/cron/google-reviews",
       "schedule": "0 5 * * *"
     },

@@ -3,6 +3,7 @@ import {
   loadOnboardingMembers,
   recordEmail6Sent,
   recordEmail6Skipped,
+  recordOnboardingSkipped,
   setOnboardingFlag,
   setProgrammeCounter,
   type OnboardingMember,
@@ -111,7 +112,9 @@ function daysBetweenYmd(from: string, to: string): number {
  *
  * `action` is "send" normally, or "mark_stale" when the email is more than
  * DRIP_MAX_LATE_DAYS past due: the flag is ticked without sending, so the member
- * moves on through the sequence instead of getting stale mail.
+ * moves on through the sequence instead of getting stale mail. A stale tick is
+ * also recorded in ONBOARDING_SKIPPED_EMAILS, so "we sent this" and "we gave up on
+ * this" never look the same in Notion afterwards.
  */
 type DripPlan = {
   email: string;
@@ -307,7 +310,14 @@ export async function GET(request: Request) {
     for (const p of plans) {
       try {
         if (p.action === "mark_stale") {
-          await setOnboardingFlag(p.pageId, p.emailIndex);
+          // Tick the flag AND record that nothing was sent. Ticking alone made a
+          // skipped email look identical to a delivered one in Notion, which is
+          // how a member could show a full set of ticks having received nothing.
+          await recordOnboardingSkipped(
+            p.pageId,
+            membersById(members, p.pageId).onboardingSkippedIndexes,
+            p.emailIndex,
+          );
           staleSeq.push({
             email: p.email,
             emailIndex: p.emailIndex,
