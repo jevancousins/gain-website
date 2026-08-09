@@ -124,21 +124,34 @@ type DripPlan = {
   dueDay: number;
   /** What the schedule is measured from, and why. */
   anchorDate: string;
-  anchorSource: "programme_start" | "upcoming_programme_start" | "joined";
+  anchorSource:
+    | "programme_start"
+    | "upcoming_programme_start"
+    | "membership_start"
+    | "joined";
   daysSinceAnchor: number;
   action: "send" | "mark_stale";
 };
 
 /**
  * The date the sequence is measured from: the member's programme start where they
- * have one (including a programme that has not begun yet), otherwise the Notion
- * Joined date.
+ * have one (including a programme that has not begun yet), then the start of any
+ * other membership they hold, and only then the Notion Joined date.
  *
  * Joined records the day they BOUGHT, which is not the day they START. Karen
  * Marshall bought on 26 Jul 2026 to start on 10 Aug; anchored to the purchase she
  * would have been asked how her first week went a fortnight before her first
- * session. Members on open-ended memberships have no programme and correctly fall
- * back to Joined.
+ * session.
+ *
+ * The `membership_start` step exists because the two programme fields above are
+ * gated on programmeLengthDays(), which only recognises "6 week" and "12 week".
+ * Every other membership fell straight through to Joined and inherited exactly the
+ * purchase-vs-start bug the programme anchor was added to fix: Lisa Gillette bought
+ * the 30-Day Strength Programme on 19 Jul 2026 to start on 4 Aug, and on day 5 of
+ * her programme the sequence read as 21 days old, so emails 1-3 were past
+ * DRIP_MAX_LATE_DAYS and were skipped without ever being sent.
+ *
+ * Only members with no membership row at all now fall back to Joined.
  */
 function dripAnchor(
   m: OnboardingMember,
@@ -149,6 +162,9 @@ function dripAnchor(
   }
   if (summary?.upcomingProgrammeStart) {
     return { date: summary.upcomingProgrammeStart, source: "upcoming_programme_start" };
+  }
+  if (summary?.membershipStart) {
+    return { date: summary.membershipStart, source: "membership_start" };
   }
   return m.joined ? { date: m.joined, source: "joined" } : null;
 }

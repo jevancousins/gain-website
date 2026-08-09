@@ -67,6 +67,22 @@ export type MembershipSummary = {
    * before her first session.
    */
   upcomingProgrammeStart: string | null;
+  /**
+   * Start date (YMD) of the member's current membership of ANY kind, or null.
+   * The last-resort anchor for the onboarding drip, used when the member holds no
+   * membership that classifies as a 6/12-week programme.
+   *
+   * `programme` and `upcomingProgrammeStart` both depend on programmeLengthDays(),
+   * which only recognises "6 week" and "12 week" names. Anything else — the retired
+   * 30-Day Strength Programme, or any future offering not named in weeks — returns
+   * null there and used to fall all the way through to the Notion Joined date, which
+   * records when the member BOUGHT, not when they START.
+   *
+   * Lisa Gillette bought the 30-day on 19 Jul 2026 to start on 4 Aug. Anchored to the
+   * purchase her sequence read as 21 days old on day 5, so emails 1-3 were judged too
+   * stale to send and were silently skipped.
+   */
+  membershipStart: string | null;
 };
 
 const ACTIVE_STATUSES = new Set(["active"]);
@@ -144,6 +160,37 @@ function selectUpcomingProgrammeStart(
 }
 
 /**
+ * Start date of the member's current membership of any kind, or null. Mirrors the
+ * two programme selectors but without the programmeLengthDays() filter, so it also
+ * covers memberships whose name carries no "N week" token.
+ *
+ * A membership that has already begun wins, taking the latest such start so a
+ * re-take or upgrade anchors to the newest instance (as `selectProgramme` does).
+ * Otherwise the earliest future start, so a member who has bought consecutive
+ * blocks anchors to the one they are about to begin (as
+ * `selectUpcomingProgrammeStart` does).
+ */
+function selectMembershipStart(
+  rows: CustomerMembership[],
+  todayYmd: string,
+): string | null {
+  const live = rows.filter(
+    (r) =>
+      PROGRAMME_LIVE_STATUSES.has((r.status ?? "").toLowerCase()) && Boolean(r.start_date),
+  );
+  const started = live
+    .map((r) => r.start_date as string)
+    .filter((d) => d <= todayYmd)
+    .sort();
+  if (started.length > 0) return started[started.length - 1];
+  const upcoming = live
+    .map((r) => r.start_date as string)
+    .filter((d) => d > todayYmd)
+    .sort();
+  return upcoming[0] ?? null;
+}
+
+/**
  * Walk paginated /customer_memberships to build a per-customer summary
  * of their current programme and membership history.
  */
@@ -201,6 +248,7 @@ export async function fetchMembershipSummaryByCustomer(
       hasHistory: rows.length > 0,
       programme: selectProgramme(rows, todayYmd),
       upcomingProgrammeStart: selectUpcomingProgrammeStart(rows, todayYmd),
+      membershipStart: selectMembershipStart(rows, todayYmd),
     });
   }
 
