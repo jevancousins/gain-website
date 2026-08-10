@@ -305,6 +305,11 @@ export async function GET(request: Request) {
         sequence: {
           noJoinDate,
           preStart,
+          // Both bounds are reported so the daily probe can SEE which steps the
+          // cron will actually send. Retiring email 1 was invisible here until
+          // minSendableIndex was added, which is the same class of silent gap
+          // this endpoint exists to expose.
+          minSendableIndex: DRIP_MIN_SENDABLE_INDEX,
           maxSendableIndex: DRIP_MAX_SENDABLE_INDEX,
           due: plans.length,
           plans,
