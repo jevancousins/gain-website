@@ -75,6 +75,30 @@ export const DRIP_SCHEDULE_DAYS: Record<number, number> = {
 export const DRIP_MAX_SENDABLE_INDEX = 4;
 
 /**
+ * Lowest drip email the cron will send. Email 1 (welcome) is RETIRED as of
+ * 10 Aug 2026: TeamUp's "When a membership is purchased" notification now carries
+ * the welcome and the induction booking button, and it fires within seconds of
+ * payment instead of at programme start.
+ *
+ * Running both sent every new member two near-identical welcomes, each with the
+ * same induction link. Karen Marshall got TeamUp's on 26 Jul 2026 at 18:15 and
+ * this one on 10 Aug at 07:26, fifteen days apart, because the drip anchors to
+ * programme start while the purchase fires on purchase. TeamUp's wins on timing:
+ * a member who buys weeks ahead of their start needs the induction prompt on the
+ * day they pay, not on the morning of their first session.
+ *
+ * Indices are deliberately NOT renumbered. Emails 2-6 keep their template
+ * aliases and their "Onboarding Email N Sent" checkboxes, so no historic member
+ * record changes meaning. Email 1 is recorded in ONBOARDING_SKIPPED_EMAILS
+ * rather than left silently unticked, because an unticked box is exactly how a
+ * retired step and a failed send come to look identical in Notion.
+ *
+ * If TeamUp's purchase email is ever disabled, LOWER THIS TO 1 or new members
+ * get no welcome and no induction link at all.
+ */
+export const DRIP_MIN_SENDABLE_INDEX = 2;
+
+/**
  * How many days past its due date an email may still be sent. Beyond this the
  * cron marks it done without sending, so a member recovering from an outage
  * never receives a stale "how was your first week?" weeks late.
