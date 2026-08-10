@@ -16,6 +16,7 @@ import {
 import {
   DRIP_MAX_LATE_DAYS,
   DRIP_MAX_SENDABLE_INDEX,
+  DRIP_MIN_SENDABLE_INDEX,
   DRIP_SCHEDULE_DAYS,
   DRIP_TEMPLATE_ALIAS,
   MID_PROGRAMME_EMAIL_INDEX,
@@ -110,11 +111,14 @@ function daysBetweenYmd(from: string, to: string): number {
  * due. A member recovering from a gap therefore catches up at one email a day
  * rather than receiving the whole sequence in a single burst.
  *
- * `action` is "send" normally, or "mark_stale" when the email is more than
- * DRIP_MAX_LATE_DAYS past due: the flag is ticked without sending, so the member
- * moves on through the sequence instead of getting stale mail. A stale tick is
- * also recorded in ONBOARDING_SKIPPED_EMAILS, so "we sent this" and "we gave up on
- * this" never look the same in Notion afterwards.
+ * `action` is "send" normally, "mark_stale" when the email is more than
+ * DRIP_MAX_LATE_DAYS past due, or "mark_retired" for a step below
+ * DRIP_MIN_SENDABLE_INDEX that another system now owns (email 1, the welcome,
+ * which TeamUp sends at purchase). In both mark_* cases the flag is ticked
+ * without sending, so the member moves on through the sequence instead of
+ * getting stale or duplicate mail, and the index is also recorded in
+ * ONBOARDING_SKIPPED_EMAILS, so "we sent this" and "we deliberately did not"
+ * never look the same in Notion afterwards.
  */
 type DripPlan = {
   email: string;
@@ -130,7 +134,7 @@ type DripPlan = {
     | "membership_start"
     | "joined";
   daysSinceAnchor: number;
-  action: "send" | "mark_stale";
+  action: "send" | "mark_stale" | "mark_retired";
 };
 
 /**
@@ -193,7 +197,12 @@ function planDripEmail(
       anchorDate: anchor.date,
       anchorSource: anchor.source,
       daysSinceAnchor,
-      action: daysSinceAnchor - dueDay > DRIP_MAX_LATE_DAYS ? "mark_stale" : "send",
+      action:
+        i < DRIP_MIN_SENDABLE_INDEX
+          ? "mark_retired"
+          : daysSinceAnchor - dueDay > DRIP_MAX_LATE_DAYS
+            ? "mark_stale"
+            : "send",
     };
   }
   return null;
@@ -322,9 +331,22 @@ export async function GET(request: Request) {
     // email ever went out, which is why the failure stayed invisible for days.
     const sentSeq: Array<{ email: string; emailIndex: number }> = [];
     const staleSeq: Array<{ email: string; emailIndex: number; daysLate: number }> = [];
+    const retiredSeq: Array<{ email: string; emailIndex: number }> = [];
     const seqErrors: Array<{ email: string; emailIndex: number; reason: string }> = [];
     for (const p of plans) {
       try {
+        if (p.action === "mark_retired") {
+          // This step is owned by another system now (email 1 is TeamUp's
+          // purchase notification). Tick and record it as deliberately not sent,
+          // so the member advances to the next email rather than stalling here.
+          await recordOnboardingSkipped(
+            p.pageId,
+            membersById(members, p.pageId).onboardingSkippedIndexes,
+            p.emailIndex,
+          );
+          retiredSeq.push({ email: p.email, emailIndex: p.emailIndex });
+          continue;
+        }
         if (p.action === "mark_stale") {
           // Tick the flag AND record that nothing was sent. Ticking alone made a
           // skipped email look identical to a delivered one in Notion, which is
@@ -411,11 +433,13 @@ export async function GET(request: Request) {
       sequence: {
         noJoinDate,
         preStart,
+        minSendableIndex: DRIP_MIN_SENDABLE_INDEX,
         maxSendableIndex: DRIP_MAX_SENDABLE_INDEX,
         due: plans.length,
         sentCount: sentSeq.length,
         sent: sentSeq,
         markedStale: staleSeq,
+        markedRetired: retiredSeq,
         errors: seqErrors,
       },
       midProgramme: {
