@@ -61,6 +61,10 @@ export type DashboardMetrics = {
     adSpend: number;
     totalCosts: number;
     netProfit: number;
+    /** Hallum's estimate for streams no system tracks. Never counted as revenue. */
+    estimatedUntrackedIncome: number;
+    indicativeRevenue: number;
+    indicativeNetProfit: number;
     /** True when the month's costs come from logged expense rows, not the estimate. */
     costsAreActual: boolean;
     /** True when non-TeamUp income (PT, rental) was logged for the month. */
@@ -74,6 +78,9 @@ export type DashboardMetrics = {
       adSpend: number;
       totalCosts: number;
       netProfit: number;
+      estimatedUntrackedIncome: number;
+      indicativeRevenue: number;
+      indicativeNetProfit: number;
       costsAreActual: boolean;
       revenueIsComplete: boolean;
     }>;
@@ -219,6 +226,38 @@ const LEADS_DB_ID = "3e2ca304-ebd8-4cea-8202-d0003bf94a6f";
 const PLAN_SOURCE = "Business Plan";
 
 /**
+ * Hallum's own estimates for the income streams that no system tracks.
+ *
+ * These are ESTIMATES and are never added to revenue. They are reported on a
+ * separate "indicative" line so the actual figure and the likely figure can be
+ * read side by side, because the actual one alone understates the business and
+ * the combined one alone would be unevidenced. Treating a forecast as income is
+ * exactly the mistake this file made once already.
+ *
+ * A month that has a real logged row in one of these categories uses the logged
+ * figure and drops the estimate for that stream, so the two can never stack.
+ */
+const ESTIMATED_UNTRACKED_INCOME: Array<{
+  category: string;
+  monthly: number;
+  provenance: string;
+}> = [
+  {
+    category: "PT",
+    monthly: 2250,
+    provenance: "Year 1 Business Plan: £2,000-£2,500/month, logged at the £2,250 midpoint",
+  },
+  {
+    category: "Rental Income",
+    monthly: 850,
+    provenance:
+      "Hallum, 18 Jun 2026: about £850/month across Becky Brown, the physio and other PTs. More recent than the plan's £1,000, so this is used",
+  },
+];
+
+const TOTAL_ESTIMATED_UNTRACKED = ESTIMATED_UNTRACKED_INCOME.reduce((s, r) => s + r.monthly, 0);
+
+/**
  * Fallback cost estimate, used ONLY for months with no expense rows logged in
  * the Finances DB. Any month Hallum has actually logged uses his real figures.
  * Every month that falls back is labelled "estimated" on the dashboard so an
@@ -359,9 +398,25 @@ function buildPnl(
     }
   }
 
+  // Which untracked streams already have a real logged row for the month, so
+  // the estimate for that stream must not be added on top.
+  const loggedCategoriesByMonth = new Map<string, Set<string>>();
+  for (const row of financeRows) {
+    const month = row.date.slice(0, 7);
+    if (!month || row.source === PLAN_SOURCE || row.type !== "Revenue") continue;
+    const set = loggedCategoriesByMonth.get(month) ?? new Set<string>();
+    set.add(row.category);
+    loggedCategoriesByMonth.set(month, set);
+  }
+
   const forMonth = (month: string, teamupNet: number) => {
     const otherRevenue = round2(otherRevenueByMonth.get(month) ?? 0);
     const revenue = round2(teamupNet + otherRevenue);
+    const loggedRevenueCategories = loggedCategoriesByMonth.get(month) ?? new Set<string>();
+    const estimatedIncome = ESTIMATED_UNTRACKED_INCOME.filter(
+      (e) => !loggedRevenueCategories.has(e.category),
+    );
+    const estimatedUntrackedIncome = round2(estimatedIncome.reduce((s, e) => s + e.monthly, 0));
     const logged = expensesByMonth.get(month) ?? [];
     const adSpend = metaAdsMonths.find((m) => m.month === month)?.spend ?? 0;
     const costsAreActual = logged.length > 0;
@@ -379,6 +434,9 @@ function buildPnl(
       adSpend: costsAreActual ? 0 : adSpend,
       totalCosts,
       netProfit: round2(revenue - totalCosts),
+      estimatedUntrackedIncome,
+      indicativeRevenue: round2(revenue + estimatedUntrackedIncome),
+      indicativeNetProfit: round2(revenue + estimatedUntrackedIncome - totalCosts),
       costsAreActual,
       revenueIsComplete: otherRevenue > 0,
       breakdown,
@@ -689,6 +747,23 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
       `Revenue: ${sym}${p.teamupRevenue.toFixed(0)} TeamUp group memberships + ${sym}${p.otherRevenue.toFixed(0)} other logged income (PT, rental).`,
     ),
   );
+  if (p.estimatedUntrackedIncome > 0) {
+    const sign = p.indicativeNetProfit >= 0 ? "+" : "";
+    blocks.push(
+      callout(
+        "🧮",
+        `Indicative including untracked income: ${sym}${p.indicativeRevenue.toFixed(0)} revenue = ${sign}${sym}${p.indicativeNetProfit.toFixed(0)} net. This adds Hallum's ESTIMATE of ${sym}${p.estimatedUntrackedIncome.toFixed(0)}/month for streams no system records. It is an estimate, not income, and is never counted in the actual figures above.`,
+      ),
+    );
+    for (const e of ESTIMATED_UNTRACKED_INCOME) {
+      blocks.push(bullet(`${e.category}: ${sym}${e.monthly}/month estimated. ${e.provenance}.`));
+    }
+    blocks.push(
+      bullet(
+        "These stop being estimates the moment a real row is logged: a month with a logged PT or Rental Income row uses the logged figure and drops the estimate for that stream.",
+      ),
+    );
+  }
   blocks.push(paragraph(p.costsAreActual ? "Costs (logged actuals):" : "Costs (estimated, nothing logged):"));
   for (const c of p.fixedBreakdown) {
     blocks.push(bullet(`${c.item}: ${sym}${c.amount}`));
@@ -706,9 +781,13 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
       const sign = h.netProfit >= 0 ? "+" : "";
       const basis = h.costsAreActual ? "actual costs" : "estimated costs";
       const rev = h.revenueIsComplete ? "all income" : "TeamUp only";
+      const indicative =
+        h.estimatedUntrackedIncome > 0
+          ? `; ${h.indicativeNetProfit >= 0 ? "+" : ""}${sym}${h.indicativeNetProfit.toFixed(0)} indicative`
+          : "";
       blocks.push(
         bullet(
-          `${h.month}: ${sym}${h.revenue.toFixed(0)} rev − ${sym}${h.totalCosts.toFixed(0)} costs = ${sign}${sym}${h.netProfit.toFixed(0)} (${rev}, ${basis})`,
+          `${h.month}: ${sym}${h.revenue.toFixed(0)} rev − ${sym}${h.totalCosts.toFixed(0)} costs = ${sign}${sym}${h.netProfit.toFixed(0)} (${rev}, ${basis}${indicative})`,
         ),
       );
     }
