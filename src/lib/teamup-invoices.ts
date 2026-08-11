@@ -37,7 +37,14 @@ export async function fetchMonthlyRevenue(maxPages = 20): Promise<MonthlyRevenue
     const month = inv.created_at.slice(0, 7); // YYYY-MM
     const amount = Number(inv.total_amount_due.decimal) || 0;
     const b = buckets.get(month) ?? { paid: 0, refunds: 0, count: 0 };
-    if (inv.is_credit_note) b.refunds += amount;
+    // TeamUp returns credit notes with a NEGATIVE decimal (verified against the
+    // live API: -180.0, -89.0). Store the magnitude so `refunds` reads as a
+    // positive amount refunded and `paid - refunds` actually subtracts.
+    // Accumulating the raw negative and then subtracting it ADDED refunds back
+    // onto revenue: July 2026 reported £455 against £241 actually collected,
+    // June £767 against £347. Math.abs also keeps this correct if TeamUp ever
+    // flips its sign convention.
+    if (inv.is_credit_note) b.refunds += Math.abs(amount);
     else b.paid += amount;
     b.count += 1;
     buckets.set(month, b);
