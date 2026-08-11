@@ -55,17 +55,27 @@ export type DashboardMetrics = {
   pnl: {
     month: string;
     revenue: number;
+    teamupRevenue: number;
+    otherRevenue: number;
     fixedCosts: number;
     adSpend: number;
     totalCosts: number;
     netProfit: number;
+    /** True when the month's costs come from logged expense rows, not the estimate. */
+    costsAreActual: boolean;
+    /** True when non-TeamUp income (PT, rental) was logged for the month. */
+    revenueIsComplete: boolean;
     fixedBreakdown: Array<{ item: string; amount: number }>;
     monthlyHistory: Array<{
       month: string;
       revenue: number;
+      teamupRevenue: number;
+      otherRevenue: number;
       adSpend: number;
       totalCosts: number;
       netProfit: number;
+      costsAreActual: boolean;
+      revenueIsComplete: boolean;
     }>;
   };
 };
@@ -132,15 +142,33 @@ async function countMembersByStatus(membersDbId: string, statusEquals: string | 
   return total;
 }
 
-async function fetchTeamupRevenueRows(financesDbId: string) {
+export type FinanceRow = {
+  description: string;
+  amount: number;
+  date: string;
+  /** "Revenue" | "Expense" as recorded in Notion. */
+  type: string;
+  /** e.g. Rent, Insurance, PT, Rental Income, Group Memberships. */
+  category: string;
+  /** "TeamUp" for cron-synced rows, empty for anything logged by hand. */
+  source: string;
+};
+
+/**
+ * Every row in the Finances DB, not just the TeamUp-synced ones.
+ *
+ * This used to filter on `Source = TeamUp`, which meant two thirds of the P&L
+ * was invisible to the dashboard: Hallum's hand-logged expenses were never read
+ * (costs fell back to a hardcoded estimate), and his PT and rental income were
+ * never counted as revenue at all. The gym read as loss-making for six straight
+ * months partly because of it.
+ */
+async function fetchFinanceRows(financesDbId: string): Promise<FinanceRow[]> {
   const { token } = notionConfig();
-  const rows: Array<{ description: string; amount: number; date: string }> = [];
+  const rows: FinanceRow[] = [];
   let cursor: string | undefined = undefined;
   while (true) {
-    const body: Record<string, unknown> = {
-      page_size: 100,
-      filter: { property: "Source", select: { equals: "TeamUp" } },
-    };
+    const body: Record<string, unknown> = { page_size: 100 };
     if (cursor) body.start_cursor = cursor;
     const res = await fetch(`${NOTION_API}/databases/${financesDbId}/query`, {
       method: "POST",
@@ -155,6 +183,9 @@ async function fetchTeamupRevenueRows(financesDbId: string) {
           Description?: { title?: Array<{ plain_text: string }> };
           Amount?: { number: number | null };
           Date?: { date?: { start: string } | null };
+          Type?: { select?: { name: string } | null };
+          Category?: { select?: { name: string } | null };
+          Source?: { select?: { name: string } | null };
         };
       }>;
       next_cursor: string | null;
@@ -164,7 +195,14 @@ async function fetchTeamupRevenueRows(financesDbId: string) {
       const description = row.properties.Description?.title?.map((t) => t.plain_text).join("") ?? "";
       const amount = readNumber(row.properties.Amount);
       const date = row.properties.Date?.date?.start ?? "";
-      rows.push({ description, amount, date });
+      rows.push({
+        description,
+        amount,
+        date,
+        type: row.properties.Type?.select?.name ?? "",
+        category: row.properties.Category?.select?.name ?? "",
+        source: row.properties.Source?.select?.name ?? "",
+      });
     }
     if (!data.has_more || !data.next_cursor) break;
     cursor = data.next_cursor;
@@ -174,7 +212,13 @@ async function fetchTeamupRevenueRows(financesDbId: string) {
 
 const LEADS_DB_ID = "3e2ca304-ebd8-4cea-8202-d0003bf94a6f";
 
-const FIXED_COSTS: Array<{ item: string; amount: number }> = [
+/**
+ * Fallback cost estimate, used ONLY for months with no expense rows logged in
+ * the Finances DB. Any month Hallum has actually logged uses his real figures.
+ * Every month that falls back is labelled "estimated" on the dashboard so an
+ * estimate is never read as fact.
+ */
+const ESTIMATED_FIXED_COSTS: Array<{ item: string; amount: number }> = [
   { item: "Rent", amount: 1500 },
   { item: "Utilities", amount: 150 },
   { item: "Insurance", amount: 100 },
@@ -183,7 +227,7 @@ const FIXED_COSTS: Array<{ item: string; amount: number }> = [
   { item: "Miscellaneous", amount: 250 },
 ];
 
-const TOTAL_FIXED = FIXED_COSTS.reduce((sum, c) => sum + c.amount, 0);
+const TOTAL_ESTIMATED_FIXED = ESTIMATED_FIXED_COSTS.reduce((sum, c) => sum + c.amount, 0);
 
 type LeadRow = {
   status: string;
@@ -263,35 +307,76 @@ function buildLeadFunnel(leads: LeadRow[]) {
   };
 }
 
+/**
+ * Month-by-month P&L from the Finances DB.
+ *
+ * Two rules make the numbers honest rather than merely present:
+ *
+ *  - Revenue is TeamUp group-membership income PLUS anything else logged for
+ *    that month (PT, rental). TeamUp alone understates it badly, because PT and
+ *    room rental never touch TeamUp.
+ *  - Costs are Hallum's logged expenses when he has logged any for that month,
+ *    and only otherwise the estimate. A month using the estimate is flagged, so
+ *    "we lost money in June" can be told apart from "nobody logged June".
+ *
+ * Ad spend is added only on estimated months. On a logged month the Marketing
+ * category already contains it, and adding Meta's figure on top would
+ * double-count.
+ */
 function buildPnl(
-  monthlyRevenue: Array<{ month: string; net: number }>,
+  teamupRevenue: Array<{ month: string; net: number }>,
+  financeRows: FinanceRow[],
   metaAdsMonths: Array<{ month: string; spend: number }>,
 ) {
   const currentMonth = new Date().toISOString().slice(0, 7);
-  const currentRevenue = monthlyRevenue.find((r) => r.month === currentMonth)?.net ?? 0;
-  const currentAdSpend = metaAdsMonths.find((m) => m.month === currentMonth)?.spend ?? 0;
-  const totalCosts = TOTAL_FIXED + currentAdSpend;
 
-  const monthlyHistory = monthlyRevenue.map((r) => {
-    const adSpend = metaAdsMonths.find((m) => m.month === r.month)?.spend ?? 0;
-    const costs = TOTAL_FIXED + adSpend;
+  const otherRevenueByMonth = new Map<string, number>();
+  const expensesByMonth = new Map<string, Array<{ item: string; amount: number }>>();
+  for (const row of financeRows) {
+    const month = row.date.slice(0, 7);
+    if (!month) continue;
+    if (row.type === "Expense") {
+      const list = expensesByMonth.get(month) ?? [];
+      list.push({ item: row.category || row.description || "Uncategorised", amount: Math.abs(row.amount) });
+      expensesByMonth.set(month, list);
+    } else if (row.type === "Revenue" && row.source !== "TeamUp") {
+      otherRevenueByMonth.set(month, (otherRevenueByMonth.get(month) ?? 0) + row.amount);
+    }
+  }
+
+  const forMonth = (month: string, teamupNet: number) => {
+    const otherRevenue = round2(otherRevenueByMonth.get(month) ?? 0);
+    const revenue = round2(teamupNet + otherRevenue);
+    const logged = expensesByMonth.get(month) ?? [];
+    const adSpend = metaAdsMonths.find((m) => m.month === month)?.spend ?? 0;
+    const costsAreActual = logged.length > 0;
+    const breakdown = costsAreActual ? logged : ESTIMATED_FIXED_COSTS;
+    const fixedCosts = costsAreActual
+      ? round2(logged.reduce((sum, c) => sum + c.amount, 0))
+      : TOTAL_ESTIMATED_FIXED;
+    const totalCosts = round2(costsAreActual ? fixedCosts : fixedCosts + adSpend);
     return {
-      month: r.month,
-      revenue: r.net,
-      adSpend,
-      totalCosts: costs,
-      netProfit: round2(r.net - costs),
+      month,
+      revenue,
+      teamupRevenue: round2(teamupNet),
+      otherRevenue,
+      fixedCosts,
+      adSpend: costsAreActual ? 0 : adSpend,
+      totalCosts,
+      netProfit: round2(revenue - totalCosts),
+      costsAreActual,
+      revenueIsComplete: otherRevenue > 0,
+      breakdown,
     };
-  });
+  };
+
+  const monthlyHistory = teamupRevenue.map((r) => forMonth(r.month, r.net));
+  const current =
+    monthlyHistory.find((h) => h.month === currentMonth) ?? forMonth(currentMonth, 0);
 
   return {
-    month: currentMonth,
-    revenue: currentRevenue,
-    fixedCosts: TOTAL_FIXED,
-    adSpend: currentAdSpend,
-    totalCosts,
-    netProfit: round2(currentRevenue - totalCosts),
-    fixedBreakdown: FIXED_COSTS,
+    ...current,
+    fixedBreakdown: current.breakdown,
     monthlyHistory,
   };
 }
@@ -306,7 +391,7 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     activeMemberships,
     totalMembers,
     activeMembers,
-    revenueRows,
+    financeRows,
     membershipSummaries,
     expansionTriggers,
     metaAds,
@@ -315,7 +400,7 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     fetchActiveCustomerMemberships(),
     countMembersByStatus(membersDbId, null),
     countMembersByStatus(membersDbId, "Active"),
-    fetchTeamupRevenueRows(financesDbId),
+    fetchFinanceRows(financesDbId),
     fetchMembershipSummaryByCustomer(),
     detectExpansionTriggers(14, 5),
     fetchMetaAdsMonthly(6),
@@ -355,7 +440,7 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     .reduce((sum, p) => sum + p.count, 0);
 
   // Monthly revenue: extract YYYY-MM from Date and pair with Amount.
-  const monthlyRevenue = revenueRows
+  const monthlyRevenue = financeRows
     .filter((r) => r.description.startsWith("TeamUp Revenue"))
     .map((r) => ({
       month: r.date.slice(0, 7),
@@ -370,7 +455,7 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
   const cutoff30 = new Date();
   cutoff30.setUTCDate(cutoff30.getUTCDate() - 30);
   const cutoffISO = cutoff30.toISOString().slice(0, 10);
-  const netLast30Days = revenueRows
+  const netLast30Days = financeRows
     .filter((r) => r.date >= cutoffISO && r.description.startsWith("TeamUp Revenue"))
     .reduce((sum, r) => sum + r.amount, 0);
 
@@ -401,7 +486,7 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     },
     metaAds,
     leadFunnel: buildLeadFunnel(allLeads),
-    pnl: buildPnl(monthlyRevenue, metaAds.months),
+    pnl: buildPnl(monthlyRevenue, financeRows, metaAds.months),
     // membershipSummaries is unused here but kept in scope above for clarity
     ...{ membershipSummariesCount: membershipSummaries.size as number },
   } as DashboardMetrics;
@@ -567,11 +652,35 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
       `${p.month}: ${sym}${p.revenue.toFixed(0)} revenue − ${sym}${p.totalCosts.toFixed(0)} costs = ${sym}${p.netProfit.toFixed(0)} net${partialNote}`,
     ),
   );
-  blocks.push(paragraph("Fixed monthly costs:"));
+  if (!p.costsAreActual || !p.revenueIsComplete) {
+    const gaps: string[] = [];
+    if (!p.revenueIsComplete) {
+      gaps.push(
+        "revenue is TeamUp group memberships only, because no PT or rental income has been logged in the Finances DB for this month",
+      );
+    }
+    if (!p.costsAreActual) {
+      gaps.push("costs are the standing estimate, because no expenses have been logged for this month");
+    }
+    blocks.push(
+      callout(
+        "⚠️",
+        `Treat this month's net as indicative, not actual: ${gaps.join("; ")}. Log the month in the Finances DB and these figures become real.`,
+      ),
+    );
+  }
+  blocks.push(
+    paragraph(
+      `Revenue: ${sym}${p.teamupRevenue.toFixed(0)} TeamUp group memberships + ${sym}${p.otherRevenue.toFixed(0)} other logged income (PT, rental).`,
+    ),
+  );
+  blocks.push(paragraph(p.costsAreActual ? "Costs (logged actuals):" : "Costs (estimated, nothing logged):"));
   for (const c of p.fixedBreakdown) {
     blocks.push(bullet(`${c.item}: ${sym}${c.amount}`));
   }
-  blocks.push(bullet(`Meta Ads (variable): ${sym}${p.adSpend.toFixed(2)}`));
+  if (!p.costsAreActual) {
+    blocks.push(bullet(`Meta Ads (variable): ${sym}${p.adSpend.toFixed(2)}`));
+  }
   blocks.push(bullet(`Total costs: ${sym}${p.totalCosts.toFixed(0)}`));
 
   if (p.monthlyHistory.length > 1) {
@@ -580,9 +689,11 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
     if (pnlChartUrl) blocks.push(image(pnlChartUrl));
     for (const h of p.monthlyHistory) {
       const sign = h.netProfit >= 0 ? "+" : "";
+      const basis = h.costsAreActual ? "actual costs" : "estimated costs";
+      const rev = h.revenueIsComplete ? "all income" : "TeamUp only";
       blocks.push(
         bullet(
-          `${h.month}: ${sym}${h.revenue.toFixed(0)} rev − ${sym}${h.totalCosts.toFixed(0)} costs = ${sign}${sym}${h.netProfit.toFixed(0)}`,
+          `${h.month}: ${sym}${h.revenue.toFixed(0)} rev − ${sym}${h.totalCosts.toFixed(0)} costs = ${sign}${sym}${h.netProfit.toFixed(0)} (${rev}, ${basis})`,
         ),
       );
     }
