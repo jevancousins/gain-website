@@ -213,6 +213,12 @@ async function fetchFinanceRows(financesDbId: string): Promise<FinanceRow[]> {
 const LEADS_DB_ID = "3e2ca304-ebd8-4cea-8202-d0003bf94a6f";
 
 /**
+ * Finances DB `Source` value marking a row as a Business Plan forecast rather
+ * than a logged transaction. Rows carrying it are excluded from the P&L.
+ */
+const PLAN_SOURCE = "Business Plan";
+
+/**
  * Fallback cost estimate, used ONLY for months with no expense rows logged in
  * the Finances DB. Any month Hallum has actually logged uses his real figures.
  * Every month that falls back is labelled "estimated" on the dashboard so an
@@ -335,11 +341,20 @@ function buildPnl(
   for (const row of financeRows) {
     const month = row.date.slice(0, 7);
     if (!month) continue;
+    // Forecast rows are NOT actuals. The Finances DB was seeded on 1 Apr 2026
+    // with Year 1 Business Plan baselines, and reading them as logged
+    // transactions made April report £5,793 revenue and £3,293 profit that
+    // nobody had earned. Source "Business Plan" means plan; empty means a real
+    // hand-logged transaction.
+    if (row.source === PLAN_SOURCE) continue;
     if (row.type === "Expense") {
       const list = expensesByMonth.get(month) ?? [];
       list.push({ item: row.category || row.description || "Uncategorised", amount: Math.abs(row.amount) });
       expensesByMonth.set(month, list);
     } else if (row.type === "Revenue" && row.source !== "TeamUp") {
+      // Group membership income already arrives via the TeamUp sync. Counting a
+      // hand-logged row in the same category would double-count the month.
+      if (row.category === "Group Memberships") continue;
       otherRevenueByMonth.set(month, (otherRevenueByMonth.get(month) ?? 0) + row.amount);
     }
   }
