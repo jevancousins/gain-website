@@ -347,6 +347,14 @@ export type OnboardingMember = {
   email: string;
   firstName: string;
   joined: string | null; // YYYY-MM-DD
+  /**
+   * Most recent attended session, YYYY-MM-DD, or null if they have never
+   * trained. Written by teamup-members-sync at 06:00 from TeamUp attendance,
+   * an hour before this cron runs, so it is same-morning fresh. Email 4 uses
+   * it to check a member has actually been in before asking how their first
+   * week went.
+   */
+  lastSession: string | null;
   /** TeamUp customer id; the join key to live membership data. Null if unset. */
   teamupId: number | null;
   /** sent[i] is true if "Onboarding Email (i+1) Sent" is ticked. Length 6. */
@@ -450,6 +458,7 @@ export async function loadOnboardingMembers(): Promise<OnboardingMember[]> {
         email,
         firstName: name.trim().split(/\s+/)[0] || "",
         joined: row.properties.Joined?.date?.start ?? null,
+        lastSession: row.properties["Last Session"]?.date?.start ?? null,
         teamupId: row.properties["TeamUp ID"]?.number ?? null,
         sent,
         programmeActiveDays: row.properties[PROGRAMME_ACTIVE_DAYS]?.number ?? 0,

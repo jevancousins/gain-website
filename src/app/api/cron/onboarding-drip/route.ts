@@ -111,8 +111,9 @@ function daysBetweenYmd(from: string, to: string): number {
  * due. A member recovering from a gap therefore catches up at one email a day
  * rather than receiving the whole sequence in a single burst.
  *
- * `action` is "send" normally, "mark_stale" when the email is more than
- * DRIP_MAX_LATE_DAYS past due, or "mark_retired" for a step below
+ * `action` is "send" normally, "mark_unattended" when the step requires the
+ * member to have trained and they have not, "mark_stale" when the email is more
+ * than DRIP_MAX_LATE_DAYS past due, or "mark_retired" for a step below
  * DRIP_MIN_SENDABLE_INDEX that another system now owns (email 1, the welcome,
  * which TeamUp sends at purchase). In both mark_* cases the flag is ticked
  * without sending, so the member moves on through the sequence instead of
@@ -134,8 +135,31 @@ type DripPlan = {
     | "membership_start"
     | "joined";
   daysSinceAnchor: number;
-  action: "send" | "mark_stale" | "mark_retired";
+  action: "send" | "mark_stale" | "mark_retired" | "mark_unattended";
 };
+
+/**
+ * Emails whose copy asserts the member has already trained, and which must
+ * therefore be checked against attendance rather than sent on a date alone.
+ *
+ * Email 4 asks "How's the first week going?". Sent on day 7 regardless, it
+ * asks that of someone who may never have walked in, which is both wrong and
+ * aimed at exactly the member you least want to misjudge. Found 12 Aug 2026 in
+ * the trigger audit that followed the induction-prep fault, which was the same
+ * mistake in a worse form: an email describing an event the system had not
+ * checked had happened.
+ *
+ * The test is attendance ON OR AFTER the drip anchor, not merely "has ever
+ * attended", so a returning member's history from a previous programme cannot
+ * satisfy it. `lastSession` comes from the Members DB, written by
+ * teamup-members-sync at 06:00 from TeamUp attendance, an hour before this cron.
+ *
+ * Email 3 (the mobility guide) is deliberately NOT in this set. It offers a
+ * resource and claims nothing, so it reads fine to someone yet to train. The
+ * rule to keep: a date trigger is only wrong when the copy asserts a fact the
+ * system has not verified.
+ */
+const REQUIRES_ATTENDANCE = new Set([4]);
 
 /**
  * The date the sequence is measured from: the member's programme start where they
@@ -173,6 +197,16 @@ function dripAnchor(
   return m.joined ? { date: m.joined, source: "joined" } : null;
 }
 
+/**
+ * Has the member trained on or after the date the sequence is measured from?
+ * A null Last Session means they have never attended anything, which counts as
+ * no. A session recorded before the anchor belongs to an earlier membership and
+ * does not count either.
+ */
+function attendedSince(m: OnboardingMember, anchorDate: string): boolean {
+  return m.lastSession != null && m.lastSession >= anchorDate;
+}
+
 function planDripEmail(
   m: OnboardingMember,
   summary: MembershipSummary | null,
@@ -188,6 +222,16 @@ function planDripEmail(
     if (m.sent[i - 1]) continue;
     const dueDay = DRIP_SCHEDULE_DAYS[i];
     if (dueDay == null || daysSinceAnchor < dueDay) return null; // not due; later ones cannot be either
+
+    // One day of slack before writing a member off as not having trained. A
+    // session on the due day itself, after this cron has run at 07:00, only
+    // reaches the Members DB at the next morning's 06:00 sync, so judging on
+    // the due day alone would skip someone who did train in their first week.
+    // Nothing is sent meanwhile; the member is simply reconsidered tomorrow.
+    if (REQUIRES_ATTENDANCE.has(i) && !attendedSince(m, anchor.date) && daysSinceAnchor === dueDay) {
+      return null;
+    }
+
     return {
       email: m.email,
       firstName: m.firstName,
@@ -202,7 +246,9 @@ function planDripEmail(
           ? "mark_retired"
           : daysSinceAnchor - dueDay > DRIP_MAX_LATE_DAYS
             ? "mark_stale"
-            : "send",
+            : REQUIRES_ATTENDANCE.has(i) && !attendedSince(m, anchor.date)
+              ? "mark_unattended"
+              : "send",
     };
   }
   return null;
@@ -337,6 +383,7 @@ export async function GET(request: Request) {
     const sentSeq: Array<{ email: string; emailIndex: number }> = [];
     const staleSeq: Array<{ email: string; emailIndex: number; daysLate: number }> = [];
     const retiredSeq: Array<{ email: string; emailIndex: number }> = [];
+    const unattendedSeq: Array<{ email: string; emailIndex: number }> = [];
     const seqErrors: Array<{ email: string; emailIndex: number; reason: string }> = [];
     for (const p of plans) {
       try {
@@ -366,6 +413,18 @@ export async function GET(request: Request) {
             emailIndex: p.emailIndex,
             daysLate: p.daysSinceAnchor - p.dueDay,
           });
+          continue;
+        }
+        if (p.action === "mark_unattended") {
+          // The copy asks how their first week went and they have not trained
+          // since the anchor, so the question is wrong and asking it late would
+          // not make it right. Tick and record it as deliberately not sent.
+          await recordOnboardingSkipped(
+            p.pageId,
+            membersById(members, p.pageId).onboardingSkippedIndexes,
+            p.emailIndex,
+          );
+          unattendedSeq.push({ email: p.email, emailIndex: p.emailIndex });
           continue;
         }
         if (!fromEmail) throw new Error("LEAD_FROM_EMAIL not set");
@@ -445,6 +504,7 @@ export async function GET(request: Request) {
         sent: sentSeq,
         markedStale: staleSeq,
         markedRetired: retiredSeq,
+        markedUnattended: unattendedSeq,
         errors: seqErrors,
       },
       midProgramme: {
