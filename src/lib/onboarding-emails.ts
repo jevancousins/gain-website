@@ -95,8 +95,29 @@ export const DRIP_MAX_SENDABLE_INDEX = 4;
  *
  * If TeamUp's purchase email is ever disabled, LOWER THIS TO 1 or new members
  * get no welcome and no induction link at all.
+ *
+ * Email 2 (induction prep) is RETIRED as of 12 Aug 2026, for a different and
+ * more serious reason: its trigger was wrong, not merely duplicated. It was due
+ * two days after programme start and went out regardless of whether an induction
+ * was booked, already done, or never arranged. On 12 Aug it reached Karen
+ * Marshall, whose induction had already happened, and Melanie Beard, who had
+ * nothing booked at all. It opens "Your induction is coming up" and carries no
+ * booking link, so it reads as confirmation of something that may not exist.
+ * Hallum raised it that morning: "I was a bit confused as to why it's not in my
+ * calendar though but she got an email confirming it".
+ *
+ * A date offset cannot express "an induction is booked", so no change to the
+ * schedule would have fixed it. Inductions are now booked exclusively through
+ * TeamUp, which knows when one exists, so TeamUp owns this email: a Registration
+ * Confirmation case scoped to the Gain Programme Induction fires on booking, and
+ * a Pre/Post Class notification scoped to the same type fires before the day.
+ * Neither can fire when nothing is booked, which is the entire point.
+ *
+ * The Resend template gain-onboarding-2-induction-prep stays published so its
+ * copy can be lifted into those TeamUp notifications, and email 2 keeps its
+ * index and its checkbox exactly as email 1 did.
  */
-export const DRIP_MIN_SENDABLE_INDEX = 2;
+export const DRIP_MIN_SENDABLE_INDEX = 3;
 
 /**
  * How many days past its due date an email may still be sent. Beyond this the
