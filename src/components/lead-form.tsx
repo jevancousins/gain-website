@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Loader2, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn, SITE } from "@/lib/utils";
 import { track } from "@/lib/analytics";
@@ -58,6 +58,14 @@ export function LeadForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
   const emailRef = useRef<HTMLInputElement>(null);
+  // Landing pages render this form twice (e.g. /6-week has one in the sticky
+  // sidebar and one lower down), so hardcoded element ids collide. A duplicate
+  // id means every <label htmlFor> in the second form resolves to the FIRST
+  // form's input, so clicking a label there focuses a field the visitor cannot
+  // see and their typing goes into the wrong form. useId() namespaces the ids
+  // per instance, which is the only reason these are not plain strings.
+  const uid = useId();
+  const fid = (name: string) => `${uid}-${name}`;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -179,24 +187,24 @@ export function LeadForm({
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="firstName" className={labelCls}>First name</label>
+          <label htmlFor={fid("firstName")} className={labelCls}>First name</label>
           <input
-            id="firstName"
+            id={fid("firstName")}
             name="firstName"
             required
             autoComplete="given-name"
             className={inputCls(fieldErrors.firstName)}
             placeholder="Jane"
             aria-invalid={Boolean(fieldErrors.firstName)}
-            aria-describedby={fieldErrors.firstName ? "firstName-error" : undefined}
+            aria-describedby={fieldErrors.firstName ? fid("firstName-error") : undefined}
             onChange={() => clearFieldError("firstName")}
           />
-          <FieldMessage id="firstName-error" msg={fieldErrors.firstName} />
+          <FieldMessage id={fid("firstName-error")} msg={fieldErrors.firstName} />
         </div>
         <div>
-          <label htmlFor="phone" className={labelCls}>Phone</label>
+          <label htmlFor={fid("phone")} className={labelCls}>Phone</label>
           <input
-            id="phone"
+            id={fid("phone")}
             name="phone"
             type="tel"
             inputMode="tel"
@@ -205,17 +213,17 @@ export function LeadForm({
             className={inputCls(fieldErrors.phone)}
             placeholder="Mobile or landline"
             aria-invalid={Boolean(fieldErrors.phone)}
-            aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
+            aria-describedby={fieldErrors.phone ? fid("phone-error") : undefined}
             onChange={() => clearFieldError("phone")}
           />
-          <FieldMessage id="phone-error" msg={fieldErrors.phone} />
+          <FieldMessage id={fid("phone-error")} msg={fieldErrors.phone} />
         </div>
       </div>
 
       <div>
-        <label htmlFor="email" className={labelCls}>Email</label>
+        <label htmlFor={fid("email")} className={labelCls}>Email</label>
         <input
-          id="email"
+          id={fid("email")}
           name="email"
           type="email"
           required
@@ -224,14 +232,14 @@ export function LeadForm({
           className={inputCls(fieldErrors.email)}
           placeholder="you@example.com"
           aria-invalid={Boolean(fieldErrors.email)}
-          aria-describedby={fieldErrors.email ? "email-error" : undefined}
+          aria-describedby={fieldErrors.email ? fid("email-error") : undefined}
           onChange={() => {
             clearFieldError("email");
             setEmailSuggestion(null);
           }}
           onBlur={(e) => setEmailSuggestion(suggestEmail(e.target.value))}
         />
-        <FieldMessage id="email-error" msg={fieldErrors.email} />
+        <FieldMessage id={fid("email-error")} msg={fieldErrors.email} />
         {emailSuggestion && (
           <p className="mt-2 text-sm text-paper/70">
             Did you mean{" "}
@@ -251,12 +259,12 @@ export function LeadForm({
       </div>
 
       <div>
-        <label htmlFor="message" className={labelCls}>
+        <label htmlFor={fid("message")} className={labelCls}>
           What&rsquo;s on your mind?{" "}
           <span className="text-paper/55 font-normal normal-case tracking-normal">(optional)</span>
         </label>
         <textarea
-          id="message"
+          id={fid("message")}
           name="message"
           rows={3}
           className={cn(inputCls(), "resize-none")}
@@ -280,9 +288,9 @@ export function LeadForm({
         password managers from filling it and dropping a genuine enquiry.
       */}
       <div aria-hidden="true" className="absolute left-[-9999px] top-0 h-0 w-0 overflow-hidden">
-        <label htmlFor="website">Leave this field blank</label>
+        <label htmlFor={fid("website")}>Leave this field blank</label>
         <input
-          id="website"
+          id={fid("website")}
           name="website"
           type="text"
           tabIndex={-1}
