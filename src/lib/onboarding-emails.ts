@@ -24,7 +24,16 @@
 export const INDUCTION_BOOKING_URL =
   "https://goteamup.com/p/8554886-gain-strength-therapy/start/?next=/p/8554886-gain-strength-therapy/c/appointment_types/310928";
 
-/** Drip emailIndex (1-6) -> published Resend template alias. */
+/**
+ * Drip emailIndex (1-6) -> Resend template alias.
+ *
+ * Aliases 1 and 2 NO LONGER EXIST IN RESEND. Both templates were deleted after
+ * the steps moved to TeamUp (verified 15 Aug 2026: the alias lookup resolves for
+ * every other entry here and 404s for these two). They are kept in the map so
+ * the indices and the "Onboarding Email N Sent" checkboxes keep their meaning,
+ * but nothing can send them: see DRIP_MIN_SENDABLE_INDEX below before lowering
+ * the floor to 1 or 2.
+ */
 export const DRIP_TEMPLATE_ALIAS: Record<number, string> = {
   1: "gain-onboarding-1-welcome",
   2: "gain-onboarding-2-induction-prep",
@@ -93,8 +102,12 @@ export const DRIP_MAX_SENDABLE_INDEX = 4;
  * rather than left silently unticked, because an unticked box is exactly how a
  * retired step and a failed send come to look identical in Notion.
  *
- * If TeamUp's purchase email is ever disabled, LOWER THIS TO 1 or new members
- * get no welcome and no induction link at all.
+ * If TeamUp's purchase email is ever disabled, new members get no welcome and no
+ * induction link at all. Lowering this floor is NO LONGER ENOUGH to restore it:
+ * the Resend template gain-onboarding-1-welcome has since been deleted, so index
+ * 1 would fail to send rather than fall back. Recreate the template first from
+ * "AI for SMBs/onboarding-flow/onboarding-emails.md" (which still holds the copy),
+ * then lower the floor.
  *
  * Email 2 (induction prep) is RETIRED as of 12 Aug 2026, for a different and
  * more serious reason: its trigger was wrong, not merely duplicated. It was due
@@ -113,9 +126,12 @@ export const DRIP_MAX_SENDABLE_INDEX = 4;
  * a Pre/Post Class notification scoped to the same type fires before the day.
  * Neither can fire when nothing is booked, which is the entire point.
  *
- * The Resend template gain-onboarding-2-induction-prep stays published so its
- * copy can be lifted into those TeamUp notifications, and email 2 keeps its
- * index and its checkbox exactly as email 1 did.
+ * The Resend template gain-onboarding-2-induction-prep was expected to stay
+ * published so its copy could be lifted into those TeamUp notifications. It has
+ * since been deleted from Resend (confirmed 15 Aug 2026), so the copy now lives
+ * only in "AI for SMBs/onboarding-flow/onboarding-emails.md" and in TeamUp
+ * notification 36605. Email 2 keeps its index and its checkbox exactly as email 1
+ * did.
  */
 export const DRIP_MIN_SENDABLE_INDEX = 3;
 
