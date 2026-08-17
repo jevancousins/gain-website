@@ -1,4 +1,5 @@
 import { fetchUpcomingBookings, type CalAttendee, type CalBooking } from "@/lib/calcom";
+import { markLeadConsultationBooked } from "@/lib/notion-leads";
 
 /**
  * Sends a "your consultation is tomorrow" reminder for Cal.com bookings, gated
@@ -12,6 +13,12 @@ import { fetchUpcomingBookings, type CalAttendee, type CalBooking } from "@/lib/
  * on exactly one daily run, so each gets exactly one reminder, with no stored
  * state needed. Cancellations are reflected immediately because status is read
  * live from the Cal.com API at send time.
+ *
+ * It also reconciles the Leads DB against the *whole* upcoming window, not just
+ * tomorrow, so a lead who books stops sitting at New. That is a second job in
+ * one route, and it lives here because this is already the only place that
+ * reads Cal.com; it is deliberately non-fatal, so a Notion outage can never
+ * cost someone their reminder.
  *
  * Manual check: GET /api/cron/consultation-reminders?key=<CRON_SECRET>&dryRun=true
  */
@@ -101,6 +108,8 @@ export async function GET(request: Request) {
       sent.push(b.uid);
     }
 
+    const leadSync = await syncLeadStatuses(bookings, dryRun);
+
     return Response.json({
       ok: true,
       durationMs: Date.now() - startedAt,
@@ -110,6 +119,7 @@ export async function GET(request: Request) {
       sentCount: sent.length,
       sent,
       skipped,
+      leadSync,
     });
   } catch (err) {
     return Response.json(
@@ -117,6 +127,47 @@ export async function GET(request: Request) {
       { status: 502 },
     );
   }
+}
+
+/**
+ * Move every lead with a confirmed upcoming consultation to Consultation Booked.
+ *
+ * Runs over the full upcoming window rather than just tomorrow's bookings, so a
+ * lead who books three weeks out is reflected on the board the next day instead
+ * of the day before they turn up. Repeats are free: the promotion is gated on
+ * the lead's current status, so a row already at Consultation Booked is skipped
+ * without a write.
+ *
+ * Failures are swallowed per attendee and reported in `errors`. Reminders have
+ * already been sent by this point, and no board-hygiene write is worth a 502
+ * that makes the whole cron look dead.
+ */
+async function syncLeadStatuses(bookings: CalBooking[], dryRun: boolean) {
+  const emails = [
+    ...new Set(
+      bookings
+        .filter(
+          (b) =>
+            b.status === "accepted" &&
+            (b.eventTypeSlug === CONSULTATION_SLUG || b.eventTypeSlug === null),
+        )
+        .flatMap((b) => b.attendees.map((a) => a.email))
+        .filter(Boolean),
+    ),
+  ];
+
+  if (dryRun) return { considered: emails.length, updated: 0, dryRun: true, errors: [] };
+
+  let updated = 0;
+  const errors: string[] = [];
+  for (const email of emails) {
+    try {
+      updated += await markLeadConsultationBooked(email);
+    } catch (err) {
+      errors.push(`${email}: ${(err as Error).message}`.slice(0, 200));
+    }
+  }
+  return { considered: emails.length, updated, dryRun: false, errors };
 }
 
 async function sendReminderEmail(
