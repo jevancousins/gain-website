@@ -194,6 +194,48 @@ export async function copyConsentFromLeadToMember(memberEmail: string): Promise<
 }
 
 /**
+ * Statuses a Cal.com booking is allowed to advance a lead from.
+ *
+ * Deliberately narrow. Anything else on the row — Converted, Lost, No Response,
+ * or Consultation Booked already — was set by a person or by
+ * `markLeadConverted`, and a booking is not evidence that judgement was wrong.
+ * A blank Status is included: that is a row the website wrote and nobody has
+ * touched.
+ */
+const CONSULTATION_PROMOTABLE_FROM = new Set([null, "New", "Contacted"]);
+
+/**
+ * Mark the lead behind a Cal.com consultation as Consultation Booked.
+ *
+ * Nothing did this before 17 Aug 2026: Cal.com was read only to send reminders,
+ * so a lead who booked sat at New until a maintenance run happened to notice and
+ * moved it by hand (Lynda on 13 Aug, Susan Wilson on 17 Aug). Hallum watches the
+ * Leads board, so the board was telling him nobody had booked when they had.
+ *
+ * Matching is by email. The two sources disagree on case — Lynda is
+ * `lyndasorrellflee@` in Notion and `Lyndasorrellflee@` in Cal.com — but
+ * Notion's email filter matches case-insensitively (checked against both rows
+ * on 17 Aug 2026), so the plain lookup is enough.
+ *
+ * Returns the number of lead rows updated.
+ */
+export async function markLeadConsultationBooked(
+  attendeeEmail: string,
+): Promise<number> {
+  const leads = await findLeadsByEmail(attendeeEmail);
+
+  let updated = 0;
+  for (const lead of leads) {
+    if (!CONSULTATION_PROMOTABLE_FROM.has(lead.status)) continue;
+    await patchNotionPage(lead.pageId, {
+      Status: { select: { name: "Consultation Booked" } },
+    });
+    updated += 1;
+  }
+  return updated;
+}
+
+/**
  * When a TeamUp member is synced, mark the matching website lead as Converted and
  * link the two records, so the Leads DB reflects conversions automatically rather
  * than relying on a manual update. Matches by email.
