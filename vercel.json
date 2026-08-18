@@ -1,0 +1,49 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "github": {
+    "silent": true
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": false
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/teamup-members-sync",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/resend-contacts-sync",
+      "schedule": "30 6 * * *"
+    },
+    {
+      "path": "/api/cron/onboarding-drip",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/teamup-retention-digest",
+      "schedule": "0 7 * * 3"
+    },
+    {
+      "path": "/api/cron/teamup-finances-sync",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/google-reviews",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/sessions-sync",
+      "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/cron/consultation-reminders",
+      "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron/teamup-schedule-sync",
+      "schedule": "0 4 * * *"
+    }
+  ]
+}
