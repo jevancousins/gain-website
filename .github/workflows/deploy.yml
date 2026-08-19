@@ -26,8 +26,14 @@ jobs:
 
       - run: npm ci
 
+      # NOT --with-deps: see the same note in qa.yml. This workflow had the
+      # identical fault and it was missed when qa.yml was fixed on 19 Aug 2026,
+      # so both merges that day landed on main and neither ever reached
+      # production: the job hung in apt for 14 minutes and was cancelled before
+      # the build, the tests or the deploy hook ran. Fixing one workflow and not
+      # the other left main green and production three days stale.
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Build the site
         run: npm run build
