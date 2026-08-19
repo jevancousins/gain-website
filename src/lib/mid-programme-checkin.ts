@@ -1,6 +1,7 @@
 import type { OnboardingMember } from "@/lib/notion-members";
 import type { ProgrammeMembership } from "@/lib/teamup-memberships";
 import { ceilingActiveDays, midpointActiveDays } from "@/lib/onboarding-emails";
+import { attendedSince } from "@/lib/onboarding-drip-plan";
 
 /**
  * Decides, for one member on one run, whether the mid-programme check-in (email 6)
@@ -12,6 +13,24 @@ import { ceilingActiveDays, midpointActiveDays } from "@/lib/onboarding-emails";
  * lands at the member's true halfway point (21 active days for a 6-week programme,
  * 42 for a 12-week) and is deferred, not lost, while the member is paused. See the
  * design note in the onboarding-drip route.
+ *
+ * ATTENDANCE IS REQUIRED, not just elapsed time. The copy tells the member they are
+ * halfway through their programme and asks how the training is going, which asserts
+ * they have been training. Reaching day 21 of a membership does not establish that.
+ * Melanie Beard was the live case on 19 Aug 2026: a 6-week programme running from
+ * 10 Aug with no TeamUp attendance row at all, on course to be told she was halfway
+ * through sessions she had never attended.
+ *
+ * This is the same rule already carried by emails 3 and 4 in REQUIRES_ATTENDANCE
+ * (see onboarding-drip-plan), and `attendedSince` is imported from there rather than
+ * restated, because the last time this rule was decided per-email by recalling what
+ * an email was for rather than reading its copy, email 3 was wrongly left ungated
+ * and went out to a member who had not trained.
+ *
+ * The same caveat applies here as there: this depends on attendance actually being
+ * registered in TeamUp. An induction that was run but never recorded is
+ * indistinguishable from a member who never came, so the failure mode is a held
+ * email rather than a false one. That is the safer direction, not a harmless one.
  */
 
 export type Email6Decision =
@@ -19,6 +38,7 @@ export type Email6Decision =
   | "SKIP_PAUSED"
   | "SKIP_NOT_YET"
   | "SKIP_PAST_CEILING"
+  | "SKIP_NO_ATTENDANCE"
   | "SKIP_EARLY_DEPARTURE"
   | "SKIP_ALREADY_HANDLED"
   | "SKIP_ORDERING"
@@ -135,6 +155,13 @@ export function planEmail6(
     decision = "SKIP_NOT_YET";
   } else if (activeDays > ceilingDays) {
     decision = "SKIP_PAST_CEILING";
+  } else if (!attendedSince(member, programme.startDate)) {
+    // Never tell someone they are halfway through training they have not done.
+    // Deliberately ordered AFTER the ceiling so this holds rather than blocks: a
+    // member who starts late still gets the check-in once they train, and one who
+    // never trains is closed out by SKIP_PAST_CEILING, which records the skip
+    // against the membership instead of re-deciding it every morning forever.
+    decision = "SKIP_NO_ATTENDANCE";
   } else {
     decision = "SEND";
   }
