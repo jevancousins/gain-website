@@ -236,6 +236,64 @@ export async function markLeadConsultationBooked(
 }
 
 /**
+ * Move a lead back off Consultation Booked when their consultation is cancelled.
+ *
+ * The promotion above has always been one-way, and the reminder cron reads
+ * Cal.com with `status=upcoming`, which excludes cancellations entirely. So a
+ * cancelled consultation left the board asserting a booking that no longer
+ * existed, and the only person who could act on it never learned it had gone.
+ *
+ * Demotes to Contacted rather than New: the enquiry and the booking both really
+ * happened, so this is a warm lead who needs ringing, not an untouched one.
+ *
+ * Guardrails:
+ * - Only demotes from Consultation Booked. Converted or Lost is a later, better
+ *   informed decision by a human and must never be walked back by a cron.
+ * - The caller is responsible for checking the person has no OTHER live booking,
+ *   because rescheduling in Cal.com cancels the old booking and creates a new one,
+ *   and demoting on the cancelled half of a reschedule would be wrong.
+ *
+ * Returns the number of lead rows updated.
+ */
+export async function markLeadConsultationCancelled(
+  attendeeEmail: string,
+  whenISO: string,
+): Promise<number> {
+  const leads = await findLeadsByEmail(attendeeEmail);
+
+  const when = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(whenISO));
+
+  let updated = 0;
+  for (const lead of leads) {
+    if (lead.status !== "Consultation Booked") continue;
+    await patchNotionPage(lead.pageId, {
+      Status: { select: { name: "Contacted" } },
+      "Next Action": {
+        rich_text: [
+          {
+            text: {
+              content:
+                `Consultation for ${when} was CANCELLED and they have not rebooked. ` +
+                `Call or text to offer a new slot. Set back to Consultation Booked if they ` +
+                `rebook, or No Response if they do not reply.`,
+            },
+          },
+        ],
+      },
+    });
+    updated += 1;
+  }
+  return updated;
+}
+
+/**
  * When a TeamUp member is synced, mark the matching website lead as Converted and
  * link the two records, so the Leads DB reflects conversions automatically rather
  * than relying on a manual update. Matches by email.
