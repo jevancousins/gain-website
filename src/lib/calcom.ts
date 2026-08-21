@@ -51,17 +51,15 @@ type RawBooking = {
  * the API key. Always hits the live API with no caching so booking status is
  * never stale. Throws on a non-2xx response.
  */
-export async function fetchUpcomingBookings(apiKey: string): Promise<CalBooking[]> {
-  const res = await fetch(
-    `${CALCOM_API}/bookings?status=upcoming&take=100&sortStart=asc`,
-    {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "cal-api-version": CALCOM_API_VERSION,
-      },
-      cache: "no-store",
+/** Shared request + mapping for any bookings query. Throws on a non-2xx. */
+async function fetchBookings(apiKey: string, query: string): Promise<CalBooking[]> {
+  const res = await fetch(`${CALCOM_API}/bookings?${query}`, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "cal-api-version": CALCOM_API_VERSION,
     },
-  );
+    cache: "no-store",
+  });
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -90,4 +88,26 @@ export async function fetchUpcomingBookings(apiKey: string): Promise<CalBooking[
           timeZone: a.timeZone,
         })),
     }));
+}
+
+/**
+ * Fetch upcoming (future, non-cancelled) bookings for the account that owns
+ * the API key. Always hits the live API with no caching so booking status is
+ * never stale. Throws on a non-2xx response.
+ */
+export async function fetchUpcomingBookings(apiKey: string): Promise<CalBooking[]> {
+  return fetchBookings(apiKey, "status=upcoming&take=100&sortStart=asc");
+}
+
+/**
+ * Fetch cancelled bookings, newest first.
+ *
+ * This exists because `status=upcoming` EXCLUDES cancellations, so a route that
+ * reads only upcoming bookings cannot tell "never booked" from "booked and then
+ * cancelled". That blind spot is exactly how Susan Wilson's cancellation on
+ * 21 Aug 2026 left her Leads row reading Consultation Booked for a consultation
+ * that never happened, with no signal anywhere that a warm lead had gone quiet.
+ */
+export async function fetchCancelledBookings(apiKey: string): Promise<CalBooking[]> {
+  return fetchBookings(apiKey, "status=cancelled&take=100&sortStart=desc");
 }

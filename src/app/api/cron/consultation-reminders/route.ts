@@ -1,5 +1,13 @@
-import { fetchUpcomingBookings, type CalAttendee, type CalBooking } from "@/lib/calcom";
-import { markLeadConsultationBooked } from "@/lib/notion-leads";
+import {
+  fetchCancelledBookings,
+  fetchUpcomingBookings,
+  type CalAttendee,
+  type CalBooking,
+} from "@/lib/calcom";
+import {
+  markLeadConsultationBooked,
+  markLeadConsultationCancelled,
+} from "@/lib/notion-leads";
 
 /**
  * Sends a "your consultation is tomorrow" reminder for Cal.com bookings, gated
@@ -109,6 +117,14 @@ export async function GET(request: Request) {
     }
 
     const leadSync = await syncLeadStatuses(bookings, dryRun);
+    const cancellations = await handleCancellations(
+      apiKey,
+      bookings,
+      now,
+      dryRun,
+      resendKey,
+      fromEmail,
+    );
 
     return Response.json({
       ok: true,
@@ -120,6 +136,7 @@ export async function GET(request: Request) {
       sent,
       skipped,
       leadSync,
+      cancellations,
     });
   } catch (err) {
     return Response.json(
@@ -204,6 +221,147 @@ async function sendReminderEmail(
         id: "gain-consultation-reminder",
         variables: { FIRST_NAME: firstName, WHEN: when, MANAGE_URL: manageUrl },
       },
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Resend API ${res.status}: ${body}`);
+  }
+}
+
+/** How far back a cancellation still counts as news worth acting on. */
+const CANCELLATION_LOOKBACK_DAYS = 3;
+
+/**
+ * Catch consultations that were cancelled, put the lead back in the work queue
+ * and tell Hallum, because nothing else in the system can.
+ *
+ * The gap this closes: `fetchUpcomingBookings` uses Cal.com's `status=upcoming`,
+ * which excludes cancellations, and `markLeadConsultationBooked` only ever
+ * promotes. Between them a cancelled consultation was invisible — the board went
+ * on claiming a booking, no email went anywhere, and the only person who could
+ * ring the lead never found out. Susan Wilson cancelled three hours before her
+ * 21 Aug 2026 slot and it surfaced only because a human went looking.
+ *
+ * Window: only cancellations whose slot falls between CANCELLATION_LOOKBACK_DAYS
+ * ago and the future. Cal.com keeps cancelled bookings forever, and re-reporting
+ * a cancellation from July every morning would train Hallum to ignore the email.
+ *
+ * Reschedules: Cal.com implements a reschedule as cancel-then-rebook, so a lead
+ * with a live accepted booking is skipped outright. Otherwise every reschedule
+ * would demote the lead and send a false alarm.
+ *
+ * Non-fatal by design, like the lead sync above: reminders have already gone out
+ * by this point and no board hygiene is worth a 502 that makes the cron look dead.
+ */
+async function handleCancellations(
+  apiKey: string,
+  upcoming: CalBooking[],
+  now: Date,
+  dryRun: boolean,
+  resendKey: string | undefined,
+  fromEmail: string | undefined,
+) {
+  const errors: string[] = [];
+  let cancelled: CalBooking[] = [];
+  try {
+    cancelled = await fetchCancelledBookings(apiKey);
+  } catch (err) {
+    return { considered: 0, demoted: 0, notified: 0, errors: [(err as Error).message] };
+  }
+
+  const floor = new Date(now);
+  floor.setUTCDate(floor.getUTCDate() - CANCELLATION_LOOKBACK_DAYS);
+
+  // Anyone with a live booking is mid-reschedule, not lost.
+  const stillBooked = new Set(
+    upcoming
+      .filter((b) => b.status === "accepted")
+      .flatMap((b) => b.attendees.map((a) => a.email.toLowerCase())),
+  );
+
+  const recent = cancelled.filter(
+    (b) =>
+      (b.eventTypeSlug === CONSULTATION_SLUG || b.eventTypeSlug === null) &&
+      new Date(b.start) >= floor &&
+      b.attendees.some((a) => !stillBooked.has(a.email.toLowerCase())),
+  );
+
+  if (dryRun) {
+    return {
+      considered: recent.length,
+      demoted: 0,
+      notified: 0,
+      dryRun: true,
+      uids: recent.map((b) => b.uid),
+      errors,
+    };
+  }
+
+  let demoted = 0;
+  let notified = 0;
+  for (const booking of recent) {
+    for (const attendee of booking.attendees) {
+      if (stillBooked.has(attendee.email.toLowerCase())) continue;
+      try {
+        const rows = await markLeadConsultationCancelled(attendee.email, booking.start);
+        demoted += rows;
+        // Only tell Hallum when the board actually changed. A row already at
+        // Contacted has been dealt with, and re-mailing it daily is noise.
+        if (rows > 0 && resendKey && fromEmail) {
+          await sendCancellationAlert(booking, attendee, resendKey, fromEmail);
+          notified += 1;
+        }
+      } catch (err) {
+        errors.push(`${attendee.email}: ${(err as Error).message}`.slice(0, 200));
+      }
+    }
+  }
+
+  return { considered: recent.length, demoted, notified, errors };
+}
+
+/**
+ * Tell Hallum a consultation was cancelled. Internal only: this goes to
+ * LEAD_NOTIFY_EMAIL, never to the lead. Deliberately plain HTML rather than a
+ * Resend template, so an owner alert can never be caught by an unsubscribe or a
+ * marketing audience the way a template send can.
+ */
+async function sendCancellationAlert(
+  booking: CalBooking,
+  attendee: CalAttendee,
+  apiKey: string,
+  from: string,
+) {
+  const notify = process.env.LEAD_NOTIFY_EMAIL;
+  if (!notify) return;
+
+  const when = new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(booking.start));
+  const esc = (v: string) =>
+    v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from,
+      to: [notify],
+      subject: `Consultation cancelled: ${attendee.name} — ${when}`,
+      html:
+        `<p style="font-weight:700;font-size:16px;margin-bottom:16px;">` +
+        `${esc(attendee.name)} cancelled their consultation</p>` +
+        `<p>It was booked for <strong>${esc(when)}</strong>, and they have not rebooked.</p>` +
+        `<p>Email: ${esc(attendee.email)}</p>` +
+        `<p>They enquired and booked themselves in, so they are worth a call. ` +
+        `Their Leads row has been moved back to Contacted with this on the Next Action.</p>`,
     }),
   });
 
