@@ -20,6 +20,13 @@ const montserrat = Montserrat({
 
 const isPreview = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production";
 
+// Meta domain verification. Normally done with a DNS TXT record, but
+// gainstrengththerapy.com's DNS sits in the business partner's 123reg account,
+// so the meta-tag route is the one Gain can actually use unaided. Set
+// META_DOMAIN_VERIFICATION to the code Events Manager shows under
+// Brand safety > Domains; unset, no tag is emitted.
+const metaDomainVerification = process.env.META_DOMAIN_VERIFICATION;
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
@@ -42,6 +49,9 @@ export const metadata: Metadata = {
   },
   alternates: { canonical: SITE.url },
   icons: { icon: "/favicon.ico" },
+  ...(metaDomainVerification
+    ? { other: { "facebook-domain-verification": metaDomainVerification } }
+    : {}),
   // Keep preview deploys out of the index so the real domain stays canonical.
   robots: isPreview
     ? { index: false, follow: false, nocache: true }
