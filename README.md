@@ -33,8 +33,10 @@ Visit <http://localhost:3000>.
 | `NOTION_TOKEN` + `NOTION_LEADS_DB_ID` | server | Writes each lead into the Notion leads database. |
 | `CRON_SECRET` | server | Authenticates Vercel cron requests (`?key=` or Bearer). |
 | `ANTHROPIC_API_KEY` | server | Optional: personalised email opener when a lead leaves a message (Claude Haiku). |
+| `NEXT_PUBLIC_META_PIXEL_ID` | client | Turns the Meta pixel on. Unset, the site loads no Meta script and sets no Meta cookie. Must be Gain's **existing** dataset id from Events Manager: creating a new pixel instead discards the event history, the Website Visitors audience and every lookalike built from it. |
+| `META_DOMAIN_VERIFICATION` | server | Emits the `facebook-domain-verification` meta tag. The DNS TXT route is not available to Gain because the domain sits in the business partner's 123reg account. |
 
-In development, when Notion is not configured, leads are appended to `.data/leads.jsonl` so you can inspect them locally. The Cal.com booking link is not an env var; it lives in `SITE.bookingUrl` (`src/lib/utils.ts`). The remaining vars in `.env.local.example` power the scheduled crons (TeamUp sync, finances, retention digest, Google reviews, Meta ad spend). Web analytics is Vercel Web Analytics + Speed Insights, enabled in the Vercel project with no env vars.
+In development, when Notion is not configured, leads are appended to `.data/leads.jsonl` so you can inspect them locally. The Cal.com booking link is not an env var; it lives in `SITE.bookingUrl` (`src/lib/utils.ts`). The remaining vars in `.env.local.example` power the scheduled crons (TeamUp sync, finances, retention digest, Google reviews, Meta ad spend). Web analytics is Vercel Web Analytics + Speed Insights, enabled in the Vercel project with no env vars. The Meta pixel is separate and off by default: it is advertising tracking, it does set a cookie, and the privacy page grows a paragraph describing it only when `NEXT_PUBLIC_META_PIXEL_ID` is set.
 
 ## Project layout
 

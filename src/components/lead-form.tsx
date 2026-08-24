@@ -4,6 +4,7 @@ import { useId, useRef, useState } from "react";
 import { Loader2, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn, SITE } from "@/lib/utils";
 import { track } from "@/lib/analytics";
+import { metaTrack } from "@/lib/meta-pixel";
 
 type FieldKey = "firstName" | "email" | "phone";
 type FieldErrors = Partial<Record<FieldKey, string>>;
@@ -112,6 +113,9 @@ export function LeadForm({
       // Primary conversion. Fired on success (not the click) so it reflects
       // a real enquiry; PostHog already auto-captures the UTM/referrer.
       track("lead_submitted", { source });
+      // Same conversion, reported to Meta so ad delivery can optimise for it.
+      // Standard event name, because custom ones cannot be optimised towards.
+      metaTrack("Lead", { content_name: source });
       form.reset();
       setEmailSuggestion(null);
     } catch {
@@ -155,7 +159,10 @@ export function LeadForm({
               href={SITE.bookingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => track("booking_clicked")}
+              onClick={() => {
+                track("booking_clicked");
+                metaTrack("Schedule", { content_name: source });
+              }}
               className="mt-5 inline-flex items-center gap-2 rounded-sm bg-flame text-ink px-5 py-3 text-[0.78rem] font-bold uppercase tracking-[0.2em] hover:bg-flame-deep transition-colors"
             >
               Book a time now <ArrowRight size={15} strokeWidth={2.4} />

@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   description: "How Gain Strength Therapy collects, uses, and protects your personal information.",
 };
 
+// Server-side read: the pixel paragraph must appear exactly when the pixel is
+// actually running, and never as boilerplate for something the site does not do.
+const metaPixelEnabled = Boolean(process.env.NEXT_PUBLIC_META_PIXEL_ID);
+
 export default function PrivacyPage() {
   return (
     <Section tone="ink">
@@ -78,7 +82,15 @@ export default function PrivacyPage() {
           <section>
             <h2 className="display-tight text-2xl text-paper mb-4">7. Cookies and analytics</h2>
             <p>
-              We use privacy-friendly, cookieless analytics (Vercel Web Analytics and PostHog) to understand how the website is used so we can improve it. These do not store cookies or other identifiers on your device, do not track you across other websites, and are not used for advertising. You can manage cookies through your browser.
+              We use privacy-friendly, cookieless analytics (Vercel Web Analytics and Speed Insights) to understand how the website is used so we can improve it. These do not store cookies or other identifiers on your device, do not track you across other websites, and are not used for advertising.
+            </p>
+            {metaPixelEnabled ? (
+              <p className="mt-4">
+                We also use the Meta pixel, which is advertising technology provided by Meta Platforms Ireland Limited. It sets a cookie and tells Meta when you visit our website and when you send us an enquiry, so we can measure how well our Facebook and Instagram adverts work and show them to people like you. It does not receive your name, and we do not use it to make decisions about you. You can control this through your Facebook and Instagram ad settings, through your browser&rsquo;s cookie controls, or by using a tracking blocker.
+              </p>
+            ) : null}
+            <p className="mt-4">
+              You can manage cookies through your browser.
             </p>
           </section>
 
