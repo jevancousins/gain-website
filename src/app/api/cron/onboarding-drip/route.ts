@@ -289,7 +289,7 @@ export async function GET(request: Request) {
       const { plan } = r;
       // Persist the day's counter for any resolved programme (send or not). The
       // active day elapsed regardless of whether the email goes out today.
-      if (plan.anchorMembershipId && (plan.anchorReset || plan.incremented)) {
+      if (plan.anchorMembershipId && (plan.anchorReset || plan.incremented || plan.clamped)) {
         try {
           await setProgrammeCounter(r.pageId, {
             activeDays: plan.activeDays,
@@ -373,6 +373,7 @@ function unresolvedPlan(m: OnboardingMember): Email6Plan {
     anchorMembershipId: m.anchorMembershipId,
     incremented: false,
     anchorReset: false,
+    clamped: false,
     midpointDays: null,
     ceilingDays: null,
   };
