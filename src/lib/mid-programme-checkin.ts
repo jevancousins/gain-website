@@ -1,7 +1,7 @@
 import type { OnboardingMember } from "@/lib/notion-members";
 import type { ProgrammeMembership } from "@/lib/teamup-memberships";
 import { ceilingActiveDays, midpointActiveDays } from "@/lib/onboarding-emails";
-import { attendedSince } from "@/lib/onboarding-drip-plan";
+import { attendedSince, daysBetweenYmd } from "@/lib/onboarding-drip-plan";
 
 /**
  * Decides, for one member on one run, whether the mid-programme check-in (email 6)
@@ -55,6 +55,8 @@ export type Email6Plan = {
   anchorMembershipId: string | null;
   incremented: boolean;
   anchorReset: boolean;
+  /** True when the stored count was impossible and was cut back to elapsed days. */
+  clamped: boolean;
   midpointDays: number | null;
   ceilingDays: number | null;
 };
@@ -102,6 +104,7 @@ export function planEmail6(
     anchorMembershipId: member.anchorMembershipId,
     incremented: false,
     anchorReset: false,
+    clamped: false,
     midpointDays: null,
     ceilingDays: null,
   };
@@ -112,8 +115,26 @@ export function planEmail6(
   // Phase B: accumulator. A new programme instance (different membership id)
   // resets the counter; a non-paused day the counter has not yet seen advances it.
   const anchorReset = member.anchorMembershipId !== programme.membershipId;
-  let activeDays = anchorReset ? 0 : member.programmeActiveDays;
-  let countedOn = anchorReset ? null : member.activeDaysCountedOn;
+
+  // A stored count only resets when the anchor membership id CHANGES, which
+  // silently trusts the number attached to an unchanged id. That is not safe:
+  // the id can be corrected by hand while the count is left behind. Melanie
+  // Beard, 25 Aug 2026, carried 8 active days against membership 10842573 whose
+  // start_date is 26 Aug, accrued days earlier against a pre-start anchor and
+  // left in place when the 22 Aug run fixed the id. Unclamped she would have
+  // reached the 21-day midpoint on ~8 Sep, 13 days into a 42-day programme, and
+  // been told she was halfway through it.
+  //
+  // An ACTIVE day is a day the programme was running, so the count can never
+  // exceed the calendar days since it started; paused days only make it smaller.
+  // Anything above that ceiling is impossible rather than merely surprising, so
+  // cut it back rather than carrying it. Self-healing beats catching it by hand:
+  // the counter is invisible until the wrong email lands.
+  const elapsedDays = Math.max(0, daysBetweenYmd(programme.startDate, todayYmd) + 1);
+  const storedDays = anchorReset ? 0 : member.programmeActiveDays;
+  const clamped = storedDays > elapsedDays;
+  let activeDays = clamped ? elapsedDays : storedDays;
+  let countedOn = anchorReset || clamped ? null : member.activeDaysCountedOn;
   let incremented = false;
   if (!programme.isPaused && countedOn !== todayYmd) {
     activeDays += 1;
@@ -129,6 +150,7 @@ export function planEmail6(
     anchorMembershipId: programme.membershipId,
     incremented,
     anchorReset,
+    clamped,
     midpointDays,
     ceilingDays,
   };
