@@ -4,7 +4,7 @@ import { useId, useRef, useState } from "react";
 import { Loader2, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn, SITE } from "@/lib/utils";
 import { track } from "@/lib/analytics";
-import { metaTrack } from "@/lib/meta-pixel";
+import { metaIdentify, metaTrack } from "@/lib/meta-pixel";
 
 type FieldKey = "firstName" | "email" | "phone";
 type FieldErrors = Partial<Record<FieldKey, string>>;
@@ -115,6 +115,13 @@ export function LeadForm({
       track("lead_submitted", { source });
       // Same conversion, reported to Meta so ad delivery can optimise for it.
       // Standard event name, because custom ones cannot be optimised towards.
+      // Identify first: advanced matching has to be attached before the event,
+      // and `data` is read here rather than after form.reset() below clears it.
+      metaIdentify({
+        em: typeof data.email === "string" ? data.email : undefined,
+        ph: typeof data.phone === "string" ? data.phone : undefined,
+        fn: typeof data.firstName === "string" ? data.firstName : undefined,
+      });
       metaTrack("Lead", { content_name: source });
       form.reset();
       setEmailSuggestion(null);
