@@ -38,6 +38,17 @@ test("lead form on /contact submits successfully and shows the success state", a
     "API should report testMode:true so we know Notion + Resend were skipped"
   ).toBe(true);
 
+  // The conversion is reported twice, by the browser pixel and by the server
+  // through the Conversions API, and Meta only collapses those two into one
+  // enquiry if they share an id. If the form ever stops sending it, the two
+  // paths silently start double-counting every lead, which no other check here
+  // would notice.
+  const sent = JSON.parse(response.request().postData() ?? "{}");
+  expect(
+    typeof sent.eventId === "string" && sent.eventId.length > 0,
+    "form should send an eventId so the pixel and the Conversions API deduplicate"
+  ).toBe(true);
+
   // The form should swap to the success state.
   await expect(page.getByText(/Thanks/i).first()).toBeVisible({ timeout: 5000 });
 });

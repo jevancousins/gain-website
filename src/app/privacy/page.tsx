@@ -86,7 +86,7 @@ export default function PrivacyPage() {
             </p>
             {metaPixelEnabled ? (
               <p className="mt-4">
-                We also use the Meta pixel, which is advertising technology provided by Meta Platforms Ireland Limited. It sets a cookie and tells Meta when you visit our website and when you send us an enquiry, so we can measure how well our Facebook and Instagram adverts work and show them to people like you. It does not receive your name, and we do not use it to make decisions about you. You can control this through your Facebook and Instagram ad settings, through your browser&rsquo;s cookie controls, or by using a tracking blocker.
+                We also use Meta advertising technology, provided by Meta Platforms Ireland Limited, to measure how well our Facebook and Instagram adverts work and to show them to people like you. It sets a cookie and tells Meta when you visit our website and when you send us an enquiry. When you send an enquiry, your name, email address and phone number are also sent to Meta from our own server in scrambled (hashed) form, so that Meta can recognise the enquiry as yours if you have a Meta account, and so that this still works if your browser blocks the cookie. We never send Meta these details in readable form, and we do not use any of it to make decisions about you. You can control this through your Facebook and Instagram ad settings, through your browser&rsquo;s cookie controls, or by using a tracking blocker.
               </p>
             ) : null}
             <p className="mt-4">
