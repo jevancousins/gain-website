@@ -87,12 +87,26 @@ declare global {
  * Fire a standard Meta event. Client-only and best-effort: it no-ops when the
  * pixel is not configured or the script has not loaded (ad blockers, offline),
  * and never throws, so a tracking failure can never break the UI.
+ *
+ * Pass `eventID` for anything the server also reports through the Conversions
+ * API. It is Meta's deduplication key: the same conversion arriving twice with
+ * one id is counted once, which is what lets both paths run without either
+ * inflating the numbers. Send an event with no id from both sides and it counts
+ * twice; send it from one side only and it is lost whenever that side fails.
  */
-export function metaTrack(event: string, params?: FbqParams) {
+export function metaTrack(
+  event: string,
+  params?: FbqParams,
+  options?: { eventID?: string },
+) {
   if (typeof window === "undefined") return;
   if (!META_PIXEL_ID) return;
   try {
-    window.fbq?.("track", event, params);
+    if (options?.eventID) {
+      window.fbq?.("track", event, params, { eventID: options.eventID });
+    } else {
+      window.fbq?.("track", event, params);
+    }
   } catch {
     // tracking is best-effort; swallow any error
   }

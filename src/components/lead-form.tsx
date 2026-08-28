@@ -85,11 +85,17 @@ export function LeadForm({
     // statically-rendered pages.
     const ad = new URLSearchParams(window.location.search).get("ad") ?? undefined;
 
+    // One id for one conversion, generated here and sent BOTH to Meta's pixel
+    // below and to /api/lead, which reports the same Lead through the
+    // Conversions API. Meta deduplicates on it, so the two reports of one
+    // enquiry are counted once and either path can fail without losing it.
+    const eventId = crypto.randomUUID();
+
     try {
       const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...data, source, ad }),
+        body: JSON.stringify({ ...data, source, ad, eventId }),
       });
 
       if (!res.ok) {
@@ -122,7 +128,7 @@ export function LeadForm({
         ph: typeof data.phone === "string" ? data.phone : undefined,
         fn: typeof data.firstName === "string" ? data.firstName : undefined,
       });
-      metaTrack("Lead", { content_name: source });
+      metaTrack("Lead", { content_name: source }, { eventID: eventId });
       form.reset();
       setEmailSuggestion(null);
     } catch {
