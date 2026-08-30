@@ -157,10 +157,24 @@ export async function POST(request: Request) {
 
   const tasks: Array<{ name: string; promise: Promise<void> }> = [];
 
+  // Resolves true when the lead reached the Leads board, false when the write
+  // was attempted and failed, null when there is no board to write to (dev).
+  // The owner notification waits on this so it can say which happened: a
+  // failure used to be console.error'd and swallowed, leaving the enquiry in
+  // Hallum's inbox and nowhere else, with nothing in the email to say so.
+  let savedToBoard: Promise<boolean | null> = Promise.resolve(null);
+
   const notionToken = process.env.NOTION_TOKEN;
   const notionDbId = process.env.NOTION_LEADS_DB_ID;
   if (notionToken && notionDbId) {
-    tasks.push({ name: "notion", promise: writeLeadToNotion(lead, notionToken, notionDbId) });
+    const write = writeLeadToNotion(lead, notionToken, notionDbId);
+    tasks.push({ name: "notion", promise: write });
+    // Both handlers are supplied, so this derived promise never rejects and the
+    // original rejection is still reported by the allSettled pass below.
+    savedToBoard = write.then(
+      () => true,
+      () => false,
+    );
   } else if (process.env.NODE_ENV !== "production") {
     tasks.push({ name: "jsonl", promise: writeLeadToJsonl(lead) });
   } else {
@@ -187,10 +201,16 @@ export async function POST(request: Request) {
     // Notify Hallum the instant an enquiry lands so he can call back fast.
     // Reaches his inbox on laptop and phone; reply-to is set to the lead's
     // own address so he can respond to them directly from the notification.
+    // Sent after the Notion write settles rather than alongside it, so the
+    // email can carry whether the lead is on the board. That costs one write's
+    // latency and buys the difference between a lost lead and a recoverable
+    // one: this email holds every detail needed to re-enter it by hand.
     if (notifyEmail) {
       tasks.push({
         name: "notify",
-        promise: sendOwnerNotificationEmail(lead, resendKey, fromEmail, notifyEmail),
+        promise: savedToBoard.then((saved) =>
+          sendOwnerNotificationEmail(lead, resendKey, fromEmail, notifyEmail, saved),
+        ),
       });
     }
   }
@@ -444,7 +464,15 @@ async function sendOwnerNotificationEmail(
   apiKey: string,
   from: string,
   to: string,
+  /**
+   * Did the enquiry reach the Leads board? false means the write was attempted
+   * and failed, so this email is the only copy of the lead that exists and the
+   * body says so. null means there was no board configured to write to, which
+   * is normal in dev and never worth alarming about.
+   */
+  savedToBoard: boolean | null = null,
 ) {
+  const lostFromBoard = savedToBoard === false;
   const safeName = escapeHtml(lead.firstName);
   const safeEmail = escapeHtml(lead.email);
   const safePhone = escapeHtml(lead.phoneRaw);
@@ -461,6 +489,12 @@ async function sendOwnerNotificationEmail(
 
   const textLines = [
     `New enquiry from ${lead.firstName}`,
+    ...(lostFromBoard
+      ? [
+          "",
+          "⚠ This enquiry did NOT save to the Leads board in Notion. This email is the only record of it — add it to the board by hand, or just reply now so it is not lost.",
+        ]
+      : []),
     ...(lead.emailSuspect
       ? [
           "",
@@ -491,10 +525,18 @@ async function sendOwnerNotificationEmail(
     ? `<p style="background:#fff4ec; border:1px solid #FC832C; color:#0a0a0a; padding:10px 12px; border-radius:6px; font-size:13px; margin:0 0 16px;"><strong>Check this email address.</strong> Its domain doesn&rsquo;t accept mail, so the confirmation may have bounced &mdash; call ${safeName} rather than relying on email.</p>`
     : "";
 
+  // Deliberately louder than the email-suspect notice, and placed above it: a
+  // lead missing from the board is invisible everywhere else, so this email is
+  // the last chance to catch it.
+  const lostHtml = lostFromBoard
+    ? `<p style="background:#fdecec; border:2px solid #c0392b; color:#0a0a0a; padding:12px 14px; border-radius:6px; font-size:13px; margin:0 0 16px;"><strong>This enquiry did not save to the Leads board.</strong> This email is the only record of it. Add ${safeName} to Notion by hand, or reply now so the enquiry isn&rsquo;t lost.</p>`
+    : "";
+
   const html = `<!doctype html>
 <html>
 <head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0a0a0a; line-height: 1.6; max-width: 480px; margin: 0 auto; padding: 24px;">
+${lostHtml}
 ${warningHtml}
 <p style="font-weight:700; font-size:16px; margin-bottom:16px;">New enquiry from ${safeName}</p>
 <table style="width:100%; border-collapse:collapse; font-size:14px;">
