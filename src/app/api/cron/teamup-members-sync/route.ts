@@ -1,5 +1,6 @@
 import { listAllCustomers } from "@/lib/teamup-customers";
 import { upsertCustomers } from "@/lib/notion-members";
+import { wantsDryRun } from "@/lib/cron-dry-run";
 
 export async function GET(request: Request) {
   // Two valid gate values so manual curl (TEAMUP_DIAG_KEY) and Vercel Cron
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
     return Response.json({ error: "not found" }, { status: 404 });
   }
 
-  const dryRun = ["1", "true"].includes(url.searchParams.get("dryRun") ?? "");
+  const dryRun = wantsDryRun(url);
 
   const startedAt = Date.now();
   try {

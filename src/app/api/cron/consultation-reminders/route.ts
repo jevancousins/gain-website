@@ -8,6 +8,7 @@ import {
   markLeadConsultationBooked,
   markLeadConsultationCancelled,
 } from "@/lib/notion-leads";
+import { wantsDryRun } from "@/lib/cron-dry-run";
 
 /**
  * Sends a "your consultation is tomorrow" reminder for Cal.com bookings, gated
@@ -78,7 +79,7 @@ export async function GET(request: Request) {
   const fromEmail = process.env.LEAD_FROM_EMAIL;
 
   const url = new URL(request.url);
-  const dryRun = url.searchParams.get("dryRun") === "true";
+  const dryRun = wantsDryRun(url);
   const now = new Date();
   const targetDate = tomorrowYmd(now, TZ);
 
