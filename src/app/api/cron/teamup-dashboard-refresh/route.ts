@@ -1,4 +1,5 @@
 import { buildDashboardMetrics, refreshDashboardPage } from "@/lib/notion-dashboard";
+import { wantsDryRun } from "@/lib/cron-dry-run";
 
 function gate(request: Request): boolean {
   const expected = [process.env.TEAMUP_DIAG_KEY, process.env.CRON_SECRET].filter(
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
   if (!gate(request)) return Response.json({ error: "not found" }, { status: 404 });
 
   const url = new URL(request.url);
-  const dryRun = url.searchParams.get("dryRun") === "true";
+  const dryRun = wantsDryRun(url);
 
   const startedAt = Date.now();
   try {

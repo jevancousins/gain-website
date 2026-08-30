@@ -1,4 +1,5 @@
 import { findAtRiskMembers, postRetentionDigestPage } from "@/lib/notion-retention";
+import { wantsDryRun } from "@/lib/cron-dry-run";
 
 const DEFAULT_THRESHOLD_DAYS = 14;
 const DEFAULT_LAPSED_AFTER_DAYS = 60;
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const thresholdDays = Number(url.searchParams.get("days") ?? DEFAULT_THRESHOLD_DAYS);
   const lapsedAfterDays = Number(url.searchParams.get("lapsedAfter") ?? DEFAULT_LAPSED_AFTER_DAYS);
-  const dryRun = url.searchParams.get("dryRun") === "true";
+  const dryRun = wantsDryRun(url);
 
   const parentPageId = process.env.RETENTION_DIGEST_PARENT_PAGE_ID;
   if (!dryRun && !parentPageId) {

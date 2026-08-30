@@ -20,6 +20,7 @@ import {
 } from "@/lib/onboarding-emails";
 import { planEmail6, type Email6Plan } from "@/lib/mid-programme-checkin";
 import { planDripEmail, type DripPlan } from "@/lib/onboarding-drip-plan";
+import { wantsDryRun } from "@/lib/cron-dry-run";
 
 /**
  * Daily member-onboarding: two passes.
@@ -53,7 +54,7 @@ import { planDripEmail, type DripPlan } from "@/lib/onboarding-drip-plan";
  * Runs at 07:00 UTC, after teamup-members-sync (06:00) and resend-contacts-sync
  * (06:30). Timezone Europe/London; day math is YMD compares.
  *
- * Manual check: GET /api/cron/onboarding-drip?key=<CRON_SECRET>&dryRun=true
+ * Manual check: GET /api/cron/onboarding-drip?key=<CRON_SECRET>&dryRun (any value but false/0/no)
  */
 
 const TZ = "Europe/London";
@@ -114,7 +115,7 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const dryRun = url.searchParams.get("dryRun") === "true";
+  const dryRun = wantsDryRun(url);
   const resendKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.LEAD_FROM_EMAIL;
 

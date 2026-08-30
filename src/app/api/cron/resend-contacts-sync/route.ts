@@ -4,6 +4,7 @@ import {
   mergeMarketingContacts,
 } from "@/lib/notion-marketing";
 import { upsertResendMarketingContact } from "@/lib/resend-contacts";
+import { wantsDryRun } from "@/lib/cron-dry-run";
 
 type SyncScope = "all" | "members" | "leads";
 
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const dryRun = ["1", "true"].includes(url.searchParams.get("dryRun") ?? "");
+  const dryRun = wantsDryRun(url);
   const scopeParam = url.searchParams.get("scope") ?? "all";
   const scope: SyncScope = ["all", "members", "leads"].includes(scopeParam)
     ? (scopeParam as SyncScope)
