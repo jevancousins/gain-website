@@ -132,6 +132,34 @@ test("/6-week: the lower form actually posts to /api/lead", async ({ page }) => 
 
   // The honeypot must be empty, or the server silently drops a real enquiry.
   const sent = JSON.parse(response.request().postData() ?? "{}");
-  expect(sent.website ?? "", "honeypot must not be populated by a real fill").toBe("");
+  expect(sent.hp_field ?? "", "honeypot must not be populated by a real fill").toBe("");
   expect(sent.firstName).toBe("QA");
+});
+
+test("the honeypot field carries no name autofill would recognise", async ({ page }) => {
+  // Headless Chromium has no autofill or password manager, so no end-to-end
+  // test can catch a real browser filling the honeypot and silently dropping
+  // the enquiry. What CAN be asserted is the precondition: the field must not
+  // be named anything an autofill heuristic matches. "website", "url",
+  // "company" and friends are all recognised tokens; that is why the field was
+  // renamed, and this test is what stops it drifting back.
+  const AUTOFILLABLE = [
+    "website", "url", "homepage", "company", "organization", "organisation",
+    "address", "name", "nickname", "title", "username", "tel", "phone", "email",
+  ];
+
+  await page.goto("/6-week");
+  const hidden = page.locator('form input[tabindex="-1"]');
+  const count = await hidden.count();
+  expect(count, "every form should still render its honeypot").toBeGreaterThan(0);
+
+  for (let i = 0; i < count; i++) {
+    const name = (await hidden.nth(i).getAttribute("name")) ?? "";
+    expect(name, "honeypot must be named").not.toBe("");
+    expect(
+      AUTOFILLABLE.includes(name.toLowerCase()),
+      `honeypot named "${name}" is a token browser autofill recognises, which silently drops real enquiries`,
+    ).toBe(false);
+    expect(await hidden.nth(i).getAttribute("autocomplete")).toBe("off");
+  }
 });

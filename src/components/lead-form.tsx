@@ -302,16 +302,24 @@ export function LeadForm({
       {/*
         Honeypot: invisible to real people (off-screen, not announced to screen
         readers, not reachable by keyboard) but present in the DOM, so naive form
-        bots fill it. A non-empty "website" value is dropped server-side in
-        /api/lead. Off-screen rather than display:none because some bots skip
-        display:none fields. Not a real field, so autoComplete is off to keep
-        password managers from filling it and dropping a genuine enquiry.
+        bots fill it. A non-empty value is dropped server-side in /api/lead.
+        Off-screen rather than display:none because some bots skip display:none
+        fields.
+
+        THE NAME IS DELIBERATELY MEANINGLESS. It used to be "website", which is
+        a token Chrome and Safari autofill heuristics recognise; autoComplete
+        ="off" alone does not stop them, and password managers ignore it
+        outright. An autofilled honeypot silently drops a genuine enquiry — no
+        Notion row, no confirmation, no notification, no error — which is the
+        worst failure this form has. "hp_field" matches no autofill heuristic,
+        so the field is only ever filled by something filling every input it
+        finds, which is exactly what we want to catch.
       */}
       <div aria-hidden="true" className="absolute left-[-9999px] top-0 h-0 w-0 overflow-hidden">
-        <label htmlFor={fid("website")}>Leave this field blank</label>
+        <label htmlFor={fid("hp_field")}>Leave this field blank</label>
         <input
-          id={fid("website")}
-          name="website"
+          id={fid("hp_field")}
+          name="hp_field"
           type="text"
           tabIndex={-1}
           autoComplete="off"
