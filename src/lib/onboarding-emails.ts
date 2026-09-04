@@ -11,18 +11,30 @@
  */
 
 // Induction booking lives in TeamUp as the "Gain Programme Induction" appointment
-// type (members-only, 45 min, Hallum; customer-facing id 310928). This is the
-// DIRECT booking link, wrapped in TeamUp's start/?next= sign-in redirect: a
-// logged-out click (common from email) lands on the branded sign-in page and is
-// then taken straight to the induction, whereas a raw /c/appointment_types/310928
-// deep link errors when the click comes in logged-out.
+// type (members-only, Hallum; customer-facing id 310928, read the duration from
+// TeamUp as it has changed). Link to the customer-site APPOINTMENTS TAB, not to
+// the type, and never wrap it in a redirect.
 //
-// The welcome email (Resend template gain-onboarding-1-welcome) now hardcodes
-// this URL directly, since it is static and the Resend Automation that sends the
-// welcome no longer passes it as a variable. This constant is the canonical value
-// and documentation; keep it and the template in sync.
+// Corrected 3 Sept 2026, and this is the whole reason no member had ever booked
+// an induction. The previous value wrapped the deep link in TeamUp's
+// `/start/?next=...`. `/start/` is TeamUp's join-the-business wizard, not a
+// sign-in redirect: it discards `next` outright, so a click from the email
+// landed on a sign-up flow asking whether you were enrolling a child or other
+// dependent. Karen, Melanie and Paul each received that email and not one
+// reached a booking screen; every induction that has happened, Hallum arranged
+// by hand in his own diary.
+//
+// The bare `/c/appointment_types/310928` deep link is not the fix either: it
+// errors for anyone whose membership does not grant that type. The tab respects
+// the same membership gate and simply shows the member what they can book.
+//
+// The welcome email is TeamUp's "When a membership is purchased" notification
+// (since 10 Aug 2026), which hardcodes this URL in its induction button. Nothing
+// in this repo sends it, so this constant is documentation only: if you change
+// it, change the TeamUp notification, the Email Library row and gain-context.md
+// in the same run, or the next reader restores the broken URL from here.
 export const INDUCTION_BOOKING_URL =
-  "https://goteamup.com/p/8554886-gain-strength-therapy/start/?next=/p/8554886-gain-strength-therapy/c/appointment_types/310928";
+  "https://goteamup.com/p/8554886-gain-strength-therapy/c/appointment_types/";
 
 /**
  * Drip emailIndex (1-6) -> Resend template alias.
