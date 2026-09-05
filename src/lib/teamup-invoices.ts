@@ -34,7 +34,17 @@ export async function fetchMonthlyRevenue(maxPages = 20): Promise<MonthlyRevenue
 
   // Paid invoices contribute to gross revenue.
   await walkInvoices("paid", maxPages, (inv) => {
-    const month = inv.created_at.slice(0, 7); // YYYY-MM
+    // Bucket by DUE date, not creation date. TeamUp pre-creates membership
+    // invoices long before they are collected: across the 447 paid invoices on
+    // this account the median gap is 49 days, p90 168, max 214. Bucketing by
+    // created_at therefore files August's money under March, which made the
+    // Live Dashboard read 2026-08 as £205 against the £1,780.50 actually
+    // collected, and inflated March to £2,760 against £1,512 genuinely due.
+    // The page then showed revenue falling off a cliff on a gym whose takings
+    // were flat, and contradicted the £1,682 MRR printed beside it.
+    // due_date is nullable, so fall back to created_at rather than dropping the
+    // invoice: a bucketed-slightly-wrong invoice beats a missing one.
+    const month = (inv.due_date ?? inv.created_at).slice(0, 7); // YYYY-MM
     const amount = Number(inv.total_amount_due.decimal) || 0;
     const b = buckets.get(month) ?? { paid: 0, refunds: 0, count: 0 };
     // TeamUp returns credit notes with a NEGATIVE decimal (verified against the
