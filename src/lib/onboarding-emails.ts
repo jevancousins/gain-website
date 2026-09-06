@@ -86,18 +86,25 @@ export const DRIP_SCHEDULE_DAYS: Record<number, number> = {
 
 /**
  * Highest drip email the cron will send. Email 5 links to
- * /media/gain-nutrition-guide.pdf, which was missing from 7 Aug 2026 and gated
- * the step off: sending it would have emailed members a dead link.
+ * /media/gain-nutrition-guide.pdf, which 404d from 7 Aug 2026 until it was
+ * committed on 6 Sept. The file now serves 200, so the DEAD LINK is fixed.
  *
- * The guide was committed to public/media/ on 6 Sept 2026 and serves 200, so the
- * ceiling is now 5. The PDF had in fact been finished since 22 July and was
- * sitting outside the repo, which is why the gate outlived the problem.
+ * The ceiling stays at 4 anyway, because the dead link was never the only gate.
+ * Jevan's standing instruction of 12 Aug 2026, recorded on the "Onboarding 5 -
+ * Nutrition guide" row in the Notion Email Library, is that no nutrition email
+ * goes out until the guide is FINALISED, meaning he or Hallum has looked at the
+ * eight pages and said yes. That approval has never been given.
  *
- * Raising this does not blast the back catalogue: planDripEmail marks anything
- * more than DRIP_MAX_LATE_DAYS past its due day as stale rather than sending it,
- * so only members inside the day 14 to day 28 window receive it.
+ * This was briefly raised to 5 on 6 Sept and reverted the same morning, before
+ * the next 07:00 cron fired and before any member received it. Hosting the PDF
+ * and approving its contents are two different gates, and only the first is
+ * mechanical.
+ *
+ * RAISE THIS TO 5 on that approval, and not on the URL alone. Nothing else needs
+ * to change: planDripEmail marks anything more than DRIP_MAX_LATE_DAYS past its
+ * due day as stale, so only members inside the day 14 to day 28 window get it.
  */
-export const DRIP_MAX_SENDABLE_INDEX = 5;
+export const DRIP_MAX_SENDABLE_INDEX = 4;
 
 /**
  * Lowest drip email the cron will send. Email 1 (welcome) is RETIRED as of
