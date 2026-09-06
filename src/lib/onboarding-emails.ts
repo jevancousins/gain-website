@@ -86,14 +86,18 @@ export const DRIP_SCHEDULE_DAYS: Record<number, number> = {
 
 /**
  * Highest drip email the cron will send. Email 5 links to
- * /media/gain-nutrition-guide.pdf, which does not exist yet (404 as of 7 Aug
- * 2026) — the missing nutrition doc Hallum has flagged since 18 July. Sending it
- * would email members a dead link, so 5 stays gated.
+ * /media/gain-nutrition-guide.pdf, which was missing from 7 Aug 2026 and gated
+ * the step off: sending it would have emailed members a dead link.
  *
- * RAISE THIS TO 5 once the nutrition guide is committed to public/media/ and
- * serves 200. Nothing else needs to change.
+ * The guide was committed to public/media/ on 6 Sept 2026 and serves 200, so the
+ * ceiling is now 5. The PDF had in fact been finished since 22 July and was
+ * sitting outside the repo, which is why the gate outlived the problem.
+ *
+ * Raising this does not blast the back catalogue: planDripEmail marks anything
+ * more than DRIP_MAX_LATE_DAYS past its due day as stale rather than sending it,
+ * so only members inside the day 14 to day 28 window receive it.
  */
-export const DRIP_MAX_SENDABLE_INDEX = 4;
+export const DRIP_MAX_SENDABLE_INDEX = 5;
 
 /**
  * Lowest drip email the cron will send. Email 1 (welcome) is RETIRED as of
