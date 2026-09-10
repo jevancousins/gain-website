@@ -29,7 +29,7 @@ Visit <http://localhost:3000>.
 | --- | --- | --- |
 | `RESEND_API_KEY` | server | Sends the lead confirmation, onboarding and consultation-reminder emails via published Resend templates. |
 | `LEAD_FROM_EMAIL` | server | From address for those emails (a verified `gainstrengththerapy.com` sender). |
-| `LEAD_NOTIFY_EMAIL` | server | Recipient of the internal "new enquiry" alert. |
+| `LEAD_NOTIFY_EMAIL` | server | Recipients of the internal "new enquiry" alert, comma-separated. Holds the business mailbox and Hallum's Gmail, which is the one his phone alerts him on. |
 | `NOTION_TOKEN` + `NOTION_LEADS_DB_ID` | server | Writes each lead into the Notion leads database. |
 | `CRON_SECRET` | server | Authenticates Vercel cron requests (`?key=` or Bearer). |
 | `ANTHROPIC_API_KEY` | server | Optional: personalised email opener when a lead leaves a message (Claude Haiku). |
@@ -87,7 +87,7 @@ On a valid submission it, in parallel:
 
 - **writes the lead to Notion** (`NOTION_LEADS_DB_ID`), with newsletter-consent metadata when opted in;
 - **sends the lead a confirmation email** via the published Resend template `gain-lead-confirmation-enquiry-form`;
-- **alerts Hallum** with an internal "new enquiry" notification (`LEAD_NOTIFY_EMAIL`), reply-to set to the lead so he can respond directly;
+- **alerts Hallum** with an internal "new enquiry" notification, sent to every address on `LEAD_NOTIFY_EMAIL`, reply-to set to the lead so he can respond directly;
 - **upserts the lead as a Resend marketing contact** for the newsletter audience.
 
 The request succeeds as long as at least one of these lands. In development, when Notion is not configured, leads are appended to `.data/leads.jsonl` for easy inspection.
