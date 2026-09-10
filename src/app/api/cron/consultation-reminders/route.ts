@@ -9,6 +9,7 @@ import {
   markLeadConsultationCancelled,
 } from "@/lib/notion-leads";
 import { wantsDryRun } from "@/lib/cron-dry-run";
+import { ownerNotifyRecipients } from "@/lib/email-shared";
 
 /**
  * Sends a "your consultation is tomorrow" reminder for Cal.com bookings, gated
@@ -335,8 +336,8 @@ async function sendCancellationAlert(
   apiKey: string,
   from: string,
 ) {
-  const notify = process.env.LEAD_NOTIFY_EMAIL;
-  if (!notify) return;
+  const notify = ownerNotifyRecipients();
+  if (notify.length === 0) return;
 
   const when = new Intl.DateTimeFormat("en-GB", {
     timeZone: TZ,
@@ -354,7 +355,7 @@ async function sendCancellationAlert(
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from,
-      to: [notify],
+      to: notify,
       subject: `Consultation cancelled: ${attendee.name} — ${when}`,
       html:
         `<p style="font-weight:700;font-size:16px;margin-bottom:16px;">` +

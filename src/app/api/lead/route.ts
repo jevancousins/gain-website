@@ -3,7 +3,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { resolveMx } from "node:dns/promises";
 import { NEWSLETTER_CONSENT_TEXT_V1 } from "@/lib/utils";
-import { escapeHtml } from "@/lib/email-shared";
+import { escapeHtml, ownerNotifyRecipients } from "@/lib/email-shared";
 import { upsertResendMarketingContact } from "@/lib/resend-contacts";
 import { metaCapiConfigured, sendMetaCapiLead } from "@/lib/meta-capi";
 
@@ -215,7 +215,7 @@ export async function POST(request: Request) {
 
   const resendKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.LEAD_FROM_EMAIL;
-  const notifyEmail = process.env.LEAD_NOTIFY_EMAIL;
+  const notifyRecipients = ownerNotifyRecipients();
   if (resendKey && fromEmail) {
     tasks.push({
       name: "email",
@@ -231,17 +231,18 @@ export async function POST(request: Request) {
       }).then(() => undefined),
     });
     // Notify Hallum the instant an enquiry lands so he can call back fast.
-    // Reaches his inbox on laptop and phone; reply-to is set to the lead's
-    // own address so he can respond to them directly from the notification.
+    // Goes to every address on LEAD_NOTIFY_EMAIL, which is the business mailbox
+    // plus the one his phone will actually alert him on; reply-to is set to the
+    // lead's own address so he can respond to them directly from any of them.
     // Sent after the Notion write settles rather than alongside it, so the
     // email can carry whether the lead is on the board. That costs one write's
     // latency and buys the difference between a lost lead and a recoverable
     // one: this email holds every detail needed to re-enter it by hand.
-    if (notifyEmail) {
+    if (notifyRecipients.length > 0) {
       tasks.push({
         name: "notify",
         promise: savedToBoard.then((saved) =>
-          sendOwnerNotificationEmail(lead, resendKey, fromEmail, notifyEmail, saved),
+          sendOwnerNotificationEmail(lead, resendKey, fromEmail, notifyRecipients, saved),
         ),
       });
     }
@@ -495,7 +496,7 @@ async function sendOwnerNotificationEmail(
   lead: Lead,
   apiKey: string,
   from: string,
-  to: string,
+  to: string[],
   /**
    * Did the enquiry reach the Leads board? false means the write was attempted
    * and failed, so this email is the only copy of the lead that exists and the
@@ -592,7 +593,7 @@ ${messageRow}
     body: JSON.stringify({
       from,
       reply_to: lead.email,
-      to: [to],
+      to,
       subject: `New enquiry: ${lead.firstName} — ${lead.phoneRaw}`,
       html,
       text,

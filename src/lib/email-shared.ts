@@ -9,6 +9,27 @@
  * Canonical source for the signature markup: AI for SMBs/gain-email-signature.html.
  */
 
+/**
+ * Who the internal owner alerts go to: the new-enquiry notification and the
+ * consultation-cancellation alert. `LEAD_NOTIFY_EMAIL` is read as a
+ * comma-separated list, so a recipient can be added or removed in Vercel
+ * without a deploy. Bare addresses only: a display name containing a comma
+ * would split in the wrong place.
+ *
+ * Two addresses since 10 September 2026. The business mailbox
+ * (`hallum@gainstrengththerapy.com`, an alias onto `info@`) stays on the list
+ * because a lead's reply lands there. Hallum's personal Gmail sits alongside it
+ * because the iPhone Mail app gives him no notification for the business
+ * mailbox and the Gmail app does: an alert that arrives silently is worth
+ * nothing on a lead that decays in days.
+ */
+export function ownerNotifyRecipients(): string[] {
+  return (process.env.LEAD_NOTIFY_EMAIL ?? "")
+    .split(",")
+    .map((address) => address.trim())
+    .filter(Boolean);
+}
+
 /** Escape user-supplied text before interpolating it into an HTML email body. */
 export function escapeHtml(s: string): string {
   return s
