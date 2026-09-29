@@ -26,6 +26,7 @@ export type LeadConsentFields = {
   unsubscribeReason: string | null;
   status: string | null;
   convertedMemberIds: string[];
+  nextAction: string;
 };
 
 type LeadRow = {
@@ -39,6 +40,7 @@ type LeadRow = {
     "Newsletter Unsubscribe Reason"?: { select?: { name: string } | null };
     Status?: { select?: { name: string } | null };
     "Converted Member"?: { relation?: Array<{ id: string }> };
+    "Next Action"?: { rich_text?: Array<{ plain_text: string }> };
   };
 };
 
@@ -76,6 +78,10 @@ export async function findLeadsByEmail(email: string): Promise<LeadConsentFields
     status: row.properties.Status?.select?.name ?? null,
     convertedMemberIds:
       row.properties["Converted Member"]?.relation?.map((r) => r.id) ?? [],
+    nextAction:
+      row.properties["Next Action"]?.rich_text
+        ?.map((t) => t.plain_text)
+        .join("") ?? "",
   }));
 }
 
@@ -330,4 +336,39 @@ export async function markLeadConverted(
     converted += 1;
   }
   return converted;
+}
+
+// Marker the bounce write-back puts at the head of Next Action. Checked before
+// writing so a replayed webhook, or a second bounce, never stacks the line.
+export const BOUNCE_MARKER = "EMAIL BOUNCED";
+
+/**
+ * A lead whose email bounced has heard nothing from Gain, and until now the
+ * only sign was a Resend log nobody reads (Christine Aldous, 18 Sep 2026).
+ * Prefix the lead's Next Action, which is the column Hallum works from, so he
+ * phones rather than emails. His own Next Action text is kept after the prefix.
+ */
+export async function markLeadEmailBounced(
+  email: string,
+  bouncedAt: Date,
+  reason: string,
+): Promise<number> {
+  const leads = await findLeadsByEmail(email);
+  const day = bouncedAt.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: "Europe/London",
+  });
+  const prefix = `${BOUNCE_MARKER} ${day}: phone, do not email (${reason.slice(0, 120)}).`;
+
+  let updated = 0;
+  for (const lead of leads) {
+    if (lead.nextAction.startsWith(BOUNCE_MARKER)) continue;
+    const content = lead.nextAction ? `${prefix} ${lead.nextAction}` : prefix;
+    await patchNotionPage(lead.pageId, {
+      "Next Action": { rich_text: [{ text: { content: content.slice(0, 2000) } }] },
+    });
+    updated += 1;
+  }
+  return updated;
 }
