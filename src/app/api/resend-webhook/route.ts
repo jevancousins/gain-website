@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   findLeadsByEmail,
   findMembersByEmail,
+  markLeadEmailBounced,
   patchNotionPage,
 } from "@/lib/notion-leads";
 
@@ -14,29 +15,41 @@ type ResendWebhookPayload = {
     email?: string;
     unsubscribed?: boolean;
     unsubscribe_reason?: string;
+    to?: string[];
+    created_at?: string;
+    bounce?: { message?: string; type?: string; subType?: string };
   };
 };
 
+// Svix scheme, which Resend uses: the key is the base64 after "whsec_", the
+// signature is base64 HMAC-SHA256 of "id.timestamp.body", and the header may
+// carry several space-separated "v1,<sig>" entries during a key rotation.
+// The earlier version keyed on the raw string and compared hex, so it could
+// never match; it went unnoticed because the secret is not set in production.
 async function verifySignature(
-  body: string,
-  signatureHeader: string | null,
+  signedContent: string,
+  signatureHeader: string,
 ): Promise<boolean> {
-  if (!RESEND_WEBHOOK_SECRET || !signatureHeader) return false;
+  if (!RESEND_WEBHOOK_SECRET) return false;
 
-  const encoder = new TextEncoder();
+  const secret = RESEND_WEBHOOK_SECRET.startsWith("whsec_")
+    ? Uint8Array.from(atob(RESEND_WEBHOOK_SECRET.slice(6)), (c) => c.charCodeAt(0))
+    : new TextEncoder().encode(RESEND_WEBHOOK_SECRET);
   const key = await crypto.subtle.importKey(
     "raw",
-    encoder.encode(RESEND_WEBHOOK_SECRET),
+    secret,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],
   );
-  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(body));
-  const expected = Array.from(new Uint8Array(signature))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(signedContent),
+  );
+  const expected = btoa(String.fromCharCode(...new Uint8Array(signature)));
 
-  return signatureHeader === expected;
+  return extractSignatures(signatureHeader).includes(expected);
 }
 
 export async function POST(request: Request) {
@@ -58,7 +71,7 @@ export async function POST(request: Request) {
     }
 
     const signedContent = `${svixId}.${svixTimestamp}.${rawBody}`;
-    const valid = await verifySignature(signedContent, extractSignature(svixSignature));
+    const valid = await verifySignature(signedContent, svixSignature);
     if (!valid) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
@@ -72,6 +85,11 @@ export async function POST(request: Request) {
   }
 
   const eventType = payload.type;
+
+  if (eventType === "email.bounced") {
+    return handleBounce(payload);
+  }
+
   const email = payload.data?.email?.toLowerCase();
 
   if (!email) {
@@ -128,11 +146,35 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true, email, event: eventType });
 }
 
-function extractSignature(header: string): string | null {
-  const parts = header.split(" ");
-  for (const part of parts) {
-    const [version, sig] = part.split(",");
-    if (version === "v1" && sig) return sig;
+function extractSignatures(header: string): string[] {
+  return header
+    .split(" ")
+    .map((part) => part.split(","))
+    .filter(([version, sig]) => version === "v1" && sig)
+    .map(([, sig]) => sig);
+}
+
+async function handleBounce(payload: ResendWebhookPayload) {
+  const recipients = (payload.data.to ?? []).map((a) => a.toLowerCase());
+  const bounce = payload.data.bounce;
+  const reason =
+    [bounce?.type, bounce?.message].filter(Boolean).join(": ") || "bounced";
+  const at = payload.data.created_at ? new Date(payload.data.created_at) : new Date();
+
+  let updated = 0;
+  const errors: string[] = [];
+  for (const email of recipients) {
+    try {
+      updated += await markLeadEmailBounced(email, at, reason);
+    } catch (err) {
+      const msg = `bounce ${email}: ${(err as Error).message}`;
+      console.error(`[resend-webhook] ${msg}`);
+      errors.push(msg);
+    }
   }
-  return null;
+
+  if (errors.length > 0) {
+    return NextResponse.json({ ok: false, errors }, { status: 500 });
+  }
+  return NextResponse.json({ ok: true, event: "email.bounced", leadsUpdated: updated });
 }
