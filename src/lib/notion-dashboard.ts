@@ -37,7 +37,7 @@ export type DashboardMetrics = {
   }>;
   monthlyRevenue: Array<{ month: string; net: number; invoiceCount: number }>;
   atRiskCount: number;
-  netLast30Days: number;
+  netLastFullMonth: { month: string; net: number } | null;
   capacity: {
     windowDays: number;
     threshold: number;
@@ -364,9 +364,9 @@ function buildLeadFunnel(leads: LeadRow[]) {
  *    and only otherwise the estimate. A month using the estimate is flagged, so
  *    "we lost money in June" can be told apart from "nobody logged June".
  *
- * Ad spend is added only on estimated months. On a logged month the Marketing
- * category already contains it, and adding Meta's figure on top would
- * double-count.
+ * Ad spend is added unless the month's logged expenses already carry a Marketing
+ * row, where adding Meta's figure on top would double-count. Logged months
+ * usually have none, so skipping every logged month dropped the spend entirely.
  */
 function buildPnl(
   teamupRevenue: Array<{ month: string; net: number }>,
@@ -424,14 +424,16 @@ function buildPnl(
     const fixedCosts = costsAreActual
       ? round2(logged.reduce((sum, c) => sum + c.amount, 0))
       : TOTAL_ESTIMATED_FIXED;
-    const totalCosts = round2(costsAreActual ? fixedCosts : fixedCosts + adSpend);
+    const adsAlreadyLogged = logged.some((c) => /marketing|\bads?\b/i.test(c.item));
+    const adSpendCounted = adsAlreadyLogged ? 0 : adSpend;
+    const totalCosts = round2(fixedCosts + adSpendCounted);
     return {
       month,
       revenue,
       teamupRevenue: round2(teamupNet),
       otherRevenue,
       fixedCosts,
-      adSpend: costsAreActual ? 0 : adSpend,
+      adSpend: adSpendCounted,
       totalCosts,
       netProfit: round2(revenue - totalCosts),
       estimatedUntrackedIncome,
@@ -524,13 +526,10 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     .slice(0, 6)
     .reverse();
 
-  // Net last 30 days: sum revenue rows with date in last 30 days.
-  const cutoff30 = new Date();
-  cutoff30.setUTCDate(cutoff30.getUTCDate() - 30);
-  const cutoffISO = cutoff30.toISOString().slice(0, 10);
-  const netLast30Days = financeRows
-    .filter((r) => r.date >= cutoffISO && r.description.startsWith("TeamUp Revenue"))
-    .reduce((sum, r) => sum + r.amount, 0);
+  // Latest full month, not a rolling window: the TeamUp rows are monthly and
+  // dated at month end, so "last 30 days" caught two whole months and doubled.
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const netLastFullMonth = monthlyRevenue.filter((m) => m.month < thisMonth).at(-1) ?? null;
 
   // At-risk count from membership summaries: members with active membership
   // whose last session is between 14 and 60 days ago. We'll keep this simple
@@ -550,7 +549,9 @@ export async function buildDashboardMetrics(): Promise<DashboardMetrics> {
     programmeBreakdown,
     monthlyRevenue,
     atRiskCount,
-    netLast30Days: round2(netLast30Days),
+    netLastFullMonth: netLastFullMonth
+      ? { month: netLastFullMonth.month, net: round2(netLastFullMonth.net) }
+      : null,
     capacity: {
       windowDays: expansionTriggers.windowDays,
       threshold: expansionTriggers.threshold,
@@ -605,10 +606,14 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
       "💷",
       `${sym}${m.recurringMrr.toFixed(2)} MRR from ${m.recurringMembers} recurring member${m.recurringMembers === 1 ? "" : "s"} (avg ${sym}${m.recurringMembers > 0 ? (m.recurringMrr / m.recurringMembers).toFixed(0) : "0"}/mo)`,
     ),
-    callout(
-      "📈",
-      `${sym}${m.netLast30Days.toFixed(2)} net revenue in the last 30 days (includes one-off programme purchases)`,
-    ),
+    ...(m.netLastFullMonth
+      ? [
+          callout(
+            "📈",
+            `${sym}${m.netLastFullMonth.net.toFixed(2)} TeamUp net revenue in ${m.netLastFullMonth.month} (includes one-off programme purchases; PT and rental are in the P&L below)`,
+          ),
+        ]
+      : []),
     callout(
       "🎫",
       `${m.prepaidActivePeople} ${m.prepaidActivePeople === 1 ? "person is" : "people are"} on a pre-paid programme right now (one-off revenue, no MRR contribution)`,
@@ -768,7 +773,7 @@ function renderDashboardBlocks(m: DashboardMetrics): unknown[] {
   for (const c of p.fixedBreakdown) {
     blocks.push(bullet(`${c.item}: ${sym}${c.amount}`));
   }
-  if (!p.costsAreActual) {
+  if (p.adSpend > 0) {
     blocks.push(bullet(`Meta Ads (variable): ${sym}${p.adSpend.toFixed(2)}`));
   }
   blocks.push(bullet(`Total costs: ${sym}${p.totalCosts.toFixed(0)}`));
