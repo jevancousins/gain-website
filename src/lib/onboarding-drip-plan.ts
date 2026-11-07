@@ -217,3 +217,56 @@ export function planDripEmail(
   }
   return null;
 }
+
+
+/** Lower-cased, whitespace-collapsed full name; "" when there is no usable name. */
+export function personKey(fullName: string): string {
+  const k = fullName.trim().toLowerCase().replace(/\s+/g, " ");
+  // A first name alone is too weak to join two people on.
+  return k.includes(" ") ? k : "";
+}
+
+/**
+ * Share the sequence sent-flags between Members rows that are the same person.
+ *
+ * WHY: dedup is one "Onboarding Email N Sent" checkbox per Members row, and a row
+ * is one TeamUp customer. A member who finishes the 6-week programme and comes
+ * back on a monthly membership under a NEW TeamUp profile (a new email address)
+ * gets a fresh row with every flag clear, so the drip treats them as a stranger
+ * and sends the mobility guide and the week-1 check-in a second time. Lynda
+ * Sorrell-Fleet: programme from 14 Sept 2026 as lyndasorrellflee@aol.com, monthly
+ * from 29 Oct as livvyfitcoaching@outlook.com, emails 3 and 4 re-sent on 4 and 5
+ * Nov. Hallum spotted it on 6 Nov.
+ *
+ * The join is the full name, case- and spacing-insensitive, because nothing else
+ * survives a new profile. The cost of a false join (two different people with an
+ * identical full name) is a skipped guide; the cost of no join is a duplicate the
+ * member notices. Only flags are shared: a returning member still gets any step
+ * neither row has had.
+ */
+export function shareSentAcrossSamePerson<T extends { email: string; fullName: string; sent: boolean[] }>(
+  members: T[],
+): { members: T[]; joined: string[] } {
+  const byKey = new Map<string, boolean[]>();
+  const counts = new Map<string, number>();
+  for (const m of members) {
+    const k = personKey(m.fullName);
+    if (!k) continue;
+    counts.set(k, (counts.get(k) ?? 0) + 1);
+    const acc = byKey.get(k) ?? m.sent.map(() => false);
+    m.sent.forEach((v, i) => {
+      if (v) acc[i] = true;
+    });
+    byKey.set(k, acc);
+  }
+  const joined: string[] = [];
+  const out = members.map((m) => {
+    const k = personKey(m.fullName);
+    if (!k || (counts.get(k) ?? 0) < 2) return m;
+    const shared = byKey.get(k)!;
+    const sent = m.sent.map((v, i) => v || Boolean(shared[i]));
+    if (sent.some((v, i) => v !== m.sent[i])) joined.push(m.email);
+    return { ...m, sent };
+  });
+  return { members: out, joined };
+}

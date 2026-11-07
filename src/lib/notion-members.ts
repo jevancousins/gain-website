@@ -346,6 +346,8 @@ export type OnboardingMember = {
   pageId: string;
   email: string;
   firstName: string;
+  /** Full Name as written in Notion; the drip's same-person join key across TeamUp profiles. */
+  fullName: string;
   joined: string | null; // YYYY-MM-DD
   /**
    * Most recent attended session, YYYY-MM-DD, or null if they have never
@@ -457,6 +459,7 @@ export async function loadOnboardingMembers(): Promise<OnboardingMember[]> {
         pageId: row.id,
         email,
         firstName: name.trim().split(/\s+/)[0] || "",
+        fullName: name.trim(),
         joined: row.properties.Joined?.date?.start ?? null,
         lastSession: row.properties["Last Session"]?.date?.start ?? null,
         teamupId: row.properties["TeamUp ID"]?.number ?? null,
