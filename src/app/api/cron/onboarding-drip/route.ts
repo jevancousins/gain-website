@@ -19,7 +19,11 @@ import {
   MID_PROGRAMME_EMAIL_INDEX,
 } from "@/lib/onboarding-emails";
 import { planEmail6, type Email6Plan } from "@/lib/mid-programme-checkin";
-import { planDripEmail, type DripPlan } from "@/lib/onboarding-drip-plan";
+import {
+  planDripEmail,
+  shareSentAcrossSamePerson,
+  type DripPlan,
+} from "@/lib/onboarding-drip-plan";
 import { wantsDryRun } from "@/lib/cron-dry-run";
 
 /**
@@ -137,10 +141,13 @@ export async function GET(request: Request) {
     }
 
     // ---- Pass 1: sequence emails 1-5 ----
+    // A returning member on a new TeamUp profile has a second Members row with
+    // clear flags; share flags by person so they are not sent the sequence twice.
+    const { members: seqMembers, joined: sharedHistory } = shareSentAcrossSamePerson(members);
     const plans: DripPlan[] = [];
     let noJoinDate = 0;
     let preStart = 0;
-    for (const m of members) {
+    for (const m of seqMembers) {
       if (!m.joined) {
         noJoinDate += 1;
         continue;
@@ -193,6 +200,7 @@ export async function GET(request: Request) {
         sequence: {
           noJoinDate,
           preStart,
+          sharedHistory,
           // Both bounds are reported so the daily probe can SEE which steps the
           // cron will actually send. Retiring email 1 was invisible here until
           // minSendableIndex was added, which is the same class of silent gap
@@ -339,6 +347,7 @@ export async function GET(request: Request) {
       sequence: {
         noJoinDate,
         preStart,
+        sharedHistory,
         minSendableIndex: DRIP_MIN_SENDABLE_INDEX,
         maxSendableIndex: DRIP_MAX_SENDABLE_INDEX,
         due: plans.length,
