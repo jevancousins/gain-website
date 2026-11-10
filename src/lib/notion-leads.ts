@@ -211,6 +211,13 @@ export async function copyConsentFromLeadToMember(memberEmail: string): Promise<
 const CONSULTATION_PROMOTABLE_FROM = new Set([null, "New", "Contacted"]);
 
 /**
+ * A consultation already in the past may only lift a row nobody has touched.
+ * After the appointment Hallum may have set Contacted himself (a no-show, a
+ * follow-up call), and an old booking is not evidence that judgement was wrong.
+ */
+const PAST_CONSULTATION_PROMOTABLE_FROM = new Set([null, "New"]);
+
+/**
  * Mark the lead behind a Cal.com consultation as Consultation Booked.
  *
  * Nothing did this before 17 Aug 2026: Cal.com was read only to send reminders,
@@ -227,12 +234,16 @@ const CONSULTATION_PROMOTABLE_FROM = new Set([null, "New", "Contacted"]);
  */
 export async function markLeadConsultationBooked(
   attendeeEmail: string,
+  opts: { pastOnly?: boolean } = {},
 ): Promise<number> {
   const leads = await findLeadsByEmail(attendeeEmail);
+  const allowed = opts.pastOnly
+    ? PAST_CONSULTATION_PROMOTABLE_FROM
+    : CONSULTATION_PROMOTABLE_FROM;
 
   let updated = 0;
   for (const lead of leads) {
-    if (!CONSULTATION_PROMOTABLE_FROM.has(lead.status)) continue;
+    if (!allowed.has(lead.status)) continue;
     await patchNotionPage(lead.pageId, {
       Status: { select: { name: "Consultation Booked" } },
     });

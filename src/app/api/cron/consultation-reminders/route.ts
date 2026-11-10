@@ -1,5 +1,6 @@
 import {
   fetchCancelledBookings,
+  fetchRecentPastBookings,
   fetchUpcomingBookings,
   type CalAttendee,
   type CalBooking,
@@ -118,7 +119,20 @@ export async function GET(request: Request) {
       sent.push(b.uid);
     }
 
-    const leadSync = await syncLeadStatuses(bookings, dryRun);
+    // A same-day booking can start and finish between two runs, so the lead
+    // sync also reads the last week. Non-fatal like the rest of the sync.
+    let recentPast: CalBooking[] = [];
+    let recentPastError: string | null = null;
+    try {
+      recentPast = await fetchRecentPastBookings(apiKey, 7, now);
+    } catch (err) {
+      recentPastError = (err as Error).message.slice(0, 200);
+    }
+    const leadSync = {
+      ...(await syncLeadStatuses(bookings, dryRun)),
+      recentPast: await syncLeadStatuses(recentPast, dryRun, { pastOnly: true }),
+      recentPastError,
+    };
     const cancellations = await handleCancellations(
       apiKey,
       bookings,
@@ -161,7 +175,11 @@ export async function GET(request: Request) {
  * already been sent by this point, and no board-hygiene write is worth a 502
  * that makes the whole cron look dead.
  */
-async function syncLeadStatuses(bookings: CalBooking[], dryRun: boolean) {
+async function syncLeadStatuses(
+  bookings: CalBooking[],
+  dryRun: boolean,
+  opts: { pastOnly?: boolean } = {},
+) {
   const emails = [
     ...new Set(
       bookings
@@ -181,7 +199,7 @@ async function syncLeadStatuses(bookings: CalBooking[], dryRun: boolean) {
   const errors: string[] = [];
   for (const email of emails) {
     try {
-      updated += await markLeadConsultationBooked(email);
+      updated += await markLeadConsultationBooked(email, opts);
     } catch (err) {
       errors.push(`${email}: ${(err as Error).message}`.slice(0, 200));
     }
