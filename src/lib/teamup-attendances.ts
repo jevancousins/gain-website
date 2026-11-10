@@ -2,8 +2,10 @@ import { teamupGet } from "@/lib/teamup";
 
 type ExpandedEvent = {
   id: number | string;
+  name?: string;
   starts_at?: string;
   ends_at?: string;
+  is_appointment?: boolean;
 };
 
 type Attendance = {
@@ -28,7 +30,22 @@ const SESSION_STATUSES = new Set(["registered", "attended"]);
 export type AttendanceSummary = {
   lastSession: string | null;
   sessionCount: number;
+  /**
+   * Sorted, de-duplicated days of past GROUP sessions: appointments and the 1-to-1
+   * induction excluded. The onboarding emails are timed from the first of these on
+   * or after a member's programme start, because that is when training begins.
+   */
+  groupSessionDays: string[];
 };
+
+/**
+ * A group class rather than a 1-to-1. The induction may be booked as an
+ * appointment or as a one-place class, so it is excluded by name as well.
+ */
+export function isGroupSession(ev: { name?: string; is_appointment?: boolean }): boolean {
+  if (ev.is_appointment) return false;
+  return !/induction|consultation|1-2-1|1-to-1|personal training/i.test(ev.name ?? "");
+}
 
 /**
  * Walk every paginated /attendances row to compute the most-recent
@@ -64,13 +81,15 @@ export async function fetchAttendanceSummaryByCustomer(
       if (startedAt > nowISO) continue;
 
       const day = startedAt.slice(0, 10);
-      const prior = summaries.get(cid);
+      let prior = summaries.get(cid);
       if (!prior) {
-        summaries.set(cid, { lastSession: day, sessionCount: 1 });
+        prior = { lastSession: day, sessionCount: 1, groupSessionDays: [] };
+        summaries.set(cid, prior);
       } else {
         prior.sessionCount += 1;
         if (!prior.lastSession || day > prior.lastSession) prior.lastSession = day;
       }
+      if (isGroupSession(ev)) prior.groupSessionDays.push(day);
     }
 
     if (!page.next) break;
@@ -83,7 +102,18 @@ export async function fetchAttendanceSummaryByCustomer(
     pages += 1;
   }
 
+  for (const s of summaries.values()) {
+    s.groupSessionDays = [...new Set(s.groupSessionDays)].sort();
+  }
   return summaries;
+}
+
+/** The first group session on or after a date, or null if they have not had one. */
+export function firstGroupSessionOnOrAfter(
+  summary: AttendanceSummary | null | undefined,
+  fromYmd: string,
+): string | null {
+  return summary?.groupSessionDays.find((d) => d >= fromYmd) ?? null;
 }
 
 // Backward-compatible export so the existing sync still imports cleanly.
