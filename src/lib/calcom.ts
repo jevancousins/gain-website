@@ -100,6 +100,26 @@ export async function fetchUpcomingBookings(apiKey: string): Promise<CalBooking[
 }
 
 /**
+ * Fetch bookings whose start fell in the last `days` days, newest first.
+ *
+ * The daily lead sync reads only `status=upcoming`, so a consultation booked and
+ * held between two 17:00 runs was never seen at all: Gary Wood booked at 06:14
+ * on 7 Nov 2026 for 11:30 the same day, and his Leads row still read New three
+ * days later. Reading the recent past closes that gap.
+ */
+export async function fetchRecentPastBookings(
+  apiKey: string,
+  days = 7,
+  now: Date = new Date(),
+): Promise<CalBooking[]> {
+  const after = new Date(now.getTime() - days * 24 * 60 * 60 * 1000).toISOString();
+  return fetchBookings(
+    apiKey,
+    `status=past&afterStart=${encodeURIComponent(after)}&take=100&sortStart=desc`,
+  );
+}
+
+/**
  * Fetch cancelled bookings, newest first.
  *
  * This exists because `status=upcoming` EXCLUDES cancellations, so a route that
