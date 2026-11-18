@@ -10,6 +10,7 @@ import { cn, IMAGES, SITE } from "@/lib/utils";
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
+  { href: "/members", label: "Members" },
   { href: "/contact", label: "Contact" },
 ];
 
