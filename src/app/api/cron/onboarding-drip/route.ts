@@ -24,6 +24,10 @@ import {
   shareSentAcrossSamePerson,
   type DripPlan,
 } from "@/lib/onboarding-drip-plan";
+import {
+  fetchAttendanceSummaryByCustomer,
+  firstGroupSessionOnOrAfter,
+} from "@/lib/teamup-attendances";
 import { wantsDryRun } from "@/lib/cron-dry-run";
 
 /**
@@ -31,8 +35,9 @@ import { wantsDryRun } from "@/lib/cron-dry-run";
  *
  * 1. SEQUENCE (emails 1-5). The welcome -> induction-prep -> mobility -> week-1 ->
  *    nutrition sequence is sent BY THIS CRON, directly via the Resend send API,
- *    each email on its own day offset from the member's join date
- *    (DRIP_SCHEDULE_DAYS). Idempotency is the per-email "Onboarding Email N Sent"
+ *    each email on its own day offset (DRIP_SCHEDULE_DAYS) from the member's
+ *    programme start, or, for the steps that assume training (3 and 4), from
+ *    their first group session. Idempotency is the per-email "Onboarding Email N Sent"
  *    checkbox in Notion, so an email is never sent twice however often we run.
  *
  *    It used to be carried by the Resend "Member onboarding drip" Automation,
@@ -49,9 +54,9 @@ import { wantsDryRun } from "@/lib/cron-dry-run";
  *    delay from enrolment cannot reflect the true midpoint, a pause, an early
  *    cancellation, or which programme the member is on. Instead this cron sends it
  *    directly, timed to the member's TRUE halfway point counted in ACTIVE-training
- *    days (21 for a 6-week programme, 42 for a 12-week), anchored to the TeamUp
- *    membership start, paused when the membership is on hold. Live membership facts
- *    come from TeamUp each run; the active-day counter and per-membership dedup are
+ *    days (21 for a 6-week programme, 42 for a 12-week), counted from the member's
+ *    first group session on or after the TeamUp membership start, paused when
+ *    the membership is on hold. Live membership and attendance facts come from TeamUp each run; the active-day counter and per-membership dedup are
  *    persisted in Notion. `planEmail6` holds the decision logic. Remove step 6 from
  *    the Resend Automation before go-live, or programme members get it twice.
  *
@@ -107,6 +112,7 @@ type Email6Record = {
   teamupId: number | null;
   programmeName: string | null;
   startDate: string | null;
+  firstGroupSession: string | null;
   status: string | null;
   isPaused: boolean;
   activeDaysBefore: number;
@@ -133,12 +139,15 @@ export async function GET(request: Request) {
     // Live membership facts for the mid-programme pass. A failed read must not
     // suppress or mistime anyone: every member falls through to
     // SKIP_UNRESOLVED_LIVE_READ and retries next run.
-    let membershipMap: Awaited<ReturnType<typeof fetchMembershipSummaryByCustomer>> | null;
-    try {
-      membershipMap = await fetchMembershipSummaryByCustomer();
-    } catch {
-      membershipMap = null;
-    }
+    // Attendance is read live for the same reason, and because the emails are
+    // timed from each member's first group session. A failed read holds every
+    // attendance-gated step rather than guessing.
+    const [membershipMap, attendanceMap] = await Promise.all([
+      fetchMembershipSummaryByCustomer().catch(() => null),
+      fetchAttendanceSummaryByCustomer().catch(() => null),
+    ]);
+    const firstGroupSession = (m: OnboardingMember, fromYmd: string) =>
+      m.teamupId != null ? firstGroupSessionOnOrAfter(attendanceMap?.get(m.teamupId), fromYmd) : null;
 
     // ---- Pass 1: sequence emails 1-5 ----
     // A returning member on a new TeamUp profile has a second Members row with
@@ -157,7 +166,10 @@ export async function GET(request: Request) {
         continue;
       }
       const summary = m.teamupId != null ? membershipMap?.get(m.teamupId) ?? null : null;
-      const plan = planDripEmail(m, summary, todayYmd, DRIP_START_DATE);
+      const plan = planDripEmail(m, summary, todayYmd, DRIP_START_DATE, {
+        known: attendanceMap != null && m.teamupId != null,
+        firstGroupSession: (anchor) => firstGroupSession(m, anchor),
+      });
       if (plan) plans.push(plan);
     }
 
@@ -169,9 +181,16 @@ export async function GET(request: Request) {
           ? membershipMap.get(m.teamupId)?.programme ?? null
           : null;
       const plan =
-        membershipMap == null && m.teamupId != null
+        (membershipMap == null || attendanceMap == null) && m.teamupId != null
           ? unresolvedPlan(m)
-          : planEmail6(m, programme, todayYmd, PROGRAMME_DRIP_START_DATE, DRIP_START_DATE);
+          : planEmail6(
+              m,
+              programme,
+              todayYmd,
+              PROGRAMME_DRIP_START_DATE,
+              DRIP_START_DATE,
+              programme ? firstGroupSession(m, programme.startDate) : null,
+            );
       // Only members with something to report (a programme, or a diagnosable skip).
       if (
         plan.decision === "SKIP_NO_PROGRAMME" ||
@@ -180,11 +199,11 @@ export async function GET(request: Request) {
         // Skip the quiet majority (no programme) from the record to keep output lean,
         // but still surface members who LOOK like programme members yet cannot resolve.
         if (plan.decision === "SKIP_NO_TEAMUP_ID") {
-          midRecords.push(buildRecord(m, programme, plan));
+          midRecords.push(buildRecord(m, programme, plan, programme ? firstGroupSession(m, programme.startDate) : null));
         }
         continue;
       }
-      midRecords.push(buildRecord(m, programme, plan));
+      midRecords.push(buildRecord(m, programme, plan, programme ? firstGroupSession(m, programme.startDate) : null));
     }
 
     if (dryRun) {
@@ -197,6 +216,7 @@ export async function GET(request: Request) {
         programmeDripStartDate: PROGRAMME_DRIP_START_DATE,
         totalMembers: members.length,
         liveMembershipRead: membershipMap != null,
+        liveAttendanceRead: attendanceMap != null,
         sequence: {
           noJoinDate,
           preStart,
@@ -344,6 +364,7 @@ export async function GET(request: Request) {
       programmeDripStartDate: PROGRAMME_DRIP_START_DATE,
       totalMembers: members.length,
       liveMembershipRead: membershipMap != null,
+      liveAttendanceRead: attendanceMap != null,
       sequence: {
         noJoinDate,
         preStart,
@@ -393,6 +414,7 @@ function buildRecord(
   m: OnboardingMember,
   programme: ProgrammeMembership | null,
   plan: Email6Plan,
+  firstGroupSession: string | null,
 ): Email6Record {
   return {
     email: m.email,
@@ -401,6 +423,7 @@ function buildRecord(
     teamupId: m.teamupId,
     programmeName: programme?.name ?? null,
     startDate: programme?.startDate ?? null,
+    firstGroupSession,
     status: programme?.status ?? null,
     isPaused: programme?.isPaused ?? false,
     activeDaysBefore: m.programmeActiveDays,

@@ -32,10 +32,11 @@ export function daysBetweenYmd(from: string, to: string): number {
  * rather than receiving the whole sequence in a single burst.
  *
  * `action` is "send" normally, "mark_unattended" when the step requires the
- * member to have trained and they still have not DRIP_MAX_LATE_DAYS after it came
- * due (before that the step simply waits and no plan is returned at all, so a
- * member whose training start lags their membership start keeps the email rather
- * than losing it), "mark_stale" when the email is more
+ * member to have trained and they have had no group session
+ * DRIP_MAX_WAIT_FOR_FIRST_SESSION_DAYS after their billing anchor (before that the
+ * step simply waits and no plan is returned at all, so a member whose training
+ * start lags their membership start keeps the email rather than losing it),
+ * "mark_stale" when the email is more
  * than DRIP_MAX_LATE_DAYS past due, or "mark_retired" for a step below
  * DRIP_MIN_SENDABLE_INDEX that another system now owns (email 1, the welcome,
  * which TeamUp sends at purchase). In both mark_* cases the flag is ticked
@@ -56,7 +57,8 @@ export type DripPlan = {
     | "programme_start"
     | "upcoming_programme_start"
     | "membership_start"
-    | "joined";
+    | "joined"
+    | "first_group_session";
   daysSinceAnchor: number;
   action: "send" | "mark_stale" | "mark_retired" | "mark_unattended";
 };
@@ -72,10 +74,9 @@ export type DripPlan = {
  * mistake in a worse form: an email describing an event the system had not
  * checked had happened.
  *
- * The test is attendance ON OR AFTER the drip anchor, not merely "has ever
+ * The test is a group session ON OR AFTER the drip anchor, not merely "has ever
  * attended", so a returning member's history from a previous programme cannot
- * satisfy it. `lastSession` comes from the Members DB, written by
- * teamup-members-sync at 06:00 from TeamUp attendance, an hour before this cron.
+ * satisfy it. The cron reads attendance live from TeamUp each run.
  *
  * Email 3 (the mobility guide) was excluded from this set on 12 Aug 2026 on the
  * grounds that it "offers a resource and claims nothing". That was wrong, and
@@ -113,13 +114,13 @@ export const REQUIRES_ATTENDANCE = new Set([3, 4]);
  *
  * Only members with no membership row at all now fall back to Joined.
  *
- * NOTE: every anchor here is a BILLING date. None of them is the day the member
- * first trains, which is what the attendance-gated steps actually care about.
+ * NOTE: every anchor here is a BILLING date. The attendance-gated steps are
+ * re-timed from the first group session on or after it: see planDripEmail.
  */
 export function dripAnchor(
   m: OnboardingMember,
   summary: MembershipSummary | null,
-): { date: string; source: DripPlan["anchorSource"] } | null {
+): { date: string; source: Exclude<DripPlan["anchorSource"], "first_group_session"> } | null {
   if (summary?.programme?.startDate) {
     return { date: summary.programme.startDate, source: "programme_start" };
   }
@@ -133,20 +134,27 @@ export function dripAnchor(
 }
 
 /**
- * Has the member trained on or after the date the sequence is measured from?
- * A null Last Session means they have never attended anything, which counts as
- * no. A session recorded before the anchor belongs to an earlier membership and
- * does not count either.
+ * How long after the billing anchor an attendance-gated step waits for the
+ * member's first group session before it is written off as unattended. Six
+ * weeks, the length of the programme: members often pay weeks before they start,
+ * and a shorter wait would close the mobility guide and the week-1 check-in
+ * before their first class.
  */
-export function attendedSince(m: OnboardingMember, anchorDate: string): boolean {
-  return m.lastSession != null && m.lastSession >= anchorDate;
-}
+export const DRIP_MAX_WAIT_FOR_FIRST_SESSION_DAYS = 42;
+
+/**
+ * What is known about the member's training. `firstGroupSession` is the first
+ * group class on or after their billing anchor, or null if they have not had one.
+ * `known: false` means the live attendance read failed, so gated steps hold.
+ */
+export type TrainingStart = { known: boolean; firstGroupSession: (anchorDate: string) => string | null };
 
 export function planDripEmail(
   m: OnboardingMember,
   summary: MembershipSummary | null,
   todayYmd: string,
   dripStartDate: string,
+  training: TrainingStart,
 ): DripPlan | null {
   if (!m.joined || m.joined < dripStartDate) return null;
   const anchor = dripAnchor(m, summary);
@@ -157,62 +165,61 @@ export function planDripEmail(
   for (let i = 1; i <= DRIP_MAX_SENDABLE_INDEX; i += 1) {
     if (m.sent[i - 1]) continue;
     const dueDay = DRIP_SCHEDULE_DAYS[i];
-    if (dueDay == null || daysSinceAnchor < dueDay) return null; // not due; later ones cannot be either
-
-    // An attendance-gated step WAITS for the member to train rather than being
-    // written off the moment it comes due. Nothing is sent meanwhile and the
-    // member is reconsidered every morning until DRIP_MAX_LATE_DAYS runs out.
-    //
-    // This used to allow a single day of slack, enough to cover the sync lag (a
-    // session on the due day itself only reaches the Members DB at the next
-    // morning's 06:00 sync, an hour before this cron), and then gave up. That
-    // silently consumed the step for anyone whose training start lagged their
-    // membership start by more than a day, which is common: every anchor above is
-    // a BILLING fact while this gate tests attendance, a TRAINING fact. Melanie
-    // Beard's 6-week programme starts 10 Aug 2026 on that billing basis but she
-    // trains from w/c 17 Aug, so on 18 Aug the old rule would have ticked her
-    // week-1 check-in unsent and she would never have received it, with Notion
-    // recording the step as handled.
-    //
-    // Deferring holds the rest of the sequence too, since the loop sends at most
-    // one email per member per run and returns on the lowest unsent due index.
-    // That is intended: emails 4 and 5 both read as mid-programme and must not
-    // overtake a step still waiting on a first session.
-    //
-    // NOTE: this makes onboarding depend on attendance actually being registered
-    // in TeamUp. Melanie's induction was run but never recorded, leaving no
-    // attendance row at all, and an unrecorded session is indistinguishable here
-    // from a member who never came. The failure is now a held email rather than a
-    // false one, which is the safer direction, but it is still a failure.
-    if (
-      REQUIRES_ATTENDANCE.has(i) &&
-      !attendedSince(m, anchor.date) &&
-      daysSinceAnchor - dueDay <= DRIP_MAX_LATE_DAYS
-    ) {
-      return null;
-    }
-
-    return {
+    if (dueDay == null) return null;
+    const base = {
       email: m.email,
       firstName: m.firstName,
       pageId: m.pageId,
       emailIndex: i,
       dueDay,
+    };
+
+    // Attendance-gated steps are timed from the member's FIRST GROUP SESSION, not
+    // from the billing date. Hallum, 10 Nov 2026: members who paid weeks ahead and
+    // started training the week before were already being told they were halfway,
+    // because every anchor above is the day they bought. The copy of emails 3 and 4
+    // ("Now that you have had your induction and your first session", "How's the
+    // first week going?") describes the first week of training, so that is the
+    // clock. The 1-to-1 induction does not start it: Hallum asked for "their first
+    // booked group session".
+    if (REQUIRES_ATTENDANCE.has(i)) {
+      if (!training.known) return null; // attendance read failed: hold, retry tomorrow
+      const first = training.firstGroupSession(anchor.date);
+      if (!first) {
+        // Not started yet. Wait, rather than consuming the step, until it is
+        // clear they are not coming; then record it as deliberately not sent.
+        if (daysSinceAnchor <= DRIP_MAX_WAIT_FOR_FIRST_SESSION_DAYS) return null;
+        return {
+          ...base,
+          anchorDate: anchor.date,
+          anchorSource: anchor.source,
+          daysSinceAnchor,
+          action: "mark_unattended",
+        };
+      }
+      const daysSinceFirst = daysBetweenYmd(first, todayYmd);
+      if (daysSinceFirst < dueDay) return null; // later ones cannot be due either
+      return {
+        ...base,
+        anchorDate: first,
+        anchorSource: "first_group_session",
+        daysSinceAnchor: daysSinceFirst,
+        action: daysSinceFirst - dueDay > DRIP_MAX_LATE_DAYS ? "mark_stale" : "send",
+      };
+    }
+
+    if (daysSinceAnchor < dueDay) return null; // not due; later ones cannot be either
+    return {
+      ...base,
       anchorDate: anchor.date,
       anchorSource: anchor.source,
       daysSinceAnchor,
-      // "mark_unattended" is tested BEFORE "mark_stale". Past the deferral above,
-      // an unattended gated step is always also past DRIP_MAX_LATE_DAYS, and
-      // "never trained" is the true reason it was not sent, where "stale" would
-      // imply the send was merely too late to be useful.
       action:
         i < DRIP_MIN_SENDABLE_INDEX
           ? "mark_retired"
-          : REQUIRES_ATTENDANCE.has(i) && !attendedSince(m, anchor.date)
-            ? "mark_unattended"
-            : daysSinceAnchor - dueDay > DRIP_MAX_LATE_DAYS
-              ? "mark_stale"
-              : "send",
+          : daysSinceAnchor - dueDay > DRIP_MAX_LATE_DAYS
+            ? "mark_stale"
+            : "send",
     };
   }
   return null;

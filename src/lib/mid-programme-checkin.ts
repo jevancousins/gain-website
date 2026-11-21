@@ -1,7 +1,7 @@
 import type { OnboardingMember } from "@/lib/notion-members";
 import type { ProgrammeMembership } from "@/lib/teamup-memberships";
 import { ceilingActiveDays, midpointActiveDays } from "@/lib/onboarding-emails";
-import { attendedSince, daysBetweenYmd } from "@/lib/onboarding-drip-plan";
+import { daysBetweenYmd } from "@/lib/onboarding-drip-plan";
 
 /**
  * Decides, for one member on one run, whether the mid-programme check-in (email 6)
@@ -22,10 +22,18 @@ import { attendedSince, daysBetweenYmd } from "@/lib/onboarding-drip-plan";
  * through sessions she had never attended.
  *
  * This is the same rule already carried by emails 3 and 4 in REQUIRES_ATTENDANCE
- * (see onboarding-drip-plan), and `attendedSince` is imported from there rather than
- * restated, because the last time this rule was decided per-email by recalling what
+ * (see onboarding-drip-plan), and both read the same first-group-session date
+ * (`firstGroupSessionOnOrAfter` in teamup-attendances) rather than each restating it, because the last time this rule was decided per-email by recalling what
  * an email was for rather than reading its copy, email 3 was wrongly left ungated
  * and went out to a member who had not trained.
+ *
+ * THE CLOCK STARTS AT THE FIRST GROUP SESSION, not the programme's billing start.
+ * Hallum, 10 Nov 2026: members who paid weeks ahead and trained for the first time
+ * the week before were told they were halfway, because active days were counted
+ * from the day they bought. No day is counted until the member's first group class
+ * on or after the programme start (the 1-to-1 induction does not count), and the
+ * clamp below cuts any count already accrued from the billing date back to the
+ * days actually elapsed since that first class.
  *
  * The same caveat applies here as there: this depends on attendance actually being
  * registered in TeamUp. An induction that was run but never recorded is
@@ -97,6 +105,8 @@ export function planEmail6(
   todayYmd: string,
   programmeCutoff: string,
   dripStartDate: string,
+  /** First group session on or after programme.startDate, or null if none yet. */
+  firstGroupSession: string | null,
 ): Email6Plan {
   const base: Omit<Email6Plan, "decision"> = {
     activeDays: member.programmeActiveDays,
@@ -130,13 +140,20 @@ export function planEmail6(
   // Anything above that ceiling is impossible rather than merely surprising, so
   // cut it back rather than carrying it. Self-healing beats catching it by hand:
   // the counter is invisible until the wrong email lands.
-  const elapsedDays = Math.max(0, daysBetweenYmd(programme.startDate, todayYmd) + 1);
+  //
+  // Elapsed days run from the first group session, so a member who has not
+  // trained has an elapsed count, and therefore an active count, of zero.
+  const elapsedDays = firstGroupSession
+    ? Math.max(0, daysBetweenYmd(firstGroupSession, todayYmd) + 1)
+    : 0;
   const storedDays = anchorReset ? 0 : member.programmeActiveDays;
   const clamped = storedDays > elapsedDays;
   let activeDays = clamped ? elapsedDays : storedDays;
-  let countedOn = anchorReset || clamped ? null : member.activeDaysCountedOn;
+  // A clamped count already includes today (elapsedDays is inclusive), so mark
+  // today counted rather than adding it a second time.
+  let countedOn = anchorReset ? null : clamped ? todayYmd : member.activeDaysCountedOn;
   let incremented = false;
-  if (!programme.isPaused && countedOn !== todayYmd) {
+  if (firstGroupSession && !programme.isPaused && countedOn !== todayYmd) {
     activeDays += 1;
     countedOn = todayYmd;
     incremented = true;
@@ -173,17 +190,14 @@ export function planEmail6(
     decision = "SKIP_PAUSED";
   } else if (isEarlyDeparture(programme, todayYmd, midpointDays, activeDays)) {
     decision = "SKIP_EARLY_DEPARTURE";
+  } else if (!firstGroupSession) {
+    // Not started training: hold. Nothing is counted meanwhile, so the check-in
+    // still lands at the true midpoint once they begin.
+    decision = "SKIP_NO_ATTENDANCE";
   } else if (activeDays < midpointDays) {
     decision = "SKIP_NOT_YET";
   } else if (activeDays > ceilingDays) {
     decision = "SKIP_PAST_CEILING";
-  } else if (!attendedSince(member, programme.startDate)) {
-    // Never tell someone they are halfway through training they have not done.
-    // Deliberately ordered AFTER the ceiling so this holds rather than blocks: a
-    // member who starts late still gets the check-in once they train, and one who
-    // never trains is closed out by SKIP_PAST_CEILING, which records the skip
-    // against the membership instead of re-deciding it every morning forever.
-    decision = "SKIP_NO_ATTENDANCE";
   } else {
     decision = "SEND";
   }
